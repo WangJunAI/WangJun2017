@@ -1,0 +1,88 @@
+﻿body {
+}
+
+.fill {
+    width: 100%;
+    height: 100%;
+    background-color: #eaedf1;
+    margin: 0;
+    overflow: hidden;
+}
+
+.dockTop {
+    background-color: #373d41;
+    height: 3em;
+}
+
+.dockDown {
+    background-color: red;
+    height: 2em;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.desktopIcon {
+    list-style: none;
+}
+
+    .desktopIcon .item {
+        width: 10em;
+        height: 10em;
+        background-color: yellow;
+        display: block;
+        text-align: right;
+        vertical-align: bottom;
+        text-decoration: none;
+    }
+
+    .desktopIcon .item_name {
+        position: relative;
+        top: 8em;
+    }
+
+
+.desktop_dialog {
+    width:80%;
+    height:90%;
+    position:absolute;
+    z-index:2000;
+    border: 1px #808080 solid;
+}
+
+.desktop_dialog .title{
+    width:100%;
+    height:2em;
+    background-color:#373d41;
+}
+
+.desktop_dialog .title .name{
+
+    color:#FFF;
+    text-decoration:none;
+    float:left;
+    height:100%;
+    vertical-align:middle;
+    line-height: 200%;
+    margin-left:0.5em;
+}
+
+.desktop_dialog .title .button{
+
+    color:#FFF;
+    text-decoration:none;
+    float:right;
+    height:100%;
+    vertical-align:middle;
+    text-align:center;
+    line-height: 200%;
+    width:4em;
+}
+
+.desktop_dialog iframe{
+    position:absolute;
+    left:0;
+    top:2em;
+    right:0;
+    bottom:0;
+}
