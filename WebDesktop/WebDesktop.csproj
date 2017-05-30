@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="1.html" />
+    <Content Include="JS\Base\APPCreator.js" />
     <Content Include="JS\Base\jquery-3.1.1.min.js" />
     <Content Include="JS\Base\jquery-ui-1.12.1\AUTHORS.txt" />
     <Content Include="JS\Base\jquery-ui-1.12.1\external\jquery\jquery.js" />
@@ -135,6 +136,7 @@
     <Content Include="JS\Base\jquery-ui-1.12.1\jquery-ui.theme.css" />
     <Content Include="JS\Base\jquery-ui-1.12.1\jquery-ui.theme.min.css" />
     <Content Include="JS\Base\jquery-ui-1.12.1\LICENSE.txt" />
+    <Content Include="UI\APP\Stock\LHB\LHB.js" />
     <Content Include="UI\Desktop\CSS\Desktop.css" />
     <Content Include="UI\Desktop\Desktop.html" />
     <Content Include="UI\Desktop\JS\Desktop.js" />

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WangJun.BIZ;
 using WangJun.Data;
 using WangJun.DB;
 
@@ -10,21 +11,39 @@ namespace WangJun.NodeRunner
     class Program
     {
         protected static DateTime StartTime = DateTime.Now; ///开始运行时间
+        protected static MongoDB  inst1 = MongoDB.GetInst("mongodb://192.168.0.140:27017");
         static void Main(string[] args)
         {
             SetConsoleInfo();
 
 
-            var inst1 = MongoDB.GetInst("mongodb://192.168.0.140:27017");
-            inst1.Save("x1", "x2", DateTime.Now);
-            return;
+      
+            
+            //return;
+            //var inst = LocalDataOperator.GetInst();
+            //var list = inst.TraverseFiles(@"E:\下载");
+            //foreach (var item in list)
+            //{
+            //    Console.WriteLine(item.Path);
+            //}
+
+            //THS ths = new THS();
+            //ths.DownloadAllStockCode();
+
             var inst = LocalDataOperator.GetInst();
-            var list = inst.TraverseFiles(@"E:\下载");
-            foreach (var item in list)
-            {
-                Console.WriteLine(item.Path);
-            }
+            inst.EventOutput += Inst_EventOutput;
+            inst.StartTraverse(@"F:\");
+
             Console.ReadKey();
+        }
+
+        private static void Inst_EventOutput(object sender, EventArgs e)
+        {
+            var data = ((TraverseEventArg)e).Data;
+            LocalDataOperator local = sender as LocalDataOperator;
+            inst1.Save("f1", "gss2t", data);
+            Console.WriteLine("文件夹队列长度:{0}\t文件队列长度:{1}\t{2}", local.FolderQueue.Count, local.FileCount, data.Path);
+
         }
 
         #region 设置程序的基本信息

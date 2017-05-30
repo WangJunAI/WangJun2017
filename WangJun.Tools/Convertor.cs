@@ -94,7 +94,7 @@ namespace WangJun.Data
                             var timespanDict = Convertor.FromObjectToDictionary(value);
                             dict.Add(name, timespanDict);
                         }
-                        else
+                        else if(null != value && (value.GetType().IsValueType || typeof(string) == value.GetType()))
                         {
                             dict.Add(name, value);
                         }

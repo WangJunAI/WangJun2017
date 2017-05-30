@@ -48,6 +48,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\WangJun.BIZ\WangJun.BIZ.csproj">
+      <Project>{bb7aa9d9-e68b-40bc-87f3-cb9972b2fd02}</Project>
+      <Name>WangJun.BIZ</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
       <Project>{af918729-03e8-443f-bd76-79bc604e286e}</Project>
       <Name>WangJun.DB</Name>

@@ -15,12 +15,27 @@ namespace WangJun.Tools
         {
             if(null != q && null != items)
             {
-                foreach (var item in items)
+                lock (q)
                 {
-                    q.Enqueue(item);
+                    foreach (var item in items)
+                    {
+                        q.Enqueue(item);
+                    }
                 }
             }
+        }
 
+        public static T DeleteFromQueue<T>(Queue<T> q)
+        {
+            T t = default(T);
+            lock (q)
+            {
+                if (null != q&& 0<q.Count)
+                {
+                    t = q.Dequeue();
+                }
+            }
+            return t;
         }
         #endregion
     }
