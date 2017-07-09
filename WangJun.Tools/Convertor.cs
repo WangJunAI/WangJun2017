@@ -80,7 +80,7 @@ namespace WangJun.Data
         public static Dictionary<string,object> FromObjectToDictionary(object data)
         {
             var dict = new Dictionary<string, object>();
-            if(null != data)
+            if(null != data&& (typeof(Dictionary<string,object>) != data.GetType()))
             {
                 var propertyArray = data.GetType().GetProperties();
                 foreach (var property in propertyArray)
@@ -101,6 +101,10 @@ namespace WangJun.Data
                         
                     }
                 }
+            }
+            else if(null != data && (typeof(Dictionary<string, object>) == data.GetType()))
+            {
+                return data as Dictionary<string, object>;
             }
             return dict;
         }

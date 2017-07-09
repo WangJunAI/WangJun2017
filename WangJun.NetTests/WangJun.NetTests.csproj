@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{10E19907-B81D-4A7E-9452-589AAED0ED55}</ProjectGuid>
+    <ProjectGuid>{7C036BC4-0B97-45DE-B271-AAA0AFDB1C40}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WangJun.BIZTests</RootNamespace>
-    <AssemblyName>WangJun.BIZTests</AssemblyName>
+    <RootNamespace>WangJun.NetTests</RootNamespace>
+    <AssemblyName>WangJun.NetTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -51,13 +51,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="FTPTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="THSTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WangJun.BIZ\WangJun.BIZ.csproj">
-      <Project>{BB7AA9D9-E68B-40BC-87F3-CB9972B2FD02}</Project>
-      <Name>WangJun.BIZ</Name>
+    <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
+      <Project>{952A70F6-06A9-405A-A3E6-62B24C218DAF}</Project>
+      <Name>WangJun.Net</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

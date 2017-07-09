@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -74,6 +75,35 @@ namespace WangJun.Net
             return data;
         }
 
+        #region
+
+        #endregion  
+        public string GetGzip(string url)
+        {
+            this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
+            byte[] byteArray = this.http.DownloadData(url);
+            // 处理　gzip   
+            string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
+            if (sContentEncoding == "gzip")
+            {
+                var sourceStream = new MemoryStream(byteArray);
+                var targetStream = new MemoryStream();
+                int count = 0;
+                // 解压  
+                GZipStream gzip = new GZipStream(sourceStream, CompressionMode.Decompress);
+                byte[] buf = new byte[512];
+                while ((count = gzip.Read(buf, 0, buf.Length)) > 0)
+                {
+                    targetStream.Write(buf, 0, count);
+                }
+                var res = Encoding.GetEncoding("gbk").GetString(targetStream.GetBuffer());
+                sourceStream.Close();
+                targetStream.Close();
+
+                return res;
+            }
+            return string.Empty;
+        }
         //public string UploadFile()
         //{
 

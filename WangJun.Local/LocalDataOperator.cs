@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using WangJun.Tools;
 using System.Threading;
+using WangJun.Debug;
 
 namespace WangJun.Data
 {
@@ -35,6 +36,22 @@ namespace WangJun.Data
         public int FolderCount { get { return this.folderQueue.Count; } } 
 
         protected string rootPath = @"G:\";
+
+        /// <summary>
+        /// 根目录
+        /// </summary>
+        public string RootPath
+        {
+            get
+            {
+                return this.rootPath;
+            }
+        }
+
+        /// <summary>
+        /// 其他参数
+        /// </summary>
+        public Dictionary<string, object> OtherData { get; set; }
 
         /// <summary>
         /// 遍历的子文件夹队列
@@ -69,6 +86,17 @@ namespace WangJun.Data
         {
             return new LocalDataOperator();
         }
+
+        /// <summary>
+        /// 获取一个实例
+        /// </summary>
+        /// <returns></returns>
+        public static LocalDataOperator GetInst(string rootPath)
+        {
+            var inst = new LocalDataOperator();
+            inst.rootPath = rootPath;
+            return inst;
+        }
         #endregion
 
         #region 遍历一个根目录下的文件
@@ -78,7 +106,7 @@ namespace WangJun.Data
         /// <param name="rootPath"></param>
         public void TraverseFiles()
         {
-            Console.WriteLine("TraverseFiles遍历线程启动");
+            LOGGER.Output("TraverseFiles遍历线程启动");
             CollectionTools.AddToQueue(this.fileQueue,this.GetFiles(this.rootPath));///获取该目录下文件信息
             var rootSubFolders = this.GetSubFolder(this.rootPath);
             CollectionTools.AddToQueue<FolderFileInfo>(this.folderQueue, rootSubFolders);
@@ -91,7 +119,7 @@ namespace WangJun.Data
                     CollectionTools.AddToQueue(this.fileQueue, files);
                     var subFolders = this.GetSubFolder(folder.Path);
                     CollectionTools.AddToQueue<FolderFileInfo>(this.folderQueue, subFolders);
-                    Console.WriteLine("TraverseFiles遍历线程 文件夹队列长度:{0}\t文件队列长度:{1}", this.FolderCount, this.FileCount);
+                    LOGGER.Output(string.Format("TraverseFiles遍历线程 文件夹队列长度:{0}\t文件队列长度:{1}", this.FolderCount, this.FileCount));
                 }
 
  
@@ -101,7 +129,7 @@ namespace WangJun.Data
                 }
  
             }
-            Console.WriteLine("TraverseFiles遍历线程结束");
+            LOGGER.Output("TraverseFiles遍历线程结束");
         }
         #endregion
 
@@ -260,7 +288,7 @@ namespace WangJun.Data
         /// <summary>
         /// 开始遍历
         /// </summary>
-        public void StartTraverse(string rootPath)
+        public void StartTraverse()
         {
             ///启动输入线程
             ///启动输出线程
@@ -463,6 +491,7 @@ namespace WangJun.Data
         /// 参数
         /// </summary>
         public FolderFileInfo Data { get; set; }
+
 
         /// <summary>
         /// 创建一个新参数

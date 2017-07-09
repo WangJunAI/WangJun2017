@@ -46,5 +46,30 @@ namespace WangJun.DB
             }
         }
         #endregion
+
+        #region 查找结果
+        /// <summary>
+        /// 根据条件查找结果
+        /// </summary>
+        /// <returns></returns>
+        public List<Dictionary<string,object>> Find(string dbName, string collectionName,string jsonString)
+        {
+            List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
+            var filterDict = Convertor.FromJsonToDict(jsonString);
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.Empty;
+            
+            var db = this.client.GetDatabase(dbName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            var cursor = collection.Find(filter).Limit(100).ToCursor();
+            foreach (var document in cursor.ToEnumerable())
+            {
+                res.Add(document.ToDictionary());
+            }
+            return res;
+        }
+        #endregion  
+
+
     }
 }

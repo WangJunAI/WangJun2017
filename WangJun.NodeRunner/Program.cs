@@ -5,6 +5,7 @@ using System.Text;
 using WangJun.BIZ;
 using WangJun.Data;
 using WangJun.DB;
+using WangJun.NetLoader;
 
 namespace WangJun.NodeRunner
 {
@@ -17,8 +18,8 @@ namespace WangJun.NodeRunner
             SetConsoleInfo();
 
 
-      
-            
+
+
             //return;
             //var inst = LocalDataOperator.GetInst();
             //var list = inst.TraverseFiles(@"E:\下载");
@@ -30,9 +31,17 @@ namespace WangJun.NodeRunner
             //THS ths = new THS();
             //ths.DownloadAllStockCode();
 
-            var inst = LocalDataOperator.GetInst();
-            inst.EventOutput += Inst_EventOutput;
-            inst.StartTraverse(@"F:\");
+            //var inst = LocalDataOperator.GetInst();
+            //inst.EventOutput += Inst_EventOutput;
+            //inst.StartTraverse();
+
+
+            //var inst = MongoDB.GetInst("mongodb://192.168.0.140:27017");
+            //var res = inst.Find("f1", "f2", "{}");
+
+            var loader = WebLoader.GetInstance();
+            loader.Run();
+
 
             Console.ReadKey();
         }
