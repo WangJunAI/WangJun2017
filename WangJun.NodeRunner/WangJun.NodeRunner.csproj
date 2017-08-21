@@ -64,6 +64,10 @@
       <Project>{ee3a5a9f-20b3-4555-9a40-609c3641a7e0}</Project>
       <Name>WangJun.NetLoader</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
+      <Project>{79474114-39e0-4fec-a040-f2e867ca82a7}</Project>
+      <Name>WangJun.Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Tools;
 
 namespace WangJun.Net
 {
@@ -16,6 +17,19 @@ namespace WangJun.Net
     public class HTTP
     {
         private WebClient http = new WebClient();
+
+        public event EventHandler EventException = null;
+
+        /// <summary>
+        /// 事件触发
+        /// </summary>
+        public void TriggerEvent(EventHandler handler , object sender,EventArgs e)
+        {
+            if(null != handler)
+            {
+                handler(sender, e);
+            }
+        }
 
         public HTTP()
         {
@@ -74,39 +88,46 @@ namespace WangJun.Net
             string data = this.http.DownloadString(url);
             return data;
         }
-
         #region
 
-        #endregion  
+        #endregion  以GZip的格式进行下载
+        /// <summary>
+        /// 以GZip的格式进行下载
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public string GetGzip(string url)
         {
-            this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
-            byte[] byteArray = this.http.DownloadData(url);
-            // 处理　gzip   
-            string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
-            if (sContentEncoding == "gzip")
+            try
             {
-                var sourceStream = new MemoryStream(byteArray);
-                var targetStream = new MemoryStream();
-                int count = 0;
-                // 解压  
-                GZipStream gzip = new GZipStream(sourceStream, CompressionMode.Decompress);
-                byte[] buf = new byte[512];
-                while ((count = gzip.Read(buf, 0, buf.Length)) > 0)
+                this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
+                byte[] byteArray = this.http.DownloadData(url);
+                // 处理　gzip   
+                string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
+                if (sContentEncoding == "gzip")
                 {
-                    targetStream.Write(buf, 0, count);
-                }
-                var res = Encoding.GetEncoding("gbk").GetString(targetStream.GetBuffer());
-                sourceStream.Close();
-                targetStream.Close();
+                    var sourceStream = new MemoryStream(byteArray);
+                    var targetStream = new MemoryStream();
+                    int count = 0;
+                    // 解压  
+                    GZipStream gzip = new GZipStream(sourceStream, CompressionMode.Decompress);
+                    byte[] buf = new byte[512];
+                    while ((count = gzip.Read(buf, 0, buf.Length)) > 0)
+                    {
+                        targetStream.Write(buf, 0, count);
+                    }
+                    var res = Encoding.GetEncoding("gbk").GetString(targetStream.GetBuffer());
+                    sourceStream.Close();
+                    targetStream.Close();
 
-                return res;
+                    return res;
+                }
+            }
+            catch(Exception e)
+            {
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(e));
             }
             return string.Empty;
-        }
-        //public string UploadFile()
-        //{
-
-        //}
+        } 
     }
 }

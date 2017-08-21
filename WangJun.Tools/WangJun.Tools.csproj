@@ -49,6 +49,9 @@
   <ItemGroup>
     <Compile Include="CollectionTools.cs" />
     <Compile Include="Convertor.cs" />
+    <Compile Include="DictTools.cs" />
+    <Compile Include="ENUM.cs" />
+    <Compile Include="EventProc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringChecker.cs" />
   </ItemGroup>

@@ -55,6 +55,10 @@
       <Project>{bb2a52e3-a00f-4591-a561-ba2e5ac00f2c}</Project>
       <Name>WangJun.Local</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
+      <Project>{79474114-39e0-4fec-a040-f2e867ca82a7}</Project>
+      <Name>WangJun.Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

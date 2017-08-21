@@ -56,6 +56,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DB.cs" />
+    <Compile Include="IAdmin.cs" />
+    <Compile Include="IDB.cs" />
     <Compile Include="MongoDB.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

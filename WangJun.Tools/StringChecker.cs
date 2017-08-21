@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Web.Script.Serialization;
 
 namespace WangJun.Data
 {
@@ -63,10 +64,45 @@ namespace WangJun.Data
             return File.Exists(input) || Directory.Exists(input);
         }
         
-
+        /// <summary>
+        /// 判断是否是MongoDB字符串
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static bool IsMongoDBConnectionString(string url)
         {
             return (!string.IsNullOrEmpty(url) && url.ToLower().StartsWith("mongodb://"));
         }
+
+        /// <summary>
+        /// 判断是否是Http地址
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsHttpUrl(string input)
+        {
+            return (!string.IsNullOrWhiteSpace(input)) && input.ToLower().Trim().StartsWith("http://");
+        }
+
+        #region 判断是否是Json格式
+        /// <summary>
+        /// 判断是否是Json格式
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+
+        public static bool IsJson(string input)
+        {
+            var convertor = new JavaScriptSerializer();
+            try
+            {
+                convertor.Serialize(input);
+                return true;
+            }
+            catch(Exception e)
+            {
+                return false;
+            }
+        }
+        #endregion
     }
 }
