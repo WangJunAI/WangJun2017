@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using WangJun.BIZ;
@@ -18,13 +19,53 @@ namespace WangJun.NodeRunner
         static void Main(string[] args)
         {
             SetConsoleInfo();
- 
+
             ///事件订阅
-            loader.EventUrlEnqueue += Loader_EventUrlEnqueue;
-            loader.EventDownloadCompleted += Loader_EventDownloadCompleted;
+            //loader.EventUrlEnqueue += Loader_EventUrlEnqueue;
+            //loader.EventDownloadCompleted += Loader_EventDownloadCompleted;
 
 
-            loader.Run();
+            //loader.Run();
+             
+            //var arr = File.ReadLines(@"E:\zhwiki-20170720-pages-articles-multistream.xml\zhwiki-20170720-pages-articles-multistream.xml");
+            //var page = new StringBuilder();
+            //var count = 0;
+            //foreach (var item in arr)
+            //{
+
+            //    if ("<page>" == item.ToLower().Trim()) ///若是文章开始
+            //    {
+            //        page.Clear();
+            //        page.AppendLine(item);
+            //    }
+            //    else if ("</page>" == item.ToLower().Trim()) ///若是文章结束
+            //    {
+            //        page.AppendLine(item);
+            //        string content = page.ToString();
+
+            //        Console.Clear();
+            //        Console.WriteLine(content);
+            //        page.Clear();
+            //        mongo.Save("wiki", "page", new { Content=content });
+            //        Console.WriteLine("已存储 " + (++count) + "  " + content);
+            //    }
+            //    else if(6<=page.Length)
+            //    {
+            //        page.AppendLine(item);
+            //    }
+            //}
+
+            var arr = File.ReadLines(@"E:\zhwiki-20170720-pages-articles-multistream-index.txt\zhwiki-20170720-pages-articles-multistream-index.txt");
+            var page = new StringBuilder();
+            var count = 0;
+            foreach (var item in arr)
+            {
+ 
+                    mongo.Save("wiki", "index", new { Content = item });
+                    Console.WriteLine("已存储 " + (++count) + "  " + item);
+ 
+            }
+
 
             Console.WriteLine("全部结束");
             Console.ReadKey();
@@ -42,15 +83,7 @@ namespace WangJun.NodeRunner
                 var ee = e as EventProcEventArgs;
                 var dict =  ee.Default as Dictionary<string,object>;
                 Console.WriteLine("下载完成{0}",dict["Url"]);
-                //var task = (dict.ContainsKey("Task")&&null != dict["Task"])?dict["Task"].ToString():string.Empty; ///提取链接
-                //if ("ExtractLink" == task)
-                //{
-                //    dict["Task"] = "Done";
-                //}
-                //else
-                //{
-                //    dict["Task"] = "ExtractLink";
-                //}
+
 
                 mongo.Save("ths", "news", dict);
             }
