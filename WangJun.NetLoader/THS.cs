@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WangJun.DB;
 using WangJun.Net;
+using WangJun.Tools;
 
 namespace WangJun.NetLoader
 {
@@ -212,71 +214,76 @@ namespace WangJun.NetLoader
 
             var httpdownloader = new HTTP("gbk");
             httpdownloader.EventException += (object sender,EventArgs e)=> {
-                mongo.Save("ths", "exception", new { }); ///个股龙虎榜明细
-
+                var ee = e as EventProcEventArgs;
+                Console.WriteLine("下载失败 {0}",ee.Default);
+                mongo.Save("ths", "exception", ee.Default); ///个股龙虎榜明细
+                Console.ReadKey();
             };
-
+            var count = 0;
             if (null != this.stockCodeDict)
             {
                 foreach (var item in this.stockCodeDict)
                 {
-                    var url1 = string.Format("http://data.10jqka.com.cn/market/lhbgg/code/{0}/", item.Key);
+                    var url1 = string.Format("http://data.10jqka.com.cn/market/lhbgg/code/{0}/", item.Key);//
                     var pageHtml = httpdownloader.GetGzip(url1);
 
                     if (100 < pageHtml.Length)
                     {
-                       
-                        #region 分析明细
-                        var tableStartIndex = pageHtml.IndexOf("<tbody>"); ///表格数据开始位置
-                        var tableEndIndex = pageHtml.IndexOf("</tbody>");///表格数据结束位置
-                        var tableHtml = pageHtml.Substring(tableStartIndex, tableEndIndex - tableStartIndex);
-                        var tdArray = tableHtml.Split(new string[] { "<td>", "</td>" }, StringSplitOptions.RemoveEmptyEntries);
-                        foreach (var td in tdArray)
+                        if (true)
                         {
-                            if (td.Contains("rid") && td.Contains("date"))
+                            #region 分析明细
+                            var tableStartIndex = pageHtml.IndexOf("<tbody>"); ///表格数据开始位置
+                            var tableEndIndex = pageHtml.IndexOf("</tbody>");///表格数据结束位置
+                            var tableHtml = pageHtml.Substring(tableStartIndex, tableEndIndex - tableStartIndex);
+                            var tdArray = tableHtml.Split(new string[] { "<td>", "</td>" }, StringSplitOptions.RemoveEmptyEntries);
+                            foreach (var td in tdArray)
                             {
-                                var paramArray = td.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                                var date = "";
-                                var rid = "";
-                                var code = "";
-                                foreach (var param in paramArray)
+                                if (td.Contains("rid") && td.Contains("date"))
                                 {
-                                    if (param.Contains("code="))
+                                    var paramArray = td.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                                    var date = "";
+                                    var rid = "";
+                                    var code = "";
+                                    foreach (var param in paramArray)
                                     {
-                                        code = param.Substring(6, 6);
-                                    }
-                                    else if (param.Contains("date="))
-                                    {
-                                        date = param.Substring(6, 10);
-                                    }
-                                    else if (param.Contains("rid="))
-                                    {
-                                        rid = param.Substring(5, 2).Replace("\"", string.Empty);
-                                    }
-
-                                    if (!string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(date) && !string.IsNullOrWhiteSpace(rid))
-                                    {
-                                        //Console.WriteLine("{3}code={0}\tdate={1}\trid={2}\t", code, date, rid,this.stockCodeDict[code]);
-                                        var url2 = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", code, date, rid);
-                                        var subHtml = httpdownloader.GetGzip(url2);
-                                        ///
-                                        var subData = new
+                                        if (param.Contains("code="))
                                         {
-                                            Code = code,
-                                            Date = date,
-                                            Rid = rid,
-                                            ParentUrl = url1,
-                                            Url = url2,
-                                            CreateTime = DateTime.Now,
-                                            Page = subHtml
-                                        };
-                                        mongo.Save("ths", "gglhbmx", subData); ///个股龙虎榜明细
+                                            code = param.Substring(6, 6);
+                                        }
+                                        else if (param.Contains("date="))
+                                        {
+                                            date = param.Substring(6, 10);
+                                        }
+                                        else if (param.Contains("rid="))
+                                        {
+                                            rid = param.Substring(5, 2).Replace("\"", string.Empty);
+                                        }
+
+                                        if (!string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(date) && !string.IsNullOrWhiteSpace(rid))
+                                        {
+                                            //Console.WriteLine("{3}code={0}\tdate={1}\trid={2}\t", code, date, rid,this.stockCodeDict[code]);
+                                            var url2 = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", code, date, rid);
+                                            var subHtml = httpdownloader.GetGzip(url2);
+                                            
+                                            var subData = new
+                                            {
+                                                Code = code,
+                                                Date = date,
+                                                Rid = rid,
+                                                ParentUrl = url1,
+                                                Url = url2,
+                                                CreateTime = DateTime.Now,
+                                                Page = subHtml
+                                            };
+                                            mongo.Save("ths", "gglhbmx", subData); ///个股龙虎榜明细
+                                            //Thread.Sleep(2000);
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        #endregion
+                            #endregion
+                        }
 
                         #region 数据保存
                         var data = new
@@ -288,8 +295,9 @@ namespace WangJun.NetLoader
                             Page = pageHtml
                         };
 
-                        mongo.Save("ths", "gglhb", data); ///个股龙虎榜
-                        Console.WriteLine("龙虎榜数据保存 {0} {1}", item.Key, item.Value);
+                        mongo.Save("ths", "gglhb2", data); ///个股龙虎榜
+                        Console.WriteLine("龙虎榜数据保存 {0} {1} {2}", item.Key, item.Value,++count);
+                        //Thread.Sleep(2000);
                         #endregion
                     }
                 }
@@ -300,6 +308,27 @@ namespace WangJun.NetLoader
         {
             throw new NotImplementedException();
         }
+        #endregion
+
+        #region 获取今日龙虎榜
+        /// <summary>
+        /// 获取今日龙虎榜
+        /// </summary>
+
+        public void GetTodayLHB()
+        {
+            var httpdownloader = new HTTP("gbk");
+            var url = "http://data.10jqka.com.cn/market/longhu/";
+            var html = httpdownloader.GetGzip(url);
+
+            var data = new {
+                CreateTime=DateTime.Now,
+                Page = html
+            };
+            mongo.Save("ths", "jrlhb", data); ///个股龙虎榜
+
+        }
+
         #endregion
 
         #region 新闻更新

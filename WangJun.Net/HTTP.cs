@@ -45,6 +45,7 @@ namespace WangJun.Net
             this.http.Encoding = Encoding.GetEncoding(coder);
         }
 
+
         /// <summary>
         /// 通过Get方式获取一份文件
         /// </summary>
@@ -100,7 +101,9 @@ namespace WangJun.Net
         {
             try
             {
+                this.http.Headers.Clear();
                 this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
+                this.http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36");
                 byte[] byteArray = this.http.DownloadData(url);
                 // 处理　gzip   
                 string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
@@ -121,7 +124,7 @@ namespace WangJun.Net
                     targetStream.Close();
 
                     return res;
-                }
+                 }
             }
             catch(Exception e)
             {

@@ -40,6 +40,7 @@ namespace WangJun.NodeRunner
             var inst = THS.GetInst();
             //inst.GetStockPage();
             inst.LHB();
+            //inst.GetTodayLHB();
             #endregion
 
 
