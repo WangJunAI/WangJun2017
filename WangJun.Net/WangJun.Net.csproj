@@ -40,6 +40,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WangJun.Debug.Fakes">
+      <HintPath>FakesAssemblies\WangJun.Debug.Fakes.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FTP.cs" />
@@ -47,10 +50,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WangJun.Debug\WangJun.Debug.csproj">
-      <Project>{0232eca8-2266-4b23-a59f-66ec9308260a}</Project>
-      <Name>WangJun.Debug</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.Local\WangJun.Local.csproj">
       <Project>{bb2a52e3-a00f-4591-a561-ba2e5ac00f2c}</Project>
       <Name>WangJun.Local</Name>

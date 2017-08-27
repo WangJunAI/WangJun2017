@@ -125,7 +125,7 @@ namespace WangJun.Net
             }
             catch(Exception e)
             {
-                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(e));
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(new { Url = url, Exception = e, CreateTime = DateTime.Now }));
             }
             return string.Empty;
         } 

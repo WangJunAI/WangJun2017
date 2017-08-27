@@ -15,6 +15,10 @@ namespace WangJun.DB
     {
         protected IMongoClient client;
 
+        #region 数据库注册
+
+        #endregion
+
         #region 初始化一个实例
         public static MongoDB GetInst(string url)
         {
