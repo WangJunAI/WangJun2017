@@ -97,6 +97,13 @@ namespace WangJun.DB
 
         }
 
+        #region 创建一个数据库
+        public void CreateDatabase()
+        {
+
+        }
+        #endregion
+
         public List<Dictionary<string,object>> Find()
         {
             throw new NotImplementedException();

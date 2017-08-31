@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DB.cs" />
+    <Compile Include="DBConvertor.cs" />
     <Compile Include="IAdmin.cs" />
     <Compile Include="IDB.cs" />
     <Compile Include="MongoDB.cs" />

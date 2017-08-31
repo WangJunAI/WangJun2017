@@ -39,8 +39,13 @@ namespace WangJun.NodeRunner
 
             var inst = THS.GetInst();
             //inst.GetStockPage();
-            inst.LHB();
+            //inst.UpdateToday();
             //inst.GetTodayLHB();
+            #endregion
+
+            #region 数据库测试
+
+             var res = mongo.GetCollectionStatistic("ths");
             #endregion
 
 

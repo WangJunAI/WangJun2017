@@ -18,5 +18,12 @@ namespace WangJun.DB.Tests
             var inst = MongoDB.GetInst("mongodb://192.168.0.140:27017");
             var res = inst.Find("f1", "f2", "{}");
         }
+
+        [TestMethod()]
+        public void GetCollectionStatisticTest()
+        {
+            var inst = MongoDB.GetInst("mongodb://192.168.0.140:27017");
+            var res = inst.GetCollectionStatistic("ths");
+        }
     }
 }

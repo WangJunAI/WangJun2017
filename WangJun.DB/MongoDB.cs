@@ -70,7 +70,7 @@ namespace WangJun.DB
         /// 根据条件查找结果
         /// </summary>
         /// <returns></returns>
-        public List<Dictionary<string, object>> Find(string dbName, string collectionName, string jsonString)
+        public List<Dictionary<string, object>> Find(string dbName, string collectionName, string jsonString,int pageIndex=0,int pageSize=5000)
         {
             List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
             var filterDict = Convertor.FromJsonToDict(jsonString);
@@ -81,7 +81,7 @@ namespace WangJun.DB
 
             var db = this.client.GetDatabase(dbName);
             var collection = db.GetCollection<BsonDocument>(collectionName);
-            var cursor = collection.Find(filter).Limit(50000).ToCursor();
+            var cursor = collection.Find(filter).Skip(pageIndex).Limit(pageSize).ToCursor();
             foreach (var document in cursor.ToEnumerable())
             {
                 res.Add(document.ToDictionary());
@@ -89,6 +89,26 @@ namespace WangJun.DB
             return res;
         }
         #endregion
+
+        #region 获取集合的统计信息
+        /// <summary>
+        /// 获取集合的统计信息
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string,object> GetCollectionStatistic(string dbName, string collectionName=null)
+        {
+            var db = this.client.GetDatabase(dbName);
+            var collectionList = db.ListCollections();
+            foreach (var collection in collectionList.ToEnumerable())
+            {
+                 var dict = collection.ToDictionary();
+                var name = dict["name"];
+            }
+            return null;
+        }
+        #endregion
+
+ 
 
 
         #region  生成查询过滤器
