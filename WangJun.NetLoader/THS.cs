@@ -193,7 +193,7 @@ namespace WangJun.NetLoader
                             CreatTime = DateTime.Now,
                             Page = html
                         };
-                        mongo.Save("ths", "Page", data);
+                        mongo.Save("ths", string.Format("Page{0:00}{1:00}",DateTime.Now.Month, DateTime.Now.Day), data);
                         Console.WriteLine("已保存 " + url.Key+ " "+ url.Value );
                     }
 

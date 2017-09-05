@@ -45,7 +45,11 @@ namespace WangJun.NodeRunner
 
             #region 数据库测试
 
-             var res = mongo.GetCollectionStatistic("ths");
+            // var res = mongo.GetCollectionStatistic("ths");
+            #endregion
+
+            #region 接口测试
+            var res = FanyYiJunAPI.Invoke("你好");
             #endregion
 
 
