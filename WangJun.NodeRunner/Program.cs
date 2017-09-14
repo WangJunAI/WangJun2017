@@ -38,7 +38,7 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            //inst.GetStockPage();
+            inst.GetStockPage();
             //inst.UpdateToday();
             //inst.GetTodayLHB();
             #endregion
@@ -49,7 +49,7 @@ namespace WangJun.NodeRunner
             #endregion
 
             #region 接口测试
-            var res = FanyYiJunAPI.Invoke("你好");
+            //var res = FanyYiJunAPI.Invoke("你好");
             #endregion
 
 

@@ -173,7 +173,8 @@ namespace WangJun.NetLoader
                     urlList.Add(new KeyValuePair<string, string>("首页概览", string.Format("http://stockpage.10jqka.com.cn/{0}/",item.Key.Trim()))); ///首页概览
                     urlList.Add(new KeyValuePair<string, string>("资金流向", string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", item.Key.Trim()))); ///资金流向
                     urlList.Add(new KeyValuePair<string, string>("公司资料", string.Format("http://stockpage.10jqka.com.cn/{0}/company/", item.Key.Trim()))); ///公司资料
-                    urlList.Add(new KeyValuePair<string, string>("新闻公告", string.Format("http://stockpage.10jqka.com.cn/{0}/news/", item.Key.Trim()))); ///新闻公告
+                    //urlList.Add(new KeyValuePair<string, string>("新闻公告", string.Format("http://stockpage.10jqka.com.cn/{0}/news/", item.Key.Trim()))); ///新闻公告
+                    urlList.Add(new KeyValuePair<string, string>("新闻公告", string.Format("http://stockpage.10jqka.com.cn/ajax/code/{0}/type/news/", item.Key.Trim()))); ///新闻公告
                     urlList.Add(new KeyValuePair<string, string>("财务分析", string.Format("http://stockpage.10jqka.com.cn/{0}/finance/", item.Key.Trim()))); ///财务分析
                     urlList.Add(new KeyValuePair<string, string>("经营分析", string.Format("http://stockpage.10jqka.com.cn/{0}/operate/", item.Key.Trim()))); ///经营分析
                     urlList.Add(new KeyValuePair<string, string>("股东股本", string.Format("http://stockpage.10jqka.com.cn/{0}/holder/", item.Key.Trim()))); ///股东股本
@@ -183,18 +184,41 @@ namespace WangJun.NetLoader
                     urlList.Add(new KeyValuePair<string, string>("价值分析", string.Format("http://stockpage.10jqka.com.cn/{0}/worth/", item.Key.Trim()))); ///价值分析
                     urlList.Add(new KeyValuePair<string, string>("行业分析",string.Format("http://stockpage.10jqka.com.cn/{0}/field/", item.Key.Trim()))); ///行业分析
 
+
+                    urlList.Add(new KeyValuePair<string, string>("日线数据", string.Format("http://d.10jqka.com.cn/v2/line/hs_{0}/01/last.js", item.Key.Trim()))); ///日线数据
+
                     foreach (var url in urlList)
                     {
-                        var html = httpdownloader.GetString(url.Value);
-                        var data = new {
-                            StockCode=item.Key,
-                            StockName = item.Value,
-                            ContentType = url.Key,
-                            CreatTime = DateTime.Now,
-                            Page = html
-                        };
-                        mongo.Save("ths", string.Format("Page{0:00}{1:00}",DateTime.Now.Month, DateTime.Now.Day), data);
-                        Console.WriteLine("已保存 " + url.Key+ " "+ url.Value );
+                        if (url.Key == "新闻公告")
+                        {
+                            var html = httpdownloader.GetGzip(url.Value);
+                            var data = new
+                            {
+                                StockCode = item.Key,
+                                StockName = item.Value,
+                                ContentType = url.Key,
+                                CreatTime = DateTime.Now,
+                                Page = html
+                            };
+                            mongo.Save("ths", string.Format("Page{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
+                            Console.WriteLine("已保存 " + url.Key + " " + url.Value);
+                        }
+                        else
+                        {
+                            var html = httpdownloader.GetString(url.Value);
+                            var data = new
+                            {
+                                StockCode = item.Key,
+                                StockName = item.Value,
+                                ContentType = url.Key,
+                                CreatTime = DateTime.Now,
+                                Page = html
+                            };
+                            mongo.Save("ths", string.Format("Page{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
+                            Console.WriteLine("已保存 " + url.Key + " " + url.Value);
+                        }
+ 
+
                     }
 
                 }
@@ -334,5 +358,25 @@ namespace WangJun.NetLoader
         #region 新闻更新
 
         #endregion
+
+        #region 下载所有股票的日线数据
+        /// <summary>
+        /// 下载所有股票的日线数据
+        /// </summary>
+        public void GetDayLine()
+        {
+            this.GetALLStockCode();
+            var httpdownloader = new HTTP(Encoding.UTF8);
+            if (null != this.stockCodeDict)
+            {
+                foreach (var item in this.stockCodeDict)
+                {
+
+                }
+            }
+        }
+        #endregion
+
+
     }
 }

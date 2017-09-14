@@ -98,13 +98,35 @@ namespace WangJun.DB
         }
 
         #region 创建一个数据库
+        /// <summary>
+        /// 
+        /// </summary>
         public void CreateDatabase()
         {
 
         }
         #endregion
 
-        public List<Dictionary<string,object>> Find()
+        #region 插入一个对象
+        /// <summary>
+        /// 插入一个对象
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="data"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public int Save(string tableName , object data, string filter)
+        {
+            return 0;
+        }
+        #endregion
+
+        /// <summary>
+        /// 查找一个对象
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        public List<Dictionary<string,object>> Find(string sql)
         {
             throw new NotImplementedException();
         }
