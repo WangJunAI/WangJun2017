@@ -174,6 +174,47 @@ namespace WangJun.Net
                 EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(new { Url = url, Exception = e, CreateTime = DateTime.Now }));
             }
             return string.Empty;
-        } 
+        }
+
+        /// <summary>
+        /// 以GZip的格式进行下载
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public string GetGzip(string url,Encoding encoding)
+        {
+            try
+            {
+                this.http.Headers.Clear();
+                this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
+                this.http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36");
+                byte[] byteArray = this.http.DownloadData(url);
+                // 处理　gzip   
+                string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
+                if (sContentEncoding == "gzip")
+                {
+                    var sourceStream = new MemoryStream(byteArray);
+                    var targetStream = new MemoryStream();
+                    int count = 0;
+                    // 解压  
+                    GZipStream gzip = new GZipStream(sourceStream, CompressionMode.Decompress);
+                    byte[] buf = new byte[512];
+                    while ((count = gzip.Read(buf, 0, buf.Length)) > 0)
+                    {
+                        targetStream.Write(buf, 0, count);
+                    }
+                    var res = encoding.GetString(targetStream.GetBuffer());
+                    sourceStream.Close();
+                    targetStream.Close();
+
+                    return res;
+                }
+            }
+            catch (Exception e)
+            {
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(new { Url = url, Exception = e, CreateTime = DateTime.Now }));
+            }
+            return string.Empty;
+        }
     }
 }

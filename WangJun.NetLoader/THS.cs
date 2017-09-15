@@ -167,13 +167,14 @@ namespace WangJun.NetLoader
             this.GetALLStockCode();
             if (null != this.stockCodeDict)
             {
+                //this.stockCodeDict = new Dictionary<string, string>();
+                //this.stockCodeDict.Add("002417", "三元达");
                 foreach (var item in this.stockCodeDict)
                 {
                     var urlList = new List<KeyValuePair<string,string>>();
                     urlList.Add(new KeyValuePair<string, string>("首页概览", string.Format("http://stockpage.10jqka.com.cn/{0}/",item.Key.Trim()))); ///首页概览
                     urlList.Add(new KeyValuePair<string, string>("资金流向", string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", item.Key.Trim()))); ///资金流向
                     urlList.Add(new KeyValuePair<string, string>("公司资料", string.Format("http://stockpage.10jqka.com.cn/{0}/company/", item.Key.Trim()))); ///公司资料
-                    //urlList.Add(new KeyValuePair<string, string>("新闻公告", string.Format("http://stockpage.10jqka.com.cn/{0}/news/", item.Key.Trim()))); ///新闻公告
                     urlList.Add(new KeyValuePair<string, string>("新闻公告", string.Format("http://stockpage.10jqka.com.cn/ajax/code/{0}/type/news/", item.Key.Trim()))); ///新闻公告
                     urlList.Add(new KeyValuePair<string, string>("财务分析", string.Format("http://stockpage.10jqka.com.cn/{0}/finance/", item.Key.Trim()))); ///财务分析
                     urlList.Add(new KeyValuePair<string, string>("经营分析", string.Format("http://stockpage.10jqka.com.cn/{0}/operate/", item.Key.Trim()))); ///经营分析
@@ -189,9 +190,9 @@ namespace WangJun.NetLoader
 
                     foreach (var url in urlList)
                     {
-                        if (url.Key == "新闻公告")
+                        if ("新闻公告" == url.Key)
                         {
-                            var html = httpdownloader.GetGzip(url.Value);
+                            var html = httpdownloader.GetGzip(url.Value, Encoding.GetEncoding("gbk"));
                             var data = new
                             {
                                 StockCode = item.Key,
@@ -205,7 +206,7 @@ namespace WangJun.NetLoader
                         }
                         else
                         {
-                            var html = httpdownloader.GetString(url.Value);
+                            var html = httpdownloader.GetGzip(url.Value, Encoding.UTF8);
                             var data = new
                             {
                                 StockCode = item.Key,
@@ -217,8 +218,6 @@ namespace WangJun.NetLoader
                             mongo.Save("ths", string.Format("Page{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
                             Console.WriteLine("已保存 " + url.Key + " " + url.Value);
                         }
- 
-
                     }
 
                 }
