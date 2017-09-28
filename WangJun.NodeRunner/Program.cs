@@ -24,6 +24,7 @@ namespace WangJun.NodeRunner
             #region SQLServer 注册
             SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=WJBigData;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
             var mssql = SQLServer.GetInstance("140");
+            //mssql.CreateDatabase("test2");
             #endregion
 
             #region MySQL注册
@@ -38,9 +39,11 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            inst.GetStockPage();
+            //inst.GetStockPage();
             //inst.UpdateToday();
             //inst.GetTodayLHB();
+            //inst.LargeFundsTracking();
+            //inst.GetFundsStock();
             #endregion
 
             #region 数据库测试
@@ -52,7 +55,10 @@ namespace WangJun.NodeRunner
             //var res = FanyYiJunAPI.Invoke("你好");
             #endregion
 
-
+            #region
+            var toutiao = new TouTiao();
+            toutiao.GetNewsSummary();
+            #endregion
 
 
             Console.WriteLine("全部结束");

@@ -99,9 +99,36 @@ namespace WangJun.DB
 
         #region 创建一个数据库
         /// <summary>
-        /// 
+        /// 创建一个数据库
         /// </summary>
-        public void CreateDatabase()
+        public void CreateDatabase(string databaseName)
+        {
+            string sql = string.Format("CREATE DATABASE {0}",databaseName);
+            var conn = this.GetConnection();
+            if (conn.State == System.Data.ConnectionState.Open)
+            {
+                var com = conn.CreateCommand();
+                com.CommandText = sql;
+                com.CommandType = System.Data.CommandType.Text;
+                 var res = com.ExecuteNonQuery();
+
+                conn.Close();
+            }
+            else
+            {
+
+            }
+
+        }
+        #endregion
+
+        #region 创建一个数据表
+        /// <summary>
+        /// 创建一个数据表
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="exampleData"></param>
+        public void CreateTable(string tableName , Dictionary<string,object> exampleData)
         {
 
         }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WangJun.Data;
 using WangJun.DB;
 using WangJun.Net;
 using WangJun.Tools;
@@ -54,10 +55,7 @@ namespace WangJun.NetLoader
                 pageCount = int.Parse(pagerHtml.Substring(pagerHtml.LastIndexOf("</span>") - 3, 3)); ///页码数
             }
             #endregion
-
-
-
-
+ 
             for (int i = 1; i <= pageCount; i++)
             {
                 var url = string.Format(@"http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/{0}/ajax/1/",i);
@@ -163,30 +161,47 @@ namespace WangJun.NetLoader
         /// </summary>
         public void GetStockPage()
         {
+            this.GetALLStockCode(); ///准备所有股票代码
+            var downloadQueue = new Queue<KeyValuePair<string, string>>();
+
             var httpdownloader = new HTTP(Encoding.UTF8);
-            this.GetALLStockCode();
+            httpdownloader.EventException += (object sender ,EventArgs e)=> {
+                var ee = e as EventProcEventArgs;
+                var data = Convertor.FromObjectToAnonymous(ee.Default, new { Url = string.Empty, Exception = new Exception(), CreateTime = DateTime.MinValue });
+                mongo.Save("ths", string.Format("Exception{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
+                //downloadQueue.Enqueue(new KeyValuePair<string, string> ())
+            };
+             
+
+
             if (null != this.stockCodeDict)
             {
-                //this.stockCodeDict = new Dictionary<string, string>();
-                //this.stockCodeDict.Add("002417", "三元达");
                 foreach (var item in this.stockCodeDict)
                 {
-                    var urlList = new List<KeyValuePair<string,string>>();
-                    urlList.Add(new KeyValuePair<string, string>("首页概览", string.Format("http://stockpage.10jqka.com.cn/{0}/",item.Key.Trim()))); ///首页概览
-                    urlList.Add(new KeyValuePair<string, string>("资金流向", string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", item.Key.Trim()))); ///资金流向
-                    urlList.Add(new KeyValuePair<string, string>("公司资料", string.Format("http://stockpage.10jqka.com.cn/{0}/company/", item.Key.Trim()))); ///公司资料
-                    urlList.Add(new KeyValuePair<string, string>("新闻公告", string.Format("http://stockpage.10jqka.com.cn/ajax/code/{0}/type/news/", item.Key.Trim()))); ///新闻公告
-                    urlList.Add(new KeyValuePair<string, string>("财务分析", string.Format("http://stockpage.10jqka.com.cn/{0}/finance/", item.Key.Trim()))); ///财务分析
-                    urlList.Add(new KeyValuePair<string, string>("经营分析", string.Format("http://stockpage.10jqka.com.cn/{0}/operate/", item.Key.Trim()))); ///经营分析
-                    urlList.Add(new KeyValuePair<string, string>("股东股本", string.Format("http://stockpage.10jqka.com.cn/{0}/holder/", item.Key.Trim()))); ///股东股本
-                    urlList.Add(new KeyValuePair<string, string>("主力持仓", string.Format("http://stockpage.10jqka.com.cn/{0}/position/", item.Key.Trim()))); ///主力持仓
-                    urlList.Add(new KeyValuePair<string, string>("公司大事", string.Format("http://stockpage.10jqka.com.cn/{0}/event/", item.Key.Trim()))); ///公司大事
-                    urlList.Add(new KeyValuePair<string, string>("分红融资", string.Format("http://stockpage.10jqka.com.cn/{0}/bonus/", item.Key.Trim()))); ///分红融资
-                    urlList.Add(new KeyValuePair<string, string>("价值分析", string.Format("http://stockpage.10jqka.com.cn/{0}/worth/", item.Key.Trim()))); ///价值分析
-                    urlList.Add(new KeyValuePair<string, string>("行业分析",string.Format("http://stockpage.10jqka.com.cn/{0}/field/", item.Key.Trim()))); ///行业分析
+                    downloadQueue.Enqueue(new KeyValuePair<string, string>(item.Key.Trim(), item.Value.Trim()));///Key：StockCode Value:StockName
+                }
+            }
+             
+            while(0<downloadQueue.Count)
+            {
+                var queueItem = downloadQueue.Dequeue();
+                 {
+                    var urlList = new List<KeyValuePair<string, string>>();
+                    //urlList.Add(new KeyValuePair<string, string>("首页概览", string.Format("http://stockpage.10jqka.com.cn/{0}/", queueItem.Key))); ///首页概览
+                    urlList.Add(new KeyValuePair<string, string>("资金流向", string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", queueItem.Key))); ///资金流向
+                    //urlList.Add(new KeyValuePair<string, string>("公司资料", string.Format("http://stockpage.10jqka.com.cn/{0}/company/", item.Key.Trim()))); ///公司资料
+                    //urlList.Add(new KeyValuePair<string, string>("新闻公告", string.Format("http://stockpage.10jqka.com.cn/ajax/code/{0}/type/news/", item.Key.Trim()))); ///新闻公告
+                    //urlList.Add(new KeyValuePair<string, string>("财务分析", string.Format("http://stockpage.10jqka.com.cn/{0}/finance/", item.Key.Trim()))); ///财务分析
+                    //urlList.Add(new KeyValuePair<string, string>("经营分析", string.Format("http://stockpage.10jqka.com.cn/{0}/operate/", item.Key.Trim()))); ///经营分析
+                    //urlList.Add(new KeyValuePair<string, string>("股东股本", string.Format("http://stockpage.10jqka.com.cn/{0}/holder/", item.Key.Trim()))); ///股东股本
+                    //urlList.Add(new KeyValuePair<string, string>("主力持仓", string.Format("http://stockpage.10jqka.com.cn/{0}/position/", item.Key.Trim()))); ///主力持仓
+                    //urlList.Add(new KeyValuePair<string, string>("公司大事", string.Format("http://stockpage.10jqka.com.cn/{0}/event/", item.Key.Trim()))); ///公司大事
+                    //urlList.Add(new KeyValuePair<string, string>("分红融资", string.Format("http://stockpage.10jqka.com.cn/{0}/bonus/", item.Key.Trim()))); ///分红融资
+                    //urlList.Add(new KeyValuePair<string, string>("价值分析", string.Format("http://stockpage.10jqka.com.cn/{0}/worth/", item.Key.Trim()))); ///价值分析
+                    //urlList.Add(new KeyValuePair<string, string>("行业分析",string.Format("http://stockpage.10jqka.com.cn/{0}/field/", item.Key.Trim()))); ///行业分析
 
 
-                    urlList.Add(new KeyValuePair<string, string>("日线数据", string.Format("http://d.10jqka.com.cn/v2/line/hs_{0}/01/last.js", item.Key.Trim()))); ///日线数据
+                    urlList.Add(new KeyValuePair<string, string>("日线数据", string.Format("http://d.10jqka.com.cn/v2/line/hs_{0}/01/last.js", queueItem.Key))); ///日线数据
 
                     foreach (var url in urlList)
                     {
@@ -195,8 +210,8 @@ namespace WangJun.NetLoader
                             var html = httpdownloader.GetGzip(url.Value, Encoding.GetEncoding("gbk"));
                             var data = new
                             {
-                                StockCode = item.Key,
-                                StockName = item.Value,
+                                StockCode = queueItem.Key,
+                                StockName = queueItem.Value,
                                 ContentType = url.Key,
                                 CreatTime = DateTime.Now,
                                 Page = html
@@ -209,8 +224,8 @@ namespace WangJun.NetLoader
                             var html = httpdownloader.GetGzip(url.Value, Encoding.UTF8);
                             var data = new
                             {
-                                StockCode = item.Key,
-                                StockName = item.Value,
+                                StockCode = queueItem.Key,
+                                StockName = queueItem.Value,
                                 ContentType = url.Key,
                                 CreatTime = DateTime.Now,
                                 Page = html
@@ -221,8 +236,13 @@ namespace WangJun.NetLoader
                     }
 
                 }
+
             }
+
+            
         }
+
+ 
 
         #endregion
 
@@ -358,23 +378,126 @@ namespace WangJun.NetLoader
 
         #endregion
 
-        #region 下载所有股票的日线数据
+        #region 资金流向 - 个股资金
         /// <summary>
-        /// 下载所有股票的日线数据
+        /// 资金流向 - 个股资金
         /// </summary>
-        public void GetDayLine()
+        /// <remarks>
+        /// 个股资金 即时 http://data.10jqka.com.cn/funds/ggzjl/field/zdf/order/desc/page/{分页}/ajax/1/
+        /// 个股资金 3日 http://data.10jqka.com.cn/funds/ggzjl/board/3/field/zdf/order/desc/page/{分页}/ajax/1/
+        /// 个股资金 5日 http://data.10jqka.com.cn/funds/ggzjl/board/5/field/zdf/order/desc/page/{分页}/ajax/1/
+        /// 个股资金 10日 http://data.10jqka.com.cn/funds/ggzjl/board/10/field/zdf/order/desc/page/{分页}/ajax/1/
+        /// 个股资金 20日 http://data.10jqka.com.cn/funds/ggzjl/board/20/field/zdf/order/desc/page/{分页}/ajax/1/
+        /// 
+        /// 概念资金 即时 http://data.10jqka.com.cn/funds/gnzjl/field/new/order/asc/page/{分页}/ajax/1/
+        /// 概念资金 3日   http://data.10jqka.com.cn/funds/gnzjl/board/3/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 概念资金 5日   http://data.10jqka.com.cn/funds/gnzjl/board/5/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 概念资金 10日 http://data.10jqka.com.cn/funds/gnzjl/board/10/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 概念资金 20日 http://data.10jqka.com.cn/funds/gnzjl/board/20/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 
+        /// 行业资金 即时 http://data.10jqka.com.cn/funds/hyzjl/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 行业资金 3日  http://data.10jqka.com.cn/funds/hyzjl/board/3/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 行业资金 5日  http://data.10jqka.com.cn/funds/hyzjl/board/5/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 行业资金 10日  http://data.10jqka.com.cn/funds/hyzjl/board/10/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 行业资金 20日 http://data.10jqka.com.cn/funds/hyzjl/board/20/field/tradezdf/order/desc/page/{分页}/ajax/1/
+        /// 
+        /// 大单追踪  即时 http://data.10jqka.com.cn/funds/ddzz/order/asc/page/{分页}/ajax/1/
+        /// </remarks>
+        public void GetFundsStock()
         {
-            this.GetALLStockCode();
-            var httpdownloader = new HTTP(Encoding.UTF8);
-            if (null != this.stockCodeDict)
+            var pageCount = 64;
+            var queue = new Queue<KeyValuePair<string,string>>(); ///url,重试次数
+            for (int i = 1; i < pageCount; i++)
             {
-                foreach (var item in this.stockCodeDict)
-                {
+                queue.Enqueue(new KeyValuePair<string, string>("个股资金即时", string.Format("http://data.10jqka.com.cn/funds/ggzjl/field/zdf/order/desc/page/{0}/ajax/1/", i)));///个股资金 即时
+                queue.Enqueue(new KeyValuePair<string, string>("个股资金3日", string.Format("http://data.10jqka.com.cn/funds/ggzjl/board/3/field/zdf/order/desc/page/{0}/ajax/1/", i)));///个股资金 3日
+                queue.Enqueue(new KeyValuePair<string, string>("个股资金5日", string.Format("http://data.10jqka.com.cn/funds/ggzjl/board/5/field/zdf/order/desc/page/{0}/ajax/1/", i)));///个股资金 5日
+                queue.Enqueue(new KeyValuePair<string, string>("个股资金10日", string.Format("http://data.10jqka.com.cn/funds/ggzjl/board/10/field/zdf/order/desc/page/{0}/ajax/1/", i)));///个股资金 10日
+                queue.Enqueue(new KeyValuePair<string, string>("个股资金20日", string.Format("http://data.10jqka.com.cn/funds/ggzjl/board/20/field/zdf/order/desc/page/{0}/ajax/1/", i)));///个股资金 20日
+            }
 
+
+            for (int i = 1; i < 5; i++)
+            {
+                queue.Enqueue(new KeyValuePair<string, string>("概念资金即时", string.Format("http://data.10jqka.com.cn/funds/gnzjl/field/new/order/asc/page/{0}/ajax/1/", i)));///概念资金 即时
+                queue.Enqueue(new KeyValuePair<string, string>("概念资金3日", string.Format("http://data.10jqka.com.cn/funds/gnzjl/board/3/field/tradezdf/order/desc/page/{0}/ajax/1/",i)));///概念资金 3日
+                queue.Enqueue(new KeyValuePair<string, string>("概念资金5日", string.Format("http://data.10jqka.com.cn/funds/gnzjl/board/5/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///概念资金 5日
+                queue.Enqueue(new KeyValuePair<string, string>("概念资金10日", string.Format("http://data.10jqka.com.cn/funds/gnzjl/board/10/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///概念资金 10日
+                queue.Enqueue(new KeyValuePair<string, string>("概念资金20日", string.Format("http://data.10jqka.com.cn/funds/gnzjl/board/20/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///概念资金 20日
+            }
+
+            for (int i = 1; i < 3; i++)
+            {
+                queue.Enqueue(new KeyValuePair<string, string>("行业资金即时", string.Format("http://data.10jqka.com.cn/funds/hyzjl/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///行业资金 即时
+                queue.Enqueue(new KeyValuePair<string, string>("行业资金3日", string.Format("http://data.10jqka.com.cn/funds/hyzjl/board/3/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///行业资金 3日
+                queue.Enqueue(new KeyValuePair<string, string>("行业资金5日", string.Format("http://data.10jqka.com.cn/funds/hyzjl/board/5/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///行业资金 5日
+                queue.Enqueue(new KeyValuePair<string, string>("行业资金10日", string.Format("http://data.10jqka.com.cn/funds/hyzjl/board/10/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///行业资金 10日
+                queue.Enqueue(new KeyValuePair<string, string>("行业资金20日", string.Format("http://data.10jqka.com.cn/funds/hyzjl/board/20/field/tradezdf/order/desc/page/{0}/ajax/1/", i)));///行业资金 20日
+            }
+
+            var httpdownloader = new HTTP(Encoding.UTF8);
+            httpdownloader.EventException += (object sender, EventArgs e) => {
+                var ee = e as EventProcEventArgs;
+                var data = Convertor.FromObjectToAnonymous(ee.Default, new { Url = string.Empty, Exception = new object(), CreateTime = DateTime.MinValue });
+                mongo.Save("ths", string.Format("Exception{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
+            };
+
+            while (0 < queue.Count)
+            {
+                var queueItem = queue.Dequeue();
+                var html = httpdownloader.GetGzip(queueItem.Value, Encoding.GetEncoding("gbk"));
+                var data = new
+                {
+                    ContentType = queueItem.Key,
+                    Url = queueItem.Value,
+                    CreatTime = DateTime.Now,
+                    Page = html
+                };
+                mongo.Save("ths", string.Format("StockFunds{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
+                Console.WriteLine("已保存 " + queueItem.Key + " " + queueItem.Value);
+            }
+
+        }
+        #endregion
+
+
+        #region 资金流向 -大单追踪
+        /// <summary>
+        /// 资金流向 -大单追踪
+        /// </summary>
+        public void LargeFundsTracking()
+        {
+            var url = "http://data.10jqka.com.cn/funds/ddzz/order/asc/page/{0}/ajax/1/"; ///实时更新
+            var httpdownloader = new HTTP(Encoding.UTF8);
+
+            while (true)
+            {
+                if (DateTime.Today.AddHours(9.4) < DateTime.Now && DateTime.Now < DateTime.Today.AddHours(15.1))
+                {
+                    for (var i = 1; i < 101; i++)
+                    {
+                        var html = httpdownloader.GetGzip(string.Format(url, i), Encoding.GetEncoding("gbk"));
+                        var data = new
+                        {
+                            ContentType = "资金流向大单追踪",
+                            Url = url,
+                            CreatTime = DateTime.Now,
+                            Page = html
+                        };
+                        mongo.Save("ths", string.Format("PageFundsTracking{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
+                        Console.WriteLine("资金流向大单追踪 已保存 " + i + " " + DateTime.Now + "   " + string.Format(url, i));
+                    }
                 }
+                else
+                {
+                    Thread.Sleep(30 * 1000);
+                    Console.WriteLine("资金流向大单追踪 当前时间 " + DateTime.Now);
+                }
+
             }
         }
         #endregion
+
 
 
     }

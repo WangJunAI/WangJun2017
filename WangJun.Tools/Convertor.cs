@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WangJun.Data
 {
@@ -205,10 +207,16 @@ namespace WangJun.Data
             return sourceDict;
         }
 
-
-        public static string FromObjectToObject()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="AnonymousType">new {Pro1=Val1,Pro2=Val2}</param>
+        /// <returns></returns>
+        public static T FromObjectToAnonymous<T>(object source , T AnonymousType)
         {
-            return null;
+            return (T)source;
         }
 
         public static Guid GetGuid(string input)
@@ -221,6 +229,13 @@ namespace WangJun.Data
         {
             Dictionary<string, object> data = js.Deserialize<Dictionary<string, object>>(jsonString);
             return data;
+        }
+
+        public static Dictionary<string, object> FromJsonToDict2(string jsonString)
+        {
+            JObject res = JsonConvert.DeserializeObject(jsonString) as JObject;
+            var str = JsonConvert.SerializeObject(res);
+            return Convertor.FromJsonToDict(str);
         }
 
         /// <summary>
