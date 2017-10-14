@@ -127,7 +127,11 @@ namespace WangJun.Net
             }
             catch (Exception e)
             {
-                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(new { Url = url, Exception = e, CreateTime = DateTime.Now }));
+                var dict = new Dictionary<string, object>();
+                dict["Url"] = url;
+                dict["Exception"] = e;
+                dict["CreateTime"] = DateTime.Now;
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
             }
             return string.Empty;
 
@@ -171,7 +175,11 @@ namespace WangJun.Net
             }
             catch(Exception e)
             {
-                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(new { Url = url, Exception = e, CreateTime = DateTime.Now }));
+                var dict = new Dictionary<string, object>();
+                dict["Url"] = url;
+                dict["Exception"] = e;
+                dict["CreateTime"] = DateTime.Now;
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
             }
             return string.Empty;
         }
@@ -186,8 +194,13 @@ namespace WangJun.Net
             try
             {
                 this.http.Headers.Clear();
+ 
+                this.http.Headers.Add("Accept", "*/*");
                 this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
-                this.http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36");
+                this.http.Headers.Add("Accept-Language", "zh - CN,zh; q = 0.8,en; q = 0.6");
+                //this.http.Headers.Add("Connection", " keep-alive");
+                this.http.Headers.Add("Referer", "http://stockpage.10jqka.com.cn/HQ_v4.html");
+                this.http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
                 byte[] byteArray = this.http.DownloadData(url);
                 // 处理　gzip   
                 string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
@@ -212,7 +225,11 @@ namespace WangJun.Net
             }
             catch (Exception e)
             {
-                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(new { Url = url, Exception = e, CreateTime = DateTime.Now }));
+                var dict = new Dictionary<string, object>();
+                dict["Url"] = url;
+                dict["Exception"] = e;
+                dict["CreateTime"] = DateTime.Now;
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
             }
             return string.Empty;
         }
@@ -256,7 +273,11 @@ namespace WangJun.Net
             }
             catch (Exception e)
             {
-                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(new { Url = url, Exception = e, CreateTime = DateTime.Now }));
+                var dict = new Dictionary<string, object>();
+                dict["Url"] = url;
+                dict["Exception"] = e;
+                dict["CreateTime"] = DateTime.Now;
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
             }
             return string.Empty;
         }

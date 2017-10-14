@@ -222,7 +222,16 @@ namespace WangJun.Data
         public static Guid GetGuid(string input)
         {
             Guid guid = Guid.Empty;
-            return (Guid.TryParse(input, out guid)) ? guid : Guid.Empty;
+            if (input.Contains("-"))
+            {
+                return (Guid.TryParse(input, out guid)) ? guid : Guid.Empty;
+            }
+            else if(32 == input.Length)
+            {
+                input = input.Insert(7, "-").Insert(12, "-").Insert(17, "-").Insert(22, "-");
+                return (Guid.TryParse(input, out guid)) ? guid : Guid.Empty;
+            }
+            return guid;
         }
 
         public static Dictionary<string, object> FromJsonToDict(string jsonString)

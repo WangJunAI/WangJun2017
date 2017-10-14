@@ -5,6 +5,7 @@ using System.Text;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using WangJun.Data;
+using WangJun.Tools;
 
 namespace WangJun.DB
 {
@@ -14,6 +15,8 @@ namespace WangJun.DB
     public class MongoDB
     {
         protected IMongoClient client;
+
+        public event EventHandler EventTraverse = null;
 
         #region 数据库注册
 
@@ -70,7 +73,7 @@ namespace WangJun.DB
         /// 根据条件查找结果
         /// </summary>
         /// <returns></returns>
-        public List<Dictionary<string, object>> Find(string dbName, string collectionName, string jsonString,int pageIndex=0,int pageSize=5000)
+        public List<Dictionary<string, object>> Find(string dbName, string collectionName, string jsonString,int pageIndex=0,int pageSize=int.MaxValue)
         {
             List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
             var filterDict = Convertor.FromJsonToDict(jsonString);
@@ -81,14 +84,23 @@ namespace WangJun.DB
 
             var db = this.client.GetDatabase(dbName);
             var collection = db.GetCollection<BsonDocument>(collectionName);
-            var cursor = collection.Find(filter).Skip(pageIndex).Limit(pageSize).ToCursor();
+            var cursor = collection.Find(filter).Skip(pageIndex* pageSize).Limit(pageSize).ToCursor();
             foreach (var document in cursor.ToEnumerable())
             {
-                res.Add(document.ToDictionary());
+                if (null == this.EventTraverse)
+                {
+                    res.Add(document.ToDictionary());
+                }
+                else
+                {
+                    EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
+                }
             }
             return res;
         }
         #endregion
+
+
 
         #region 获取集合的统计信息
         /// <summary>
@@ -127,6 +139,10 @@ namespace WangJun.DB
                 var key = item.Key;
                 var value = item.Value;
                 filter &= filterBuilder.Eq(key, value);
+            }
+            if("{}" == jsonString)
+            {
+                return Builders<BsonDocument>.Filter.Empty;
             }
             return filter;
         }

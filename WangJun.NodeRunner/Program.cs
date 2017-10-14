@@ -44,6 +44,9 @@ namespace WangJun.NodeRunner
             //inst.GetTodayLHB();
             //inst.LargeFundsTracking();
             //inst.GetFundsStock();
+            inst.GetTodayNewData();
+
+             
             #endregion
 
             #region 数据库测试
@@ -57,7 +60,11 @@ namespace WangJun.NodeRunner
 
             #region
             var toutiao = new TouTiao();
-            toutiao.GetNewsSummary();
+            //toutiao.GetNewsSummary();
+            #endregion
+
+            #region 数据转换测试
+            //DBConvertor.FromMongoDBToSQLServer("", "", "", "", "", "");
             #endregion
 
 

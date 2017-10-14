@@ -130,8 +130,20 @@ namespace WangJun.DB
         /// <param name="exampleData"></param>
         public void CreateTable(string tableName , Dictionary<string,object> exampleData)
         {
+            if(null != exampleData) ///若数据有效
+            {
 
+
+            }
         }
+        #endregion
+
+        #region 检查数据库是否存在
+
+        #endregion
+
+        #region 检查数据表是否存在
+
         #endregion
 
         #region 插入一个对象
