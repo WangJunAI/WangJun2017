@@ -19,7 +19,7 @@ namespace WangJun.NodeRunner
          protected static WebLoader loader = WebLoader.GetInstance();
         static void Main(string[] args)
         {
-            SetConsoleInfo();
+            SetConsoleInfo("大单追踪程序V2");
 
             #region SQLServer 注册
             SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=WJBigData;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
@@ -39,12 +39,9 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            //inst.GetStockPage();
-            //inst.UpdateToday();
-            //inst.GetTodayLHB();
-            //inst.LargeFundsTracking();
-            //inst.GetFundsStock();
-            inst.GetTodayNewData();
+            //inst.GetTodayNewData();
+
+            //inst.GetLargeFundsTracking();
 
              
             #endregion
@@ -76,9 +73,9 @@ namespace WangJun.NodeRunner
  
 
         #region 设置程序的基本信息
-        static void SetConsoleInfo()
+        static void SetConsoleInfo(string title)
         {
-            Console.Title = string.Format("本地文件遍历器  开始时间:{0}",Program.StartTime);
+            Console.Title = string.Format("{0}  开始时间:{1}", title,Program.StartTime);
         }
         #endregion
     }

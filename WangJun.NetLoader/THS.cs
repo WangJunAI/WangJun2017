@@ -57,7 +57,12 @@ namespace WangJun.NetLoader
             /// <summary>
             /// 异常信息集合
             /// </summary>
-            public static string Exception { get { return string.Format("Exception"); } }//异常信息
+            public static string Exception { get { return string.Format("Exception"); } }//异常信息 
+
+            /// <summary>
+            /// 大单追踪集合
+            /// </summary>
+            public static string PageLargeFundsTracking { get { return string.Format("PageLargeFundsTracking"); } } 
         }
         #region 获取一个实例
         /// <summary>
@@ -249,7 +254,9 @@ namespace WangJun.NetLoader
                                 StockName = queueItem.Value,
                                 ContentType = url.Key,
                                 CreatTime = DateTime.Now,
-                                Page = html
+                                Url = url,
+                                Page = html,
+                                MD5=Convertor.Encode_MD5(html)
                             };
                             mongo.Save(THS.CONST.DBName, THS.CONST.PageStock, item);
                             Console.WriteLine("已保存 " + url.Key + " " + url.Value);
@@ -262,8 +269,10 @@ namespace WangJun.NetLoader
                                 StockCode = queueItem.Key,
                                 StockName = queueItem.Value,
                                 ContentType = url.Key,
+                                Url = url,
                                 CreatTime = DateTime.Now,
-                                Page = html
+                                Page = html,
+                                MD5 = Convertor.Encode_MD5(html)
                             };
                             var collectionName = ("日线数据" == url.Key) ? THS.CONST.PageKLine : THS.CONST.PageStock;
                              mongo.Save(THS.CONST.DBName, collectionName, item);
@@ -372,7 +381,8 @@ namespace WangJun.NetLoader
                                         CreateTime = DateTime.Now,
                                         Page = subHtml,
                                         ContentType = "个股龙虎榜明细",
-                                        RefID=refID
+                                        RefID=refID,
+                                        MD5 = Convertor.Encode_MD5(subHtml)
                                     };
 
                                     mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
@@ -393,7 +403,8 @@ namespace WangJun.NetLoader
                         CreateTime = DateTime.Now,
                         Page = pagegglhbHtml,
                         ContentType = "个股龙虎榜",
-                        RefID=refID
+                        RefID=refID,
+                        MD5 = Convertor.Encode_MD5(pagegglhbHtml)
                     };
 
                     mongo.Save(THS.CONST.DBName,THS.CONST.PageGGLHB, gglhbData); ///个股龙虎榜
@@ -406,7 +417,8 @@ namespace WangJun.NetLoader
                         ContentType = "龙虎榜下载数据异常",
                         Page = pagegglhbHtml,
                         Url=urlgglhb,
-                        CreateTime=DateTime.Now
+                        CreateTime=DateTime.Now,
+                        MD5 = Convertor.Encode_MD5(pagegglhbHtml)
                     };
 
                     mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
@@ -565,7 +577,8 @@ namespace WangJun.NetLoader
                     Url = queueItem.Value,
                     CreatTime = DateTime.Now,
                     Remark="次日更新",
-                    Page = html
+                    Page = html,
+                    MD5 = Convertor.Encode_MD5(html)
                 };
                 mongo.Save(THS.CONST.DBName, THS.CONST.PageFundsStock, item);
                 Console.WriteLine("已保存 " + queueItem.Key + " " + queueItem.Value);
@@ -578,33 +591,35 @@ namespace WangJun.NetLoader
         /// <summary>
         /// 资金流向 -大单追踪
         /// </summary>
-        public void LargeFundsTracking()
+        public void GetLargeFundsTracking()
         {
             var url = "http://data.10jqka.com.cn/funds/ddzz/order/asc/page/{0}/ajax/1/"; ///实时更新
             var httpdownloader = new HTTP(Encoding.UTF8);
 
             while (true)
             {
-                if (DateTime.Today.AddHours(9.4) < DateTime.Now && DateTime.Now < DateTime.Today.AddHours(15.1))
+                if (DateTime.Today.AddHours(9.4) < DateTime.Now && DateTime.Now < DateTime.Today.AddHours(15.1) 
+                    && !(DateTime.Now.DayOfWeek == DayOfWeek.Sunday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday))
                 {
                     for (var i = 1; i < 101; i++)
                     {
                         var html = httpdownloader.GetGzip(string.Format(url, i), Encoding.GetEncoding("gbk"));
                         var data = new
                         {
-                            ContentType = "资金流向大单追踪",
+                            ContentType = "大单追踪实时数据",
                             Url = string.Format(url, i),
                             CreatTime = DateTime.Now,
-                            Page = html
+                            Page = html,
+                            MD5 = Convertor.Encode_MD5(html)
                         };
-                        mongo.Save("ths", string.Format("PageFundsTracking{0:00}{1:00}", DateTime.Now.Month, DateTime.Now.Day), data);
+                        mongo.Save(THS.CONST.DBName, THS.CONST.PageLargeFundsTracking, data);
                         Console.WriteLine("资金流向大单追踪 已保存 " + i + " " + DateTime.Now + "   " + string.Format(url, i));
                     }
                 }
                 else
                 {
-                    Thread.Sleep(30 * 1000);
-                    Console.WriteLine("资金流向大单追踪 没在开市时间 当前时间 " + DateTime.Now);
+                    Console.WriteLine("资金流向大单追踪 目前没在开市时间 工作日 9:30 - 15:00 当前时间 " + DateTime.Now);
+                    Thread.Sleep(60 * 1000);
                 }
 
             }
@@ -625,9 +640,7 @@ namespace WangJun.NetLoader
             this.GetALLStockCode();///获取所有股票代码
             //this.GetStockLHB();///获取个股龙虎榜数据
             //this.GetFundsStock();///下载个股资金流向
-            this.GetPageStock();///获取每个股票页面的数据
-
-
+            //this.GetPageStock();///获取每个股票页面的数据
         }
 
     }
