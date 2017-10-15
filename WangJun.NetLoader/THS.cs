@@ -62,7 +62,9 @@ namespace WangJun.NetLoader
             /// <summary>
             /// 大单追踪集合
             /// </summary>
-            public static string PageLargeFundsTracking { get { return string.Format("PageLargeFundsTracking"); } } 
+            public static string PageLargeFundsTracking { get { return string.Format("PageLargeFundsTracking"); } }
+
+            public static string TaskID = DateTime.Now.Year + DateTime.Now.Month + DateTime.Now.Day+Guid.NewGuid().ToString().Replace("-", string.Empty);
         }
         #region 获取一个实例
         /// <summary>
@@ -161,7 +163,7 @@ namespace WangJun.NetLoader
                     #region 保存到数据库
                     foreach (var item in stockCodeDict)
                     {
-                        mongo.Save(THS.CONST.DBName, THS.CONST.StockBaseInfo, new { StockCode = item.Key, StockName = item.Value, CreateTime = DateTime.Now, UpdateTime = DateTime.Now });
+                        mongo.Save(THS.CONST.DBName, THS.CONST.StockBaseInfo, new { StockCode = item.Key, StockName = item.Value, CreateTime = DateTime.Now, UpdateTime = DateTime.Now, TaskID = THS.CONST.TaskID });
                     }
                     #endregion
                     Console.WriteLine("股票代码添加完毕 {0}", DateTime.Now);
@@ -187,6 +189,7 @@ namespace WangJun.NetLoader
                 Console.WriteLine("下载失败 {0}", ee.Default);
                 var item = ee.Default as Dictionary<string, object>;
                 item["ContentType"] = "个股详细页面下载失败异常信息";
+                item["TaskID"] = THS.CONST.TaskID;
 
                 var url = item["Url"].ToString();
                 var type = string.Empty;
@@ -254,9 +257,10 @@ namespace WangJun.NetLoader
                                 StockName = queueItem.Value,
                                 ContentType = url.Key,
                                 CreatTime = DateTime.Now,
-                                Url = url,
+                                Url = url.Value,
                                 Page = html,
-                                MD5=Convertor.Encode_MD5(html)
+                                MD5=Convertor.Encode_MD5(html),
+                                TaskID = THS.CONST.TaskID
                             };
                             mongo.Save(THS.CONST.DBName, THS.CONST.PageStock, item);
                             Console.WriteLine("已保存 " + url.Key + " " + url.Value);
@@ -269,10 +273,11 @@ namespace WangJun.NetLoader
                                 StockCode = queueItem.Key,
                                 StockName = queueItem.Value,
                                 ContentType = url.Key,
-                                Url = url,
+                                Url = url.Value,
                                 CreatTime = DateTime.Now,
                                 Page = html,
-                                MD5 = Convertor.Encode_MD5(html)
+                                MD5 = Convertor.Encode_MD5(html),
+                                TaskID = THS.CONST.TaskID
                             };
                             var collectionName = ("日线数据" == url.Key) ? THS.CONST.PageKLine : THS.CONST.PageStock;
                              mongo.Save(THS.CONST.DBName, collectionName, item);
@@ -318,6 +323,7 @@ namespace WangJun.NetLoader
                 Console.WriteLine("下载失败 {0}",ee.Default);
                 var item = ee.Default as Dictionary<string, object>;
                 item["ContentType"] = "龙虎榜下载失败异常信息";
+                item["TaskID"] =THS.CONST.TaskID;
 
                 mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
                 queueUrl.Enqueue(item["Url"].ToString());
@@ -382,7 +388,8 @@ namespace WangJun.NetLoader
                                         Page = subHtml,
                                         ContentType = "个股龙虎榜明细",
                                         RefID=refID,
-                                        MD5 = Convertor.Encode_MD5(subHtml)
+                                        MD5 = Convertor.Encode_MD5(subHtml),
+                                        TaskID = THS.CONST.TaskID
                                     };
 
                                     mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
@@ -404,7 +411,8 @@ namespace WangJun.NetLoader
                         Page = pagegglhbHtml,
                         ContentType = "个股龙虎榜",
                         RefID=refID,
-                        MD5 = Convertor.Encode_MD5(pagegglhbHtml)
+                        MD5 = Convertor.Encode_MD5(pagegglhbHtml),
+                        TaskID = THS.CONST.TaskID
                     };
 
                     mongo.Save(THS.CONST.DBName,THS.CONST.PageGGLHB, gglhbData); ///个股龙虎榜
@@ -418,7 +426,8 @@ namespace WangJun.NetLoader
                         Page = pagegglhbHtml,
                         Url=urlgglhb,
                         CreateTime=DateTime.Now,
-                        MD5 = Convertor.Encode_MD5(pagegglhbHtml)
+                        MD5 = Convertor.Encode_MD5(pagegglhbHtml),
+                        TaskID = THS.CONST.TaskID
                     };
 
                     mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
@@ -495,6 +504,7 @@ namespace WangJun.NetLoader
                 Console.WriteLine("下载失败 {0}", ee.Default);
                 var item = ee.Default as Dictionary<string, object>;
                 item["ContentType"] = "资金流向个股资金下载失败异常信息";
+                item["TaskID"] = THS.CONST.TaskID;
 
                 mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
                 var url = item["Url"].ToString();
@@ -578,7 +588,8 @@ namespace WangJun.NetLoader
                     CreatTime = DateTime.Now,
                     Remark="次日更新",
                     Page = html,
-                    MD5 = Convertor.Encode_MD5(html)
+                    MD5 = Convertor.Encode_MD5(html),
+                    TaskID = THS.CONST.TaskID
                 };
                 mongo.Save(THS.CONST.DBName, THS.CONST.PageFundsStock, item);
                 Console.WriteLine("已保存 " + queueItem.Key + " " + queueItem.Value);
@@ -610,7 +621,8 @@ namespace WangJun.NetLoader
                             Url = string.Format(url, i),
                             CreatTime = DateTime.Now,
                             Page = html,
-                            MD5 = Convertor.Encode_MD5(html)
+                            MD5 = Convertor.Encode_MD5(html),
+                            TaskID = THS.CONST.TaskID
                         };
                         mongo.Save(THS.CONST.DBName, THS.CONST.PageLargeFundsTracking, data);
                         Console.WriteLine("资金流向大单追踪 已保存 " + i + " " + DateTime.Now + "   " + string.Format(url, i));
@@ -640,7 +652,7 @@ namespace WangJun.NetLoader
             this.GetALLStockCode();///获取所有股票代码
             //this.GetStockLHB();///获取个股龙虎榜数据
             //this.GetFundsStock();///下载个股资金流向
-            //this.GetPageStock();///获取每个股票页面的数据
+            this.GetPageStock();///获取每个股票页面的数据
         }
 
     }

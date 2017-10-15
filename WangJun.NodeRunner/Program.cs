@@ -19,7 +19,7 @@ namespace WangJun.NodeRunner
          protected static WebLoader loader = WebLoader.GetInstance();
         static void Main(string[] args)
         {
-            SetConsoleInfo("大单追踪程序V2");
+            SetConsoleInfo("股票数据获取器V2");
 
             #region SQLServer 注册
             SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=WJBigData;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
@@ -39,7 +39,7 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            //inst.GetTodayNewData();
+            inst.GetTodayNewData();
 
             //inst.GetLargeFundsTracking();
 
