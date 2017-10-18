@@ -306,27 +306,64 @@ namespace WangJun.NetLoader
             this.GetALLStockCode(); ///准备全部股票代码
             Console.WriteLine("准备下载龙虎榜个股及明细页面");
             var httpdownloader = new HTTP("gbk");
-             
+
             #region 准备下载队列
-            var queueUrl = new Queue<URL>(); ///key :url value 失败次数
-            var queueMxUrl = new Queue<URL>();///龙虎榜明细队列
+            var queueUrl = new Queue<string>(); ///key :url value 失败次数
             foreach (var stock in this.stockCodeDict)
             {
-                var urlgglhb = new URL(string.Format("http://data.10jqka.com.cn/market/lhbgg/code/{0}/", stock.Key), message : "个股龙虎榜");
+                var urlgglhb = string.Format("http://data.10jqka.com.cn/market/lhbgg/code/{0}/", stock.Key);//
 
                 queueUrl.Enqueue(urlgglhb);
             }
             #endregion
-             
-            var excetionDict = new Dictionary<string, int>();
-            while (0 < queueUrl.Count) ///下载个股龙虎榜准备龙虎榜明细队列
+
+            ///若下载失败
+            httpdownloader.EventException += (object sender,EventArgs e)=> {
+                var ee = e as EventProcEventArgs;
+                Console.WriteLine("下载失败 {0}",ee.Default);
+                var item = ee.Default as Dictionary<string, object>;
+                item["ContentType"] = "龙虎榜下载失败异常信息";
+                item["TaskID"] =THS.CONST.TaskID;
+
+                mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
+                queueUrl.Enqueue(item["Url"].ToString());
+                Thread.Sleep(60 * 1000);
+            };
+            Func<string,string,string, string,string, int> downloadLHBMX = (string code ,string date,string rid,string urlgglhb,string refID) =>
+            {
+                var urlgglhbmx = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", code, date, rid); ///个股龙虎榜明细
+
+                var subHtml = httpdownloader.GetGzip(urlgglhbmx);
+
+                var gglhbmxData = new
+                {
+                    StockCode = code,
+                    StockName = this.stockCodeDict[code],
+                    Date = date,
+                    Rid = rid,
+                    ParentUrl = urlgglhb,
+                    Url = urlgglhbmx,
+                    CreateTime = DateTime.Now,
+                    Page = subHtml,
+                    ContentType = "个股龙虎榜明细",
+                    RefID = refID,
+                    MD5 = Convertor.Encode_MD5(subHtml),
+                    TaskID = THS.CONST.TaskID
+                };
+
+                mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
+                return 0;
+            };
+            
+
+            while (0<queueUrl.Count)
             {
                 var qItem = queueUrl.Dequeue();
                 var urlgglhb = qItem;///个股龙虎榜URL
- 
-                var stockCode = urlgglhb.Url.Substring(urlgglhb.Url.Length - 8).Replace("/", string.Empty);//http://data.10jqka.com.cn/market/lhbgg/code/600360/ //http://data.10jqka.com.cn/ifmarket/getnewlh/code/601228/date/2017-04-14/rid/7/
+                var url = qItem;
+                var stockCode = urlgglhb.Substring(urlgglhb.Length-8).Replace("/",string.Empty);//http://data.10jqka.com.cn/market/lhbgg/code/600360/ //http://data.10jqka.com.cn/ifmarket/getnewlh/code/601228/date/2017-04-14/rid/7/
                 var refID = Guid.NewGuid().ToString().Replace("-", string.Empty);
-                var pagegglhbHtml = httpdownloader.GetGzip(urlgglhb.Url, refData: refID);///下载的个股龙虎榜页面
+                var pagegglhbHtml = httpdownloader.GetGzip(urlgglhb);///下载的个股龙虎榜页面
                 if (100 < pagegglhbHtml.Length) ///若下载的有数据
                 {
                     #region 分析个股龙虎榜明细
@@ -334,7 +371,7 @@ namespace WangJun.NetLoader
                     var tableEndIndex = pagegglhbHtml.IndexOf("</tbody>");///个股龙虎榜表格数据结束位置
                     var tableHtml = pagegglhbHtml.Substring(tableStartIndex, tableEndIndex - tableStartIndex);
                     var tdArray = tableHtml.Split(new string[] { "<td>", "</td>" }, StringSplitOptions.RemoveEmptyEntries);
-
+ 
                     foreach (var td in tdArray)
                     {
                         if (td.Contains("rid") && td.Contains("date"))
@@ -361,37 +398,26 @@ namespace WangJun.NetLoader
                                 if (!string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(date) && !string.IsNullOrWhiteSpace(rid))
                                 {
                                     var urlgglhbmx = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", code, date, rid); ///个股龙虎榜明细
+                                    
+                                    var subHtml = httpdownloader.GetGzip(urlgglhbmx);
 
+                                    var gglhbmxData = new
+                                    {
+                                        StockCode = code,
+                                        StockName = this.stockCodeDict[code],
+                                        Date = date,
+                                        Rid = rid,
+                                        ParentUrl = urlgglhb,
+                                        Url = urlgglhbmx,
+                                        CreateTime = DateTime.Now,
+                                        Page = subHtml,
+                                        ContentType = "个股龙虎榜明细",
+                                        RefID=refID,
+                                        MD5 = Convertor.Encode_MD5(subHtml),
+                                        TaskID = THS.CONST.TaskID
+                                    };
 
-                                    var mxUrl = new URL(urlgglhbmx);
-                                    mxUrl.Data["StockCode"] = code;
-                                    mxUrl.Data["Date"] = date;
-                                    mxUrl.Data["Rid"] = rid;
-                                    mxUrl.Data["ParentUrl"] = urlgglhb.Url;
-                                    mxUrl.Data["RefID"] = refID;
-                                    mxUrl.Message = "个股龙虎榜明细";
-
-                                    queueMxUrl.Enqueue(mxUrl);
-
-                                    //var subHtml = httpdownloader.GetGzip(urlgglhbmx);
-
-                                    //var gglhbmxData = new
-                                    //{
-                                    //    StockCode = code,
-                                    //    StockName = this.stockCodeDict[code],
-                                    //    Date = date,
-                                    //    Rid = rid,
-                                    //    ParentUrl = urlgglhb.Url,
-                                    //    Url = urlgglhbmx,
-                                    //    CreateTime = DateTime.Now,
-                                    //    Page = subHtml,
-                                    //    ContentType = "个股龙虎榜明细",
-                                    //    RefID = refID,
-                                    //    MD5 = Convertor.Encode_MD5(subHtml),
-                                    //    TaskID = THS.CONST.TaskID
-                                    //};
-
-                                    //mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
+                                    mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
 
                                 }
                             }
@@ -400,7 +426,7 @@ namespace WangJun.NetLoader
                     #endregion
 
 
-                    #region 个股龙虎榜数据保存
+                    #region 数据保存
                     var gglhbData = new //个股龙虎榜 数据
                     {
                         StockCode = stockCode,
@@ -409,105 +435,31 @@ namespace WangJun.NetLoader
                         CreateTime = DateTime.Now,
                         Page = pagegglhbHtml,
                         ContentType = "个股龙虎榜",
-                        RefID = refID,///和明细保持一致
+                        RefID=refID,
                         MD5 = Convertor.Encode_MD5(pagegglhbHtml),
                         TaskID = THS.CONST.TaskID
                     };
 
-                    mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbData); ///个股龙虎榜
+                    mongo.Save(THS.CONST.DBName,THS.CONST.PageGGLHB, gglhbData); ///个股龙虎榜
                     Console.WriteLine("个股龙虎榜 数据保存 {0} {1} {2}", stockCode, this.stockCodeDict[stockCode], queueUrl.Count);
                     #endregion
                 }
                 else
                 {
-                    if (excetionDict.ContainsKey(qItem.Url) && 3 <= excetionDict[qItem.Url])
-                    {
-                        ///写异常信息
-                        Console.WriteLine("下载失败 {0}", qItem.Url);
-                        var item = new Dictionary<string, object>();
-                        item["ContentType"] = "龙虎榜下载失败异常信息";
-                        item["TaskID"] = THS.CONST.TaskID;
-                        item["CreateTime"] = DateTime.Now;
-                        item["Data"] = qItem;
-
-                        mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
-                        Thread.Sleep(60 * 1000);
-                    }
-                    else
-                    {
-                        excetionDict[qItem.Url] = (excetionDict.ContainsKey(qItem.Url)) ? excetionDict[qItem.Url] + 1 : 0;
-                        queueUrl.Enqueue(qItem);
-                    }
-
-                }
-            }
-
-
-            var excetionMxDict = new Dictionary<string, int>();
-            while (0 < queueMxUrl.Count)
-            {
-                var qItem = queueMxUrl.Dequeue();
-
-                ///下载明细
-                var subHtml = httpdownloader.GetGzip(qItem.Url);
-                if (50 < subHtml.Length)
-                {
-                    var stockCode = qItem.Data["StockCode"].ToString();
-                    var date = qItem.Data["Date"].ToString();
-                    var rid = qItem.Data["Rid"].ToString();
-                    var parentUrl = qItem.Data["ParentUrl"].ToString();
-                    var refID = qItem.Data["RefID"].ToString();
-
-                    var gglhbmxData = new
-                    {
-                        StockCode = qItem.Data["StockCode"].ToString(),
-                        StockName = this.stockCodeDict[stockCode],
-                        Date = date,
-                        Rid = rid,
-                        ParentUrl = parentUrl,
-                        Url = qItem.Url,
-                        CreateTime = DateTime.Now,
-                        Page = subHtml,
-                        ContentType = "个股龙虎榜明细",
-                        RefID = refID,
-                        MD5 = Convertor.Encode_MD5(subHtml),
+                    var item = new {
+                        ContentType = "龙虎榜下载数据异常",
+                        Page = pagegglhbHtml,
+                        Url=urlgglhb,
+                        CreateTime=DateTime.Now,
+                        MD5 = Convertor.Encode_MD5(pagegglhbHtml),
                         TaskID = THS.CONST.TaskID
                     };
 
-                    mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
+                    mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
 
-                    ///若能正常下载则删除
-                    if (excetionMxDict.ContainsKey(qItem.Url))
-                    {
-                        ///正常下载完毕删除异常信息
-                        excetionMxDict.Remove(qItem.Url);
-                    }
                 }
-                else
-                {
-                    Console.WriteLine("下载异常 {0} ", qItem.Url);
-
-                    if (excetionMxDict.ContainsKey(qItem.Url) && 3 <= excetionMxDict[qItem.Url])
-                    {
-                        ///写异常信息
-                        Console.WriteLine("下载失败 {0}", qItem.Url);
-                        var item = new Dictionary<string, object>();
-                        item["ContentType"] = "龙虎榜明细下载失败异常信息";
-                        item["TaskID"] = THS.CONST.TaskID;
-                        item["CreateTime"] = DateTime.Now;
-                        item["Data"] = qItem;
-                        mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
-                        Thread.Sleep(60 * 1000);
-                    }
-                    else
-                    {
-                        ///重新加入队列
-                        excetionMxDict[qItem.Url] = (excetionMxDict.ContainsKey(qItem.Url)) ? excetionMxDict[qItem.Url] + 1 : 0;
-                        queueMxUrl.Enqueue(qItem);
-                    }
-                }
-
             }
+
  
         }
 
@@ -725,8 +677,8 @@ namespace WangJun.NetLoader
  
             this.GetALLStockCode();///获取所有股票代码
             this.GetStockLHB();///获取个股龙虎榜数据
-            //this.GetFundsStock();///下载个股资金流向
-            //this.GetPageStock();///获取每个股票页面的数据
+            this.GetFundsStock();///下载个股资金流向
+            this.GetPageStock();///获取每个股票页面的数据
         }
 
     }

@@ -20,6 +20,8 @@ namespace WangJun.Net
 
         public event EventHandler EventException = null;
 
+         
+
         /// <summary>
         /// 事件触发
         /// </summary>
@@ -94,6 +96,7 @@ namespace WangJun.Net
         #region 通过POST方法获取结果
         public string PostGZip(string url,string postData)
         {
+            string res = string.Empty;
             try
             {
                 this.http.Headers.Clear();
@@ -118,7 +121,7 @@ namespace WangJun.Net
                     {
                         targetStream.Write(buf, 0, count);
                     }
-                    var res = Encoding.UTF8.GetString(targetStream.GetBuffer());
+                    res = Encoding.UTF8.GetString(targetStream.GetBuffer());
                     sourceStream.Close();
                     targetStream.Close();
 
@@ -129,9 +132,10 @@ namespace WangJun.Net
             {
                 var dict = new Dictionary<string, object>();
                 dict["Url"] = url;
-                dict["Exception"] = e;
+                dict["Exception"] = e.Message;
                 dict["CreateTime"] = DateTime.Now;
                 EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
+                 
             }
             return string.Empty;
 
@@ -144,7 +148,7 @@ namespace WangJun.Net
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public string GetGzip(string url)
+        public string GetGzip(string url,object refData=null)
         {
             try
             {
@@ -177,8 +181,9 @@ namespace WangJun.Net
             {
                 var dict = new Dictionary<string, object>();
                 dict["Url"] = url;
-                dict["Exception"] = e;
+                dict["Exception"] = e.Message;
                 dict["CreateTime"] = DateTime.Now;
+                dict["RefData"] = refData;
                 EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
             }
             return string.Empty;
@@ -227,7 +232,7 @@ namespace WangJun.Net
             {
                 var dict = new Dictionary<string, object>();
                 dict["Url"] = url;
-                dict["Exception"] = e;
+                dict["Exception"] = e.Message;
                 dict["CreateTime"] = DateTime.Now;
                 EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
             }
@@ -275,11 +280,13 @@ namespace WangJun.Net
             {
                 var dict = new Dictionary<string, object>();
                 dict["Url"] = url;
-                dict["Exception"] = e;
+                dict["Exception"] = e.Message;
                 dict["CreateTime"] = DateTime.Now;
                 EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
             }
             return string.Empty;
         }
     }
+ 
+         
 }
