@@ -39,7 +39,7 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            inst.GetTodayNewData();
+            //inst.GetTodayNewData();
 
             //inst.GetLargeFundsTracking();
 
@@ -64,6 +64,10 @@ namespace WangJun.NodeRunner
             //DBConvertor.FromMongoDBToSQLServer("", "", "", "", "", "");
             #endregion
 
+            #region 新浪大单测试
+            SinaFin sina = new SinaFin();
+            sina.GetLargeFundsTracking();
+            #endregion
 
             Console.WriteLine("全部结束");
             Console.ReadKey();
