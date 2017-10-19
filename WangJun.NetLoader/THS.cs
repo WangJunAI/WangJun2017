@@ -24,6 +24,8 @@ namespace WangJun.NetLoader
 
         protected Dictionary<string, string> stockCodeDict = new Dictionary<string, string>();
 
+ 
+
         /// <summary>
         /// 数据库集合
         /// </summary>
@@ -200,10 +202,6 @@ namespace WangJun.NetLoader
                 {
                     type = "资金流向";
                 }
-                if (url.Contains("/01/last.js"))
-                {
-                    type = "日线数据";
-                }
                 else if(url.Length == "http://stockpage.10jqka.com.cn/000000/".Length)
                 {
                     type = "首页概览";
@@ -242,15 +240,19 @@ namespace WangJun.NetLoader
                     //urlList.Add(new KeyValuePair<string, string>("价值分析", string.Format("http://stockpage.10jqka.com.cn/{0}/worth/", queueItem.Key))); ///价值分析
                     //urlList.Add(new KeyValuePair<string, string>("行业分析", string.Format("http://stockpage.10jqka.com.cn/{0}/field/", queueItem.Key))); ///行业分析
 
-
-                    urlList.Add(new KeyValuePair<string, string>("日线数据", string.Format("http://d.10jqka.com.cn/v2/line/hs_{0}/01/last.js", queueItem.Key))); ///日线数据
-                    //urlList.Add(new KeyValuePair<string, string>("日线数据", string.Format("http://d.10jqka.com.cn/v6/line/hs_{0}/01/all.js", queueItem.Key))); ///日线数据
+                    var headers = new Dictionary<string, string>();
+                    headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+                    headers.Add("Accept-Encoding", "gzip,deflate");
+                    headers.Add("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+                    headers.Add("Host", "stockpage.10jqka.com.cn");
+                    headers.Add("Referer", "http://www.10jqka.com.cn/");
+                    headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
 
                     foreach (var url in urlList)
                     {
                         if ("新闻公告" == url.Key)
                         {
-                            var html = httpdownloader.GetGzip(url.Value, Encoding.GetEncoding("gbk"));
+                            var html = httpdownloader.GetGzip(url.Value, Encoding.GetEncoding("gbk"), headers);
                             var item = new
                             {
                                 StockCode = queueItem.Key,
@@ -267,7 +269,7 @@ namespace WangJun.NetLoader
                         }
                         else
                         {
-                            var html = httpdownloader.GetGzip(url.Value, Encoding.UTF8);
+                            var html = httpdownloader.GetGzip(url.Value, Encoding.UTF8,headers);
                             var item = new
                             {
                                 StockCode = queueItem.Key,
@@ -279,8 +281,8 @@ namespace WangJun.NetLoader
                                 MD5 = Convertor.Encode_MD5(html),
                                 TaskID = THS.CONST.TaskID
                             };
-                            var collectionName = ("日线数据" == url.Key) ? THS.CONST.PageKLine : THS.CONST.PageStock;
-                             mongo.Save(THS.CONST.DBName, collectionName, item);
+                            var collectionName =THS.CONST.PageStock;
+                             //mongo.Save(THS.CONST.DBName, collectionName, item);
                             Console.WriteLine("已保存 " + url.Key + " " + url.Value);
                         }
                     }
@@ -292,7 +294,96 @@ namespace WangJun.NetLoader
             
         }
 
- 
+
+
+        #endregion
+
+        #region 下载每个股票的日线页面
+        /// <summary>
+        /// 下载每个股票的页面 UTF8
+        /// </summary>
+        public void GetPageKLine()
+        {
+            this.GetALLStockCode(); ///准备所有股票代码
+            var queueUrl = new Queue<KeyValuePair<string, string>>();
+
+            var httpdownloader = new HTTP(Encoding.UTF8);
+            httpdownloader.EventException += (object sender, EventArgs e) => {
+                var ee = e as EventProcEventArgs;
+                Console.WriteLine("下载失败 {0}", ee.Default);
+                var item = ee.Default as Dictionary<string, object>;
+                item["ContentType"] = "个股日线页面下载失败异常信息";
+                item["TaskID"] = THS.CONST.TaskID;
+
+                var url = item["Url"].ToString();
+                var type = string.Empty;
+
+                mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
+                #region 类型判断
+
+                if (url.Contains("/01/last.js"))
+                {
+                    type = "日线数据";
+                }
+                #endregion
+
+                queueUrl.Enqueue(new KeyValuePair<string, string>(type, url));
+                Thread.Sleep(60 * 1000);
+            };
+             
+            if (null != this.stockCodeDict)
+            {
+                foreach (var item in this.stockCodeDict)
+                {
+                    queueUrl.Enqueue(new KeyValuePair<string, string>(item.Key.Trim(), item.Value.Trim()));///Key：StockCode Value:StockName
+                }
+            }
+
+            while (0 < queueUrl.Count)
+            {
+                var queueItem = queueUrl.Dequeue();
+                {
+                    var urlList = new List<KeyValuePair<string, string>>();
+                    urlList.Add(new KeyValuePair<string, string>("日线数据", string.Format("http://d.10jqka.com.cn/v2/line/hs_{0}/01/last.js", queueItem.Key))); ///日线数据
+
+
+                    foreach (var url in urlList)
+                    {
+                        var headers = new Dictionary<string, string>();
+                        headers.Add("Accept", "*/*");
+                        headers.Add("Accept-Encoding", "gzip,deflate");
+                        headers.Add("Accept-Language", "zh - CN,zh; q = 0.8,en; q = 0.4");
+                        headers.Add("Host", "d.10jqka.com.cn");
+                        headers.Add("Referer", "http://data.10jqka.com.cn/funds/ggzjl/");
+                        headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+
+
+                        var html = httpdownloader.GetGzip(url.Value, Encoding.UTF8,headers);
+                        var item = new
+                        {
+                            StockCode = queueItem.Key,
+                            StockName = queueItem.Value,
+                            ContentType = url.Key,
+                            Url = url.Value,
+                            CreatTime = DateTime.Now,
+                            Page = html,
+                            MD5 = Convertor.Encode_MD5(html),
+                            TaskID = THS.CONST.TaskID
+                        };
+                        var collectionName =THS.CONST.PageKLine;
+                        //mongo.Save(THS.CONST.DBName, collectionName, item);
+                        Console.WriteLine("已保存 " + url.Key + " " + url.Value);
+
+                    }
+
+                }
+
+            }
+
+
+        }
+
+
 
         #endregion
 
@@ -475,7 +566,7 @@ namespace WangJun.NetLoader
                     };
 
                     mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
-
+                    Console.WriteLine("个股龙虎榜明细 数据保存 {0} {1} {2}", stockCode, this.stockCodeDict[stockCode], queueMxUrl.Count);
                     ///若能正常下载则删除
                     if (excetionMxDict.ContainsKey(qItem.Url))
                     {
@@ -721,12 +812,11 @@ namespace WangJun.NetLoader
             ///最新涨跌幅排行(总表,三日, 五日)  http://data.10jqka.com.cn/market/zdfph/
             ///最新 个股市盈率 http://data.10jqka.com.cn/market/ggsyl/
             ///最新 个股资金流(个股资金,概念资金,行业资金,大单追踪) http://data.10jqka.com.cn/funds/ggzjl/
-            ///龙虎榜
- 
-            this.GetALLStockCode();///获取所有股票代码
+            ///龙虎榜 
             this.GetStockLHB();///获取个股龙虎榜数据
-            //this.GetFundsStock();///下载个股资金流向
-            //this.GetPageStock();///获取每个股票页面的数据
+            this.GetFundsStock();///下载个股资金流向
+            this.GetPageStock();///获取每个股票页面的数据
+            this.GetPageKLine();//获取日线信息
         }
 
     }

@@ -16,11 +16,22 @@ namespace WangJun.Net
     /// </summary>
     public class HTTP
     {
-        private WebClient http = new WebClient();
+        private WebClientWithCookie http = new WebClientWithCookie();
 
         public event EventHandler EventException = null;
 
-         
+         public void SetHeaders(Dictionary<string,string> headers)
+        {
+            if(null !=headers)
+            {
+                this.http.Headers.Clear();
+                foreach (var item in headers)
+                {
+                    this.http.Headers.Add(item.Key, item.Value);
+                }
+            }
+
+        }
 
         /// <summary>
         /// 事件触发
@@ -40,6 +51,7 @@ namespace WangJun.Net
         public HTTP(Encoding coder)
         {
             this.http.Encoding = coder;
+
         }
 
         public HTTP (string coder)
@@ -152,9 +164,8 @@ namespace WangJun.Net
         {
             try
             {
-                this.http.Headers.Clear();
-                this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
-                this.http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36");
+                
+
                 byte[] byteArray = this.http.DownloadData(url);
                 // 处理　gzip   
                 string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
@@ -194,18 +205,12 @@ namespace WangJun.Net
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public string GetGzip(string url,Encoding encoding)
+        public string GetGzip(string url,Encoding encoding,Dictionary<string,string> headers)
         {
             try
             {
-                this.http.Headers.Clear();
- 
-                this.http.Headers.Add("Accept", "*/*");
-                this.http.Headers.Add("Accept-Encoding", "gzip,deflate");
-                this.http.Headers.Add("Accept-Language", "zh - CN,zh; q = 0.8,en; q = 0.6");
-                //this.http.Headers.Add("Connection", " keep-alive");
-                this.http.Headers.Add("Referer", "http://stockpage.10jqka.com.cn/HQ_v4.html");
-                this.http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+                this.SetHeaders(headers);
+
                 byte[] byteArray = this.http.DownloadData(url);
                 // 处理　gzip   
                 string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];

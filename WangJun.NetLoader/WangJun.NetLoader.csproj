@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FanyYiJunAPI.cs" />
+    <Compile Include="SinaFin.cs" />
     <Compile Include="THS.cs" />
     <Compile Include="TouTiao.cs" />
     <Compile Include="WebLoader.cs" />
