@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Desktop", "Desktop", "{D9C34850-9C74-45C1-A338-FF619DCF1E0C}"
 EndProject
@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.Local", "WangJun.Lo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.Tools", "WangJun.Tools\WangJun.Tools.csproj", "{79474114-39E0-4FEC-A040-F2E867CA82A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.LocalTests", "WangJun.LocalTests\WangJun.LocalTests.csproj", "{4C0E67AD-A30B-4273-B0F2-744C9F739E2F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.DB", "WangJun.DB\WangJun.DB.csproj", "{AF918729-03E8-443F-BD76-79BC604E286E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DLL", "DLL", "{9E49886F-0F1A-4480-9717-CED21578F821}"
@@ -30,15 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{487D8059-71C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.Net", "WangJun.Net\WangJun.Net.csproj", "{952A70F6-06A9-405A-A3E6-62B24C218DAF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.NetTests", "WangJun.NetTests\WangJun.NetTests.csproj", "{7C036BC4-0B97-45DE-B271-AAA0AFDB1C40}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.Debug", "WangJun.Debug\WangJun.Debug.csproj", "{0232ECA8-2266-4B23-A59F-66EC9308260A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.NetLoader", "WangJun.NetLoader\WangJun.NetLoader.csproj", "{EE3A5A9F-20B3-4555-9A40-609C3641A7E0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.DBTests1", "WangJun.DBTests1\WangJun.DBTests1.csproj", "{60DE72B8-2D5C-44EB-A776-44326D94BBDC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.NetLoaderTests", "WangJun.NetLoaderTests\WangJun.NetLoaderTests.csproj", "{DBD5DB09-5CBF-46CE-8DB0-86BF146D237C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,10 +54,6 @@ Global
 		{79474114-39E0-4FEC-A040-F2E867CA82A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79474114-39E0-4FEC-A040-F2E867CA82A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79474114-39E0-4FEC-A040-F2E867CA82A7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4C0E67AD-A30B-4273-B0F2-744C9F739E2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C0E67AD-A30B-4273-B0F2-744C9F739E2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C0E67AD-A30B-4273-B0F2-744C9F739E2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C0E67AD-A30B-4273-B0F2-744C9F739E2F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AF918729-03E8-443F-BD76-79BC604E286E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AF918729-03E8-443F-BD76-79BC604E286E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF918729-03E8-443F-BD76-79BC604E286E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -74,10 +62,6 @@ Global
 		{952A70F6-06A9-405A-A3E6-62B24C218DAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{952A70F6-06A9-405A-A3E6-62B24C218DAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{952A70F6-06A9-405A-A3E6-62B24C218DAF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C036BC4-0B97-45DE-B271-AAA0AFDB1C40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C036BC4-0B97-45DE-B271-AAA0AFDB1C40}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C036BC4-0B97-45DE-B271-AAA0AFDB1C40}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C036BC4-0B97-45DE-B271-AAA0AFDB1C40}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0232ECA8-2266-4B23-A59F-66EC9308260A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0232ECA8-2266-4B23-A59F-66EC9308260A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0232ECA8-2266-4B23-A59F-66EC9308260A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -86,14 +70,6 @@ Global
 		{EE3A5A9F-20B3-4555-9A40-609C3641A7E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE3A5A9F-20B3-4555-9A40-609C3641A7E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE3A5A9F-20B3-4555-9A40-609C3641A7E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{60DE72B8-2D5C-44EB-A776-44326D94BBDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{60DE72B8-2D5C-44EB-A776-44326D94BBDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{60DE72B8-2D5C-44EB-A776-44326D94BBDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{60DE72B8-2D5C-44EB-A776-44326D94BBDC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBD5DB09-5CBF-46CE-8DB0-86BF146D237C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBD5DB09-5CBF-46CE-8DB0-86BF146D237C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBD5DB09-5CBF-46CE-8DB0-86BF146D237C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBD5DB09-5CBF-46CE-8DB0-86BF146D237C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
