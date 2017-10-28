@@ -39,7 +39,7 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            //inst.GetTodayNewData();
+            inst.GetTodayNewData();
 
             //inst.GetLargeFundsTracking();
 
@@ -66,7 +66,7 @@ namespace WangJun.NodeRunner
 
             #region 新浪大单测试
             SinaFin sina = new SinaFin();
-            sina.GetLargeFundsTracking();
+            //sina.GetLargeFundsTracking();
             #endregion
 
             Console.WriteLine("全部结束");

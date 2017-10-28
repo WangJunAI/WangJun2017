@@ -103,7 +103,7 @@ namespace WangJun.Net
             string data = this.http.DownloadString(url);
             return data;
         }
-        #region
+         
 
         #region 通过POST方法获取结果
         public string PostGZip(string url,string postData)
@@ -154,58 +154,13 @@ namespace WangJun.Net
         }
         #endregion
 
-        #endregion  以GZip的格式进行下载
-        /// <summary>
-        /// 以GZip的格式进行下载
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public string GetGzip(string url,object refData=null)
-        {
-            try
-            {
-                
-
-                byte[] byteArray = this.http.DownloadData(url);
-                // 处理　gzip   
-                string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
-                if (sContentEncoding == "gzip")
-                {
-                    var sourceStream = new MemoryStream(byteArray);
-                    var targetStream = new MemoryStream();
-                    int count = 0;
-                    // 解压  
-                    GZipStream gzip = new GZipStream(sourceStream, CompressionMode.Decompress);
-                    byte[] buf = new byte[512];
-                    while ((count = gzip.Read(buf, 0, buf.Length)) > 0)
-                    {
-                        targetStream.Write(buf, 0, count);
-                    }
-                    var res = Encoding.GetEncoding("gbk").GetString(targetStream.GetBuffer());
-                    sourceStream.Close();
-                    targetStream.Close();
-
-                    return res;
-                 }
-            }
-            catch(Exception e)
-            {
-                var dict = new Dictionary<string, object>();
-                dict["Url"] = url;
-                dict["Exception"] = e.Message;
-                dict["CreateTime"] = DateTime.Now;
-                dict["RefData"] = refData;
-                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
-            }
-            return string.Empty;
-        }
 
         /// <summary>
         /// 以GZip的格式进行下载
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public string GetGzip(string url,Encoding encoding,Dictionary<string,string> headers)
+        public string GetGzip(string url,Encoding encoding,Dictionary<string,string> headers=null)
         {
             try
             {
@@ -214,6 +169,8 @@ namespace WangJun.Net
                 byte[] byteArray = this.http.DownloadData(url);
                 // 处理　gzip   
                 string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
+                 
+
                 if (sContentEncoding == "gzip")
                 {
                     var sourceStream = new MemoryStream(byteArray);
@@ -231,6 +188,10 @@ namespace WangJun.Net
                     targetStream.Close();
 
                     return res;
+                }
+                else
+                {
+                    var p= 0;
                 }
             }
             catch (Exception e)

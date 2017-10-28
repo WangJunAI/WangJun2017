@@ -1,15 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Desktop", "Desktop", "{D9C34850-9C74-45C1-A338-FF619DCF1E0C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mobile", "Mobile", "{9F0748B2-4E82-4704-89D8-09E4DE242038}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{B5A52323-8FFE-4831-BDFA-A70B6C8613D5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebDesktop", "WebDesktop\WebDesktop.csproj", "{20642A8A-780C-41DC-98C7-8E211C024B2D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.NodeRunner", "WangJun.NodeRunner\WangJun.NodeRunner.csproj", "{62DCEA58-6039-4290-8455-5488A243F2A8}"
 EndProject
@@ -20,11 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.DB", "WangJun.DB\WangJun.DB.csproj", "{AF918729-03E8-443F-BD76-79BC604E286E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DLL", "DLL", "{9E49886F-0F1A-4480-9717-CED21578F821}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{487D8059-71C5-43CE-9610-8134DE1364CA}"
-	ProjectSection(SolutionItems) = preProject
-		同花顺数据源.html = 同花顺数据源.html
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.Net", "WangJun.Net\WangJun.Net.csproj", "{952A70F6-06A9-405A-A3E6-62B24C218DAF}"
 EndProject
@@ -38,10 +27,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{20642A8A-780C-41DC-98C7-8E211C024B2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20642A8A-780C-41DC-98C7-8E211C024B2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20642A8A-780C-41DC-98C7-8E211C024B2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20642A8A-780C-41DC-98C7-8E211C024B2D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62DCEA58-6039-4290-8455-5488A243F2A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62DCEA58-6039-4290-8455-5488A243F2A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62DCEA58-6039-4290-8455-5488A243F2A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -75,7 +60,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{20642A8A-780C-41DC-98C7-8E211C024B2D} = {D9C34850-9C74-45C1-A338-FF619DCF1E0C}
 		{62DCEA58-6039-4290-8455-5488A243F2A8} = {B5A52323-8FFE-4831-BDFA-A70B6C8613D5}
 		{BB2A52E3-A00F-4591-A561-BA2E5AC00F2C} = {B5A52323-8FFE-4831-BDFA-A70B6C8613D5}
 		{79474114-39E0-4FEC-A040-F2E867CA82A7} = {B5A52323-8FFE-4831-BDFA-A70B6C8613D5}

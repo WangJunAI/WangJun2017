@@ -94,38 +94,7 @@ namespace WangJun.NetLoader
             return inst;
         }
 
-        /// <summary>
-        /// 启动下载
-        /// 从数据库中读取URL,下载文件后,写入其中
-        /// </summary>
-        public void Run()
-        {
 
-            this.PrepareData();
-
-            if(!this.IsQueueURLEmpty) ///若下载队列不为空
-            {
-                while (0 < this.queueUrl.Count)
-                {
-                    var item = this.queueUrl.Dequeue();
-                    var url = item["Url"].ToString();
-                    var html = this.http.GetGzip(url);  ///获取数据
-                     
-                    var dict = CollectionTools.CloneDict(item);
-                    dict["UpdateTime"] = DateTime.Now;
-                    dict["Status"] = "Downloaded";
-                    dict["PageData"] = html;
-                    dict["FileType"] = "html";
-                    EventProc.TriggerEvent(this.EventDownloadCompleted, this, EventProcEventArgs.Create(dict));
-
-
-                    //this.mongo.Save("ths", "news", dict);
-                    Console.WriteLine("已处理\t{0}", url);
-                }
-            }
-
-
-        }
 
 
 

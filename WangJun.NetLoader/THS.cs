@@ -31,7 +31,7 @@ namespace WangJun.NetLoader
         /// </summary>
         public static class CONST
         {
-            public static string DBName { get { return "THSV1017"; } }
+            public static string DBName { get { return "THSV1025"; } }
             /// <summary>
             /// 股票基本信息
             /// </summary>
@@ -105,10 +105,19 @@ namespace WangJun.NetLoader
                 {
                     Console.WriteLine("重新获取股票信息");
 
+                    var headers = new Dictionary<string, string>();
+                    headers.Add("Accept","text/html,*/*; q=0.01");
+                    headers.Add("Accept-Encoding", "gzip, deflate");
+                    headers.Add("Accept-Language","zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+                    headers.Add("Host","q.10jqka.com.cn");
+                    headers.Add("Referer","http://q.10jqka.com.cn/");
+                    headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+                    headers.Add("X-Requested-With", "XMLHttpRequest");
+
                     #region 获取分页数 
                     var pageCount = 0;
                     var pagerUrl = string.Format(@"http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/{0}/ajax/1/", 1);
-                    var pagerHtml = http.GetGzip(pagerUrl);
+                    var pagerHtml = http.GetGzip(pagerUrl,Encoding.GetEncoding("GBK"), headers);
                     if (100 < pagerHtml.Length)
                     {
                         pageCount = int.Parse(pagerHtml.Substring(pagerHtml.LastIndexOf("</span>") - 3, 3)); ///页码数
@@ -121,7 +130,7 @@ namespace WangJun.NetLoader
                     for (int i = 1; i <= pageCount; i++)
                     {
                         var url = string.Format(@"http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/{0}/ajax/1/", i);
-                        var html = http.GetGzip(url);
+                        var html = http.GetGzip(url, Encoding.GetEncoding("GBK"), headers);
 
 
                         #region 股票代码处理
@@ -282,7 +291,7 @@ namespace WangJun.NetLoader
                                 TaskID = THS.CONST.TaskID
                             };
                             var collectionName =THS.CONST.PageStock;
-                             //mongo.Save(THS.CONST.DBName, collectionName, item);
+                             mongo.Save(THS.CONST.DBName, collectionName, item);
                             Console.WriteLine("已保存 " + url.Key + " " + url.Value);
                         }
                     }
@@ -371,7 +380,7 @@ namespace WangJun.NetLoader
                             TaskID = THS.CONST.TaskID
                         };
                         var collectionName =THS.CONST.PageKLine;
-                        //mongo.Save(THS.CONST.DBName, collectionName, item);
+                        mongo.Save(THS.CONST.DBName, collectionName, item);
                         Console.WriteLine("已保存 " + url.Key + " " + url.Value);
 
                     }
@@ -417,7 +426,18 @@ namespace WangJun.NetLoader
  
                 var stockCode = urlgglhb.Url.Substring(urlgglhb.Url.Length - 8).Replace("/", string.Empty);//http://data.10jqka.com.cn/market/lhbgg/code/600360/ //http://data.10jqka.com.cn/ifmarket/getnewlh/code/601228/date/2017-04-14/rid/7/
                 var refID = Guid.NewGuid().ToString().Replace("-", string.Empty);
-                var pagegglhbHtml = httpdownloader.GetGzip(urlgglhb.Url, refData: refID);///下载的个股龙虎榜页面
+
+                var headers = new Dictionary<string, string>();
+                headers.Add("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+                headers.Add("Accept-Encoding","gzip, deflate");
+                headers.Add("Accept-Language","zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+                headers.Add("Host","data.10jqka.com.cn");
+                headers.Add("Referer","http://data.10jqka.com.cn/market/longhu/");
+                headers.Add("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+
+
+
+                var pagegglhbHtml = httpdownloader.GetGzip(urlgglhb.Url,Encoding.GetEncoding("GBK"), headers);///下载的个股龙虎榜页面
                 if (100 < pagegglhbHtml.Length) ///若下载的有数据
                 {
                     #region 分析个股龙虎榜明细
@@ -464,26 +484,6 @@ namespace WangJun.NetLoader
 
                                     queueMxUrl.Enqueue(mxUrl);
 
-                                    //var subHtml = httpdownloader.GetGzip(urlgglhbmx);
-
-                                    //var gglhbmxData = new
-                                    //{
-                                    //    StockCode = code,
-                                    //    StockName = this.stockCodeDict[code],
-                                    //    Date = date,
-                                    //    Rid = rid,
-                                    //    ParentUrl = urlgglhb.Url,
-                                    //    Url = urlgglhbmx,
-                                    //    CreateTime = DateTime.Now,
-                                    //    Page = subHtml,
-                                    //    ContentType = "个股龙虎榜明细",
-                                    //    RefID = refID,
-                                    //    MD5 = Convertor.Encode_MD5(subHtml),
-                                    //    TaskID = THS.CONST.TaskID
-                                    //};
-
-                                    //mongo.Save(THS.CONST.DBName, THS.CONST.PageGGLHB, gglhbmxData);
-
                                 }
                             }
                         }
@@ -519,7 +519,7 @@ namespace WangJun.NetLoader
                         item["ContentType"] = "龙虎榜下载失败异常信息";
                         item["TaskID"] = THS.CONST.TaskID;
                         item["CreateTime"] = DateTime.Now;
-                        item["Data"] = qItem;
+                        item["Data"] = Convertor.FromObjectToDictionary(qItem);
 
                         mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
                         Thread.Sleep(60 * 1000);
@@ -539,8 +539,17 @@ namespace WangJun.NetLoader
             {
                 var qItem = queueMxUrl.Dequeue();
 
+                var headers = new Dictionary<string, string>();
+                headers.Add("Accept","*/*");
+                headers.Add("Accept-Encoding","gzip, deflate");
+                headers.Add("Accept-Language","zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+                headers.Add("Host","data.10jqka.com.cn");
+                headers.Add("Referer",string.Format("http://data.10jqka.com.cn/market/lhbgg/code/{0}/", qItem.Data["StockCode"].ToString()));
+                headers.Add("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+                headers.Add("X-Requested-With", "XMLHttpRequest");
+
                 ///下载明细
-                var subHtml = httpdownloader.GetGzip(qItem.Url);
+                var subHtml = httpdownloader.GetGzip(qItem.Url, Encoding.GetEncoding("GBK"), headers);
                 if (50 < subHtml.Length)
                 {
                     var stockCode = qItem.Data["StockCode"].ToString();
@@ -814,7 +823,7 @@ namespace WangJun.NetLoader
             ///最新 个股资金流(个股资金,概念资金,行业资金,大单追踪) http://data.10jqka.com.cn/funds/ggzjl/
             ///龙虎榜 
             this.GetStockLHB();///获取个股龙虎榜数据
-            this.GetFundsStock();///下载个股资金流向
+            //this.GetFundsStock();///下载个股资金流向
             this.GetPageStock();///获取每个股票页面的数据
             this.GetPageKLine();//获取日线信息
         }
