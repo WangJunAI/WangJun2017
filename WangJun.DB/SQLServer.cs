@@ -132,7 +132,8 @@ namespace WangJun.DB
         {
             if(null != exampleData) ///若数据有效
             {
-
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendFormat(" CREATE TABLE {0} ");
 
             }
         }

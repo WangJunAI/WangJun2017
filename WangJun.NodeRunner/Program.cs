@@ -39,10 +39,9 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            inst.GetTodayNewData();
+            //inst.GetTodayNewData();
 
-            //inst.GetLargeFundsTracking();
-
+ 
              
             #endregion
 
@@ -53,12 +52,7 @@ namespace WangJun.NodeRunner
 
             #region 接口测试
             //var res = FanyYiJunAPI.Invoke("你好");
-            #endregion
-
-            #region
-            var toutiao = new TouTiao();
-            //toutiao.GetNewsSummary();
-            #endregion
+            #endregion 
 
             #region 数据转换测试
             //DBConvertor.FromMongoDBToSQLServer("", "", "", "", "", "");
@@ -67,6 +61,11 @@ namespace WangJun.NodeRunner
             #region 新浪大单测试
             SinaFin sina = new SinaFin();
             //sina.GetLargeFundsTracking();
+            #endregion
+
+            #region 金融街
+            var jrj = new JRJ();
+            jrj.GetKLine();
             #endregion
 
             Console.WriteLine("全部结束");

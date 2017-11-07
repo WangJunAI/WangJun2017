@@ -25,8 +25,8 @@ namespace WangJun.Net
             WebRequest request = base.GetWebRequest(address);
             if (request is HttpWebRequest)
             {
-                HttpWebRequest httpRequest = request as HttpWebRequest;
-                httpRequest.CookieContainer = Cookies;
+                //HttpWebRequest httpRequest = request as HttpWebRequest;
+                //httpRequest.CookieContainer = Cookies;
             }
             return request;
         }

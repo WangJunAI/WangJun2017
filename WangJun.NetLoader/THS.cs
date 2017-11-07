@@ -31,7 +31,7 @@ namespace WangJun.NetLoader
         /// </summary>
         public static class CONST
         {
-            public static string DBName { get { return "THSV1025"; } }
+            public static string DBName { get { return "THSV1106"; } }
             /// <summary>
             /// 股票基本信息
             /// </summary>
@@ -361,13 +361,13 @@ namespace WangJun.NetLoader
                         var headers = new Dictionary<string, string>();
                         headers.Add("Accept", "*/*");
                         headers.Add("Accept-Encoding", "gzip,deflate");
-                        headers.Add("Accept-Language", "zh - CN,zh; q = 0.8,en; q = 0.4");
+                        headers.Add("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.4");
                         headers.Add("Host", "d.10jqka.com.cn");
                         headers.Add("Referer", "http://data.10jqka.com.cn/funds/ggzjl/");
                         headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
 
 
-                        var html = httpdownloader.GetGzip(url.Value, Encoding.UTF8,headers);
+                        var html = httpdownloader.GetGzip(url.Value,Encoding.GetEncoding("GBK"),headers);
                         var item = new
                         {
                             StockCode = queueItem.Key,
@@ -822,9 +822,9 @@ namespace WangJun.NetLoader
             ///最新 个股市盈率 http://data.10jqka.com.cn/market/ggsyl/
             ///最新 个股资金流(个股资金,概念资金,行业资金,大单追踪) http://data.10jqka.com.cn/funds/ggzjl/
             ///龙虎榜 
-            this.GetStockLHB();///获取个股龙虎榜数据
+            //this.GetStockLHB();///获取个股龙虎榜数据
             //this.GetFundsStock();///下载个股资金流向
-            this.GetPageStock();///获取每个股票页面的数据
+            //this.GetPageStock();///获取每个股票页面的数据
             this.GetPageKLine();//获取日线信息
         }
 

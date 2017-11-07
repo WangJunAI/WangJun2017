@@ -48,9 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FanyYiJunAPI.cs" />
+    <Compile Include="JRJ.cs" />
     <Compile Include="SinaFin.cs" />
     <Compile Include="THS.cs" />
-    <Compile Include="TouTiao.cs" />
     <Compile Include="WebLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
