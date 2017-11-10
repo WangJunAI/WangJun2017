@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
+using System.Data;
+using WangJun.Data;
 
 namespace WangJun.DB
 {
@@ -16,6 +18,7 @@ namespace WangJun.DB
 
         protected string keyName = string.Empty;
         protected string connectionString = string.Empty;
+        protected List<Dictionary<string, object>> systemObjects = null;
 
         #region 注册连接
         ///<summary>
@@ -55,6 +58,34 @@ namespace WangJun.DB
             return conn;
         }
         #endregion
+
+        #region 获取数据库系统信息
+        public void UpdateSysObject(bool forceUpdate= false)
+        {
+            if (null == this.systemObjects || true == forceUpdate)
+            {
+                string sql = "SELECT * FROM sysobjects";
+                var res = this.Find(sql);
+                this.systemObjects = res;
+            }
+        }
+        #endregion  
+
+        /// <summary>
+        /// 检测
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public bool IsExistUserTable(string tableName)
+        {
+            this.UpdateSysObject();///获取最新数据
+            if(!string.IsNullOrWhiteSpace(tableName))
+            {
+                var res = from dictItem in this.systemObjects where dictItem["name"].ToString().ToUpper() == tableName.ToUpper()  select dictItem;
+                return 0 < res.Count();
+            }
+            return false;
+        }
 
 
         /// <summary>
@@ -131,10 +162,30 @@ namespace WangJun.DB
         public void CreateTable(string tableName , Dictionary<string,object> exampleData)
         {
             if(null != exampleData) ///若数据有效
-            {
+            { 
                 var stringBuilder = new StringBuilder();
-                stringBuilder.AppendFormat(" CREATE TABLE {0} ");
+                
+                foreach (var item in exampleData)
+                { 
+                    stringBuilder.AppendFormat(" {0} {1} ,",item.Key,"NVARCHAR(MAX)");
+                }
 
+                var sql = string.Format("CREATE TABLE {0} ({1})", tableName, stringBuilder.ToString());
+
+                var conn = this.GetConnection();
+                if (conn.State == System.Data.ConnectionState.Open)
+                {
+                    var com = conn.CreateCommand();
+                    com.CommandText = sql;
+                    com.CommandType = System.Data.CommandType.Text;
+                    var res = com.ExecuteNonQuery();
+
+                    conn.Close();
+                }
+                else
+                {
+
+                }
             }
         }
         #endregion
@@ -166,9 +217,38 @@ namespace WangJun.DB
         /// </summary>
         /// <param name="sql"></param>
         /// <returns></returns>
-        public List<Dictionary<string,object>> Find(string sql)
+        public List<Dictionary<string,object>> Find(string sql, List<KeyValuePair<string, object>> paramList = null)
         {
-            throw new NotImplementedException();
+            var conn = this.GetConnection();
+            if (conn.State == System.Data.ConnectionState.Open)
+            {
+                var com = conn.CreateCommand();
+                com.CommandText = sql;
+                com.CommandType = System.Data.CommandType.Text;
+                if (null != paramList)
+                {
+                    foreach (var item in paramList)
+                    {
+                        com.Parameters.Add(new SqlParameter(item.Key, item.Value));
+                    }
+                }
+
+                SqlDataAdapter adapter = new SqlDataAdapter(com);
+                var tableSet = new DataSet();
+                adapter.Fill(tableSet);
+                adapter.Dispose();
+
+                var res = Convertor.FromDataTableToList(tableSet);
+
+                return res;
+
+                
+            }
+            else
+            {
+
+            }
+            return null;
         }
     }
 }

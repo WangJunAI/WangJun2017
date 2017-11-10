@@ -22,7 +22,7 @@ namespace WangJun.NodeRunner
             SetConsoleInfo("股票数据获取器V2");
 
             #region SQLServer 注册
-            SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=WJBigData;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
+            SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=WJStock;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
             var mssql = SQLServer.GetInstance("140");
             //mssql.CreateDatabase("test2");
             #endregion
@@ -39,7 +39,7 @@ namespace WangJun.NodeRunner
             #region 同花顺数据测试
 
             var inst = THS.GetInst();
-            //inst.GetTodayNewData();
+            inst.GetTodayNewData();
 
  
              
@@ -55,7 +55,7 @@ namespace WangJun.NodeRunner
             #endregion 
 
             #region 数据转换测试
-            //DBConvertor.FromMongoDBToSQLServer("", "", "", "", "", "");
+            DBConvertor.FromMongoDBToSQLServer("", "", "", "", "", "");
             #endregion
 
             #region 新浪大单测试
@@ -65,7 +65,11 @@ namespace WangJun.NodeRunner
 
             #region 金融街
             var jrj = new JRJ();
-            jrj.GetKLine();
+            //jrj.GetKLine();
+            #endregion
+
+            #region SQL Server 测试
+            //mssql.IsExistUserTable("Test");
             #endregion
 
             Console.WriteLine("全部结束");

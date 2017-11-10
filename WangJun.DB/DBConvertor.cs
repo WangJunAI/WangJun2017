@@ -29,44 +29,49 @@ namespace WangJun.DB
             MongoDB mongo = MongoDB.GetInst("mongodb://192.168.0.140:27017");
             #endregion
 
-            mongo.EventTraverse += (object sender, EventArgs e)=> {
+            mongo.EventTraverse += (object sender, EventArgs e)=>
+            {
                 var ee = e as EventProcEventArgs;
                 var dict = ee.Default as Dictionary<string, object>;
-                if ("涨幅在5%以上的股票日线信息" == dict["ContentType"].ToString())
+                var list = dict["Data"] as Array;
+                var itemArrayIndex = 0;
+                string sql = "INSERT INTO  [DataDaDan2D]  ([dbItemID] ,[StockCode] ,[StockName] ,[TradingDate] ,[Price] ,[Volume] ,[PrevPrice] ,[Kind],[ItemArrayIndex])  VALUES (@dbItemID ,@StockCode ,@StockName ,@TradingDate ,@Price ,@Volume  ,@PrevPrice  ,@Kind,@ItemArrayIndex)";
+                foreach (var item in list)
                 {
-                    StringBuilder sql = new StringBuilder();
-                    sql.Append("INSERT INTO [Target1]");
-                    sql.Append("([ObjectId],[Date],[Opening],[Max],[Lowest],[Closing],[Volume],[Turnover],[Rate],[ContentType],[ArchorDate],[涨幅],[成交均价],[StockCode],[StockName],[CreateTime],[UpdateTime],[ItemStatus])");
-                    sql.Append("VALUES(@ObjectId, @Date, @Opening, @Max, @Lowest, @Closing, @Volume, @Turnover, @Rate, @ContentType, @ArchorDate, @涨幅, @成交均价, @StockCode, @StockName, @CreateTime, @UpdateTime, @ItemStatus)");
+                    var srcItem = item as Dictionary<string, object>;
+                    var svItem = new Dictionary<string, object>();
+                    svItem["dbItemID"] = dict["_id"].ToString();
+                    svItem["StockCode"] = srcItem["symbol"].ToString().Substring(2);
+                    svItem["StockName"] = srcItem["name"];
+                    svItem["TradingDate"] = srcItem["ticktime"];
+                    svItem["Price"] = srcItem["price"];
+                    svItem["Volume"] = srcItem["volume"];
+                    svItem["PrevPrice"] = srcItem["prev_price"];
+                    svItem["Kind"] = srcItem["kind"];
+                    svItem["ItemArrayIndex"] = itemArrayIndex++;
+                    svItem["Source"] = "SINA";
+                    mongo.Save("Stock2D", "SINADaDan2D", svItem);
 
                     var paramList = new List<KeyValuePair<string, object>>();
+                    paramList.Add(new KeyValuePair<string, object>("@dbItemID", svItem["dbItemID"]));
+                    paramList.Add(new KeyValuePair<string, object>("@StockCode", svItem["StockCode"]));
+                    paramList.Add(new KeyValuePair<string, object>("@StockName", svItem["StockName"]));
+                    paramList.Add(new KeyValuePair<string, object>("@TradingDate", svItem["TradingDate"]));
+                    paramList.Add(new KeyValuePair<string, object>("@Price", svItem["Price"]));
+                    paramList.Add(new KeyValuePair<string, object>("@Volume", svItem["Volume"]));
+                    paramList.Add(new KeyValuePair<string, object>("@PrevPrice", svItem["PrevPrice"]));
+                    paramList.Add(new KeyValuePair<string, object>("@Kind", svItem["Kind"]));
+                    paramList.Add(new KeyValuePair<string, object>("@ItemArrayIndex", svItem["ItemArrayIndex"]));
 
-                    paramList.Add(new KeyValuePair<string, object>("@ObjectId", dict["_id"].ToString()));
-                    paramList.Add(new KeyValuePair<string, object>("@Date", dict["Date"]));
-                    paramList.Add(new KeyValuePair<string, object>("@Opening", dict["Opening"]));
-                    paramList.Add(new KeyValuePair<string, object>("@Max", dict["Max"]));
-                    paramList.Add(new KeyValuePair<string, object>("@Lowest", dict["Lowest"]));
-                    paramList.Add(new KeyValuePair<string, object>("@Closing", dict["Closing"]));
-                    paramList.Add(new KeyValuePair<string, object>("@Volume", dict["Volume"]));
-                    paramList.Add(new KeyValuePair<string, object>("@Turnover", dict["Turnover"]));
-                    paramList.Add(new KeyValuePair<string, object>("@Rate", dict["Rate"]));
-                    paramList.Add(new KeyValuePair<string, object>("@ContentType", dict["ContentType"]));
-                    paramList.Add(new KeyValuePair<string, object>("@ArchorDate", dict["ArchorDate"]));
-                    paramList.Add(new KeyValuePair<string, object>("@涨幅", dict["涨幅"]));
-                    paramList.Add(new KeyValuePair<string, object>("@成交均价", dict["成交均价"]));
-                    paramList.Add(new KeyValuePair<string, object>("@StockCode", dict["StockCode"]));
-                    paramList.Add(new KeyValuePair<string, object>("@StockName", dict["StockName"]));
-                    paramList.Add(new KeyValuePair<string, object>("@CreateTime", dict["CreateTime"]));
-                    paramList.Add(new KeyValuePair<string, object>("@UpdateTime", dict["UpdateTime"]));
-                    paramList.Add(new KeyValuePair<string, object>("@ItemStatus", dict["ItemStatus"]));
-
-                    mssql.Save(sql.ToString(), paramList);
-
-                    Console.WriteLine("成功插入" + dict["_id"]);
+                    //mssql.Save(sql, paramList);
                 }
+                 
+
+                Console.WriteLine("成功插入" + dict["_id"]);
+
 
             };
-            mongo.Find("ths", "THSDataAnalyse4", "{}");
+            mongo.Find("SINA", "DataDaDan", "{}");
         }
          
         #endregion

@@ -59,7 +59,7 @@ namespace WangJun.DB
                     var filterBuilder = Builders<BsonDocument>.Filter;
                     var filter = filterBuilder.Eq("_id", id);
                     //dat.Remove("_id");
-                    collection.ReplaceOne(filter, dat);
+                    var res = collection.ReplaceOne(filter, dat);
                 }
 
 
