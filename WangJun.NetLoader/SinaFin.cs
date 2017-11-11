@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,6 +78,21 @@ namespace WangJun.NetLoader
                 }
 
             }
+        }
+
+        public string GetKLine(string stockCode,int year,int jidu)
+        {
+            var httpdownloader = new HTTP();
+            var url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/{0}.phtml?year={1}&jidu={2}", stockCode,year,jidu);
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+            headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+            headers.Add(HttpRequestHeader.Referer, url);
+ 
+            var strData = httpdownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+            return strData;
         }
 
 

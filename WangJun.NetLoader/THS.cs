@@ -366,7 +366,7 @@ namespace WangJun.NetLoader
                         headers.Add(HttpRequestHeader.Host, "d.10jqka.com.cn");
                         headers.Add(HttpRequestHeader.Referer, "http://data.10jqka.com.cn/funds/ggzjl/");
                         headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
-                        headers.Add(HttpRequestHeader.Cookie, " _ga=GA1.3.1308637288.1480656705; Hm_lvt_f79b64788a4e377c608617fba4c736e2=1490269470; searchGuide=sg; spversion=20130314; historystock=601989%7C*%7C002156%7C*%7C600807%7C*%7C300708%7C*%7C002333; Hm_lvt_78c58f01938e4d85eaf619eae71b4ed1=1509953463,1509994430,1510022996,1510068180; __utma=156575163.1308637288.1480656705.1500515050.1510209522.23; __utmc=156575163; __utmz=156575163.1510209522.23.17.utmcsr=10jqka.com.cn|utmccn=(referral)|utmcmd=referral|utmcct=/; log=; v=AW-Nj4anaiubwG3eYIu3CPk-_oh9FMIzXWrHJoH8CBLnyYF-ieRThm04V3GR");
+                        headers.Add(HttpRequestHeader.Cookie, "_ga=GA1.3.1308637288.1480656705; Hm_lvt_f79b64788a4e377c608617fba4c736e2=1490269470; searchGuide=sg; spversion=20130314; __utma=156575163.1308637288.1480656705.1500515050.1510209522.23; __utmz=156575163.1510209522.23.17.utmcsr=10jqka.com.cn|utmccn=(referral)|utmcmd=referral|utmcct=/; Hm_lvt_78c58f01938e4d85eaf619eae71b4ed1=1509994430,1510022996,1510068180,1510300758; historystock=300201%7C*%7C601989%7C*%7C002156%7C*%7C600807; log=; v=AfoYrKP4d7j2x_gcqfWa-6RZSysYq39G8C3yOgTzpzFYPpSd7DvOlcC_QirU");
 
 
                         var html = httpdownloader.GetGzip2(url.Value,Encoding.GetEncoding("GBK"),headers);
@@ -384,6 +384,7 @@ namespace WangJun.NetLoader
                         var collectionName =THS.CONST.PageKLine;
                         mongo.Save(THS.CONST.DBName, collectionName, item);
                         Console.WriteLine("已保存 " + url.Key + " " + url.Value);
+                        Thread.Sleep(1000);
 
                     }
 
@@ -459,9 +460,78 @@ namespace WangJun.NetLoader
                 mongo.Save(THS.CONST.DBName, collectionName, item);
                 Console.WriteLine("已保存 " + stockCode + " " + queueUrl.Count);
 
-                Thread.Sleep(2000);
+                Thread.Sleep(1000);
 
 
+            }
+
+
+        }
+
+
+
+        #endregion
+
+        #region 下载SINA每个股票的日线页面
+        /// <summary>
+        /// 下载每个股票的页面 UTF8
+        /// </summary>
+        public void GetPageKLineSINA()
+        {
+            this.GetALLStockCode(); ///准备所有股票代码
+            var queueUrl = new Queue<string>();
+
+            var httpdownloader = new HTTP(Encoding.UTF8);
+            httpdownloader.EventException += (object sender, EventArgs e) => {
+                var ee = e as EventProcEventArgs;
+                Console.WriteLine("下载失败 {0}", ee.Default);
+                var item = ee.Default as Dictionary<string, object>;
+                item["ContentType"] = "SINA个股日线页面下载失败异常信息";
+                item["TaskID"] = THS.CONST.TaskID;
+
+                var url = item["Url"].ToString();
+                var type = string.Empty;
+
+                mongo.Save(THS.CONST.DBName, THS.CONST.Exception, item);
+ 
+
+                Thread.Sleep(60 * 1000);
+            };
+
+            if (null != this.stockCodeDict)
+            {
+                foreach (var item in this.stockCodeDict)
+                {
+                    queueUrl.Enqueue(item.Key);///Key：StockCode Value:StockName
+                }
+            }
+            var sina = new SinaFin();
+            while (0 < queueUrl.Count)
+            {
+                var stockCode = queueUrl.Dequeue();
+                var year = DateTime.Now.Year;
+                for (int jidu = 1; jidu <= 4; jidu++)
+                {
+                    var html = sina.GetKLine(stockCode, year, jidu);
+                    var item = new
+                    {
+                        StockCode = stockCode,
+                        StockName = this.stockCodeDict[stockCode],
+                        ContentType = "SINA日线数据",
+                        Url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/{0}.phtml?year={1}&jidu={2}", stockCode, year, jidu),
+                        CreatTime = DateTime.Now,
+                        Page = html,
+                        MD5 = Convertor.Encode_MD5(html),
+                        TaskID = THS.CONST.TaskID,
+                        JiDu=jidu,
+                        Year=year
+                    };
+                    var collectionName = THS.CONST.PageKLine;
+                    mongo.Save(THS.CONST.DBName, collectionName, item);
+                    Console.WriteLine("已保存 " + stockCode + " " + queueUrl.Count);
+
+                    Thread.Sleep(1000);
+                }
             }
 
 
@@ -694,10 +764,11 @@ namespace WangJun.NetLoader
         /// </summary>
         public void GetTodayNewData()
         {
-            this.GetStockLHB();///获取个股龙虎榜数据
-            this.GetPageStock();///获取每个股票页面的数据
+            //this.GetStockLHB();///获取个股龙虎榜数据
+            //this.GetPageStock();///获取每个股票页面的数据
             //this.GetPageKLine();//获取日线信息
             //this.GetPageKLineJRJ();
+            this.GetPageKLineSINA();
         }
 
     }

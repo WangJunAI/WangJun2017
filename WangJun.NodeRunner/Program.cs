@@ -55,7 +55,7 @@ namespace WangJun.NodeRunner
             #endregion 
 
             #region 数据转换测试
-            DBConvertor.FromMongoDBToSQLServer("", "", "", "", "", "");
+            //DBConvertor.FromMongoDBToSQLServer("", "", "", "", "", "");
             #endregion
 
             #region 新浪大单测试
