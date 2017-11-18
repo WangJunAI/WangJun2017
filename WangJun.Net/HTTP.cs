@@ -202,6 +202,11 @@ namespace WangJun.Net
 
                     return res;
                 }
+                else if (string.IsNullOrWhiteSpace(sContentEncoding))
+                {
+                    var res = encoding.GetString(byteArray);
+                    return res;
+                }
                 else
                 {
                     var p= 0;

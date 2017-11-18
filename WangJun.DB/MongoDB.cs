@@ -14,21 +14,36 @@ namespace WangJun.DB
     /// </summary>
     public class MongoDB
     {
+        private static Dictionary<string, string> regDict = new Dictionary<string, string>(); ///数据注册中心
+
+
         protected IMongoClient client;
 
         public event EventHandler EventTraverse = null;
 
         #region 数据库注册
-
+        public static void Register(string keyName, string connectionString)
+        {
+            if (null == MongoDB.regDict)
+            {
+                MongoDB.regDict = new Dictionary<string, string>();
+            }
+            MongoDB.regDict[keyName] = connectionString;
+        }
         #endregion
 
         #region 初始化一个实例
-        public static MongoDB GetInst(string url)
+        /// <summary>
+        /// 获取一个实例
+        /// </summary>
+        /// <param name="keyName"></param>
+        /// <returns></returns>
+        public static MongoDB GetInst(string keyName)
         {
-            if (StringChecker.IsMongoDBConnectionString(url))
+            if (MongoDB.regDict.ContainsKey(keyName))
             {
                 var db = new MongoDB();
-                db.client = new MongoClient(url);
+                db.client = new MongoClient(MongoDB.regDict[keyName]);
                 return db;
             }
             return null;
@@ -40,7 +55,7 @@ namespace WangJun.DB
         /// 保存一个数据实体
         /// </summary>
         public void Save(string dbName, string collectionName, object data)
-        {
+        { 
             if (null != data) ///若数据有效
             {
                 var dict = Convertor.FromObjectToDictionary(data);
@@ -58,12 +73,30 @@ namespace WangJun.DB
                     var id = dict["_id"];
                     var filterBuilder = Builders<BsonDocument>.Filter;
                     var filter = filterBuilder.Eq("_id", id);
-                    //dat.Remove("_id");
                     var res = collection.ReplaceOne(filter, dat);
                 }
 
 
 
+            }
+        }
+        #endregion
+
+        #region 保存一组数据实体
+        /// <summary>
+        /// 保存一组数据实体
+        /// </summary>
+        /// <param name="dbName"></param>
+        /// <param name="collectionName"></param>
+        /// <param name="items"></param>
+        public void Save(string dbName, string collectionName, IEnumerable<object> items)
+        {
+            if(null != items)
+            {
+                foreach (var item in items)
+                {
+                    this.Save(dbName, collectionName, item);
+                }
             }
         }
         #endregion
@@ -77,9 +110,7 @@ namespace WangJun.DB
         {
             List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
             var filterDict = Convertor.FromJsonToDict(jsonString);
-            var filterBuilder = Builders<BsonDocument>.Filter;
-            //var filter = filterBuilder.Empty;
-            //var filter = filterBuilder.Eq("ItemType", "PageArticle") & filterBuilder.Eq("Status", "NotDownloaded");
+            var filterBuilder = Builders<BsonDocument>.Filter; 
             var filter = this.FilterConvertor(jsonString);
 
             var db = this.client.GetDatabase(dbName);
@@ -120,8 +151,32 @@ namespace WangJun.DB
         }
         #endregion
 
- 
 
+        #region 删除一个实体
+        public void Delete(string dbName, string collectionName, string jsonString)
+        {
+             
+            var filterDict = Convertor.FromJsonToDict(jsonString);
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = this.FilterConvertor(jsonString);
+
+            var db = this.client.GetDatabase(dbName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            collection.DeleteOne(filter); 
+        }
+        #endregion
+
+
+        #region 全部删除
+        public void DeleteMany(string dbName, string collectionName, string jsonString)
+        {
+            var filter = Builders<BsonDocument>.Filter.Empty;
+
+            var db = this.client.GetDatabase(dbName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            collection.DeleteMany(filter);
+        }
+        #endregion
 
         #region  生成查询过滤器
         /// <summary>
@@ -138,8 +193,14 @@ namespace WangJun.DB
             {
                 var key = item.Key;
                 var value = item.Value;
+                if("_id" == key.ToLower())
+                {
+                    value = ObjectId.Parse(value.ToString());
+                }
                 filter &= filterBuilder.Eq(key, value);
             }
+
+
             if("{}" == jsonString)
             {
                 return Builders<BsonDocument>.Filter.Empty;

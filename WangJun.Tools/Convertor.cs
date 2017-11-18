@@ -66,7 +66,7 @@ namespace WangJun.Data
                         }
                         else if(property.PropertyType.IsValueType)
                         {
-                            
+                            property.SetValue(item, data[key], null);
                         }
                         else
                         {
@@ -77,6 +77,16 @@ namespace WangJun.Data
                 return item;
             }
             return null;
+        }
+
+        public static List<T> FromDictionaryToObject<T>(List<Dictionary<string, object>> dataList) where T : class, new()
+        {
+            var list = new List<T>();
+            foreach (var item in dataList)
+            {
+                list.Add(Convertor.FromDictionaryToObject<T>(item));
+            }
+            return list;
         }
 
         public static Dictionary<string,object> FromObjectToDictionary(object data)
@@ -100,7 +110,16 @@ namespace WangJun.Data
                         {
                             dict.Add(name, value);
                         }
-                        
+                        else if (null != value && (  typeof(Dictionary<string,object>) == value.GetType()))
+                        {
+                            value = Convertor.FromObjectToDictionary(value);
+                            dict.Add(name, value);
+                        }
+                        else if(null == value)
+                        {
+                            dict.Add(name, value);
+                        }
+
                     }
                 }
             }

@@ -59,7 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DB.cs" />
+    <Compile Include="DataStorage.cs" />
     <Compile Include="DBConvertor.cs" />
     <Compile Include="IAdmin.cs" />
     <Compile Include="IDB.cs" />

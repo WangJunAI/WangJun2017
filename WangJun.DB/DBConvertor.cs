@@ -55,7 +55,7 @@ namespace WangJun.DB
                         svItem["ItemArrayIndex"] = itemArrayIndex++;
                         svItem["Source"] = "SINA";
 
-                        mongo.Save("DataSource2D", "DaDan2D", svItem);
+                        //mongo.Save("DataSource2D", "DaDan2D", svItem);
 
                         //var paramList = new List<KeyValuePair<string, object>>();
                         //paramList.Add(new KeyValuePair<string, object>("@dbItemID", svItem["dbItemID"]));
@@ -108,7 +108,9 @@ namespace WangJun.DB
             createTime = DateTime.Parse(string.Format("{0}/{1}/{2} {3}", createTime.Year, createTime.Month, createTime.Day, ticktime));
             return createTime;
         }
-         
+
         #endregion
+
+
     }
 }

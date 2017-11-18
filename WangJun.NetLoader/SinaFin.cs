@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using WangJun.Data;
 using WangJun.DB;
 using WangJun.Net;
+using WangJun.Tools;
 
 namespace WangJun.NetLoader
 {
@@ -19,13 +20,13 @@ namespace WangJun.NetLoader
 
         protected Dictionary<string, string> stockCodeDict = new Dictionary<string, string>();
 
-        public void GetLargeFundsTracking()
+        public void GetPageDaDa()
         {
              
             while (true)
             {
-                if ((DateTime.Today.AddHours(16) < DateTime.Now )
-                    && !(DateTime.Now.DayOfWeek == DayOfWeek.Sunday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday))
+                if ((DateTime.Today.AddHours(16) < DateTime.Now )///每日收盘后
+                    && !(DateTime.Now.DayOfWeek == DayOfWeek.Sunday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday)) 
                 {
                     #region
                     var httpDownloader = new HTTP("GBK");
@@ -57,7 +58,7 @@ namespace WangJun.NetLoader
                         var pageContent = httpDownloader.GetGzip(url, Encoding.GetEncoding("GBK"), headers);
                         var data = new
                         {
-                            ContentType = "大单追踪实时数据",
+                            ContentType = "SINA大单追踪实时数据",
                             Url = url,
                             CreatTime = DateTime.Now,
                             Page = pageContent,
@@ -65,7 +66,7 @@ namespace WangJun.NetLoader
                             TaskID = THS.CONST.TaskID,
                             TradingDate = DateTime.Now
                         };
-                        mongo.Save("SINA", "DaDan", data);
+                        mongo.Save("PageSource", "PageDaDan", data);
                         Console.WriteLine("正在下载 {0} 共 {1}页 ", url, pageCount);
                         Thread.Sleep(1000);
                     }
@@ -80,6 +81,13 @@ namespace WangJun.NetLoader
             }
         }
 
+        /// <summary>
+        /// 获取日K线数据
+        /// </summary>
+        /// <param name="stockCode"></param>
+        /// <param name="year"></param>
+        /// <param name="jidu"></param>
+        /// <returns></returns>
         public string GetKLine(string stockCode,int year,int jidu)
         {
             var httpdownloader = new HTTP();
@@ -95,13 +103,110 @@ namespace WangJun.NetLoader
             return strData;
         }
 
+        /// <summary>
+        /// KLIine
+        /// </summary>
+        /// <param name="mongodbConnectionString"></param>
+        /// <param name="mongodbDBName"></param>
+        /// <param name="mongodbCollectionName"></param>
+        /// <param name="sqlserverConnectionString"></param>
+        /// <param name="sqlserverDBName"></param>
+        /// <param name="sqlserverCollectionName"></param>
+        public void ConvertKLine2D(string mongodbConnectionString, string mongodbDBName, string mongodbCollectionName, string sqlserverConnectionString, string sqlserverDBName, string sqlserverCollectionName)
+        {
+            #region SQLServer 注册
+            SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=WJStock;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
+            var mssql = SQLServer.GetInstance("140");
+            #endregion
+
+            #region   MongoDB注册
+            MongoDB mongo = MongoDB.GetInst("mongodb://192.168.0.140:27017");
+            #endregion
+            var count = 0;
+            mongo.EventTraverse += (object sender, EventArgs e) =>
+            {
+                var ee = e as EventProcEventArgs;
+                var dict = ee.Default as Dictionary<string, object>;
+                var list = dict["Rows"] as Array;
+                var lscjmx = dict["历史成交明细"] as Array;
+                if (list is Array)
+                {
+                    var itemArrayIndex = 0;
+                    string sql = "INSERT INTO  [DataDaDan2D]  ([dbItemID] ,[StockCode] ,[StockName] ,[TradingDate] ,[Price] ,[Volume] ,[PrevPrice] ,[Kind],[ItemArrayIndex])  VALUES (@dbItemID ,@StockCode ,@StockName ,@TradingDate ,@Price ,@Volume  ,@PrevPrice  ,@Kind,@ItemArrayIndex)";
+
+                    foreach (var item in list)
+                    {
+                        var srcItem = item as Dictionary<string, object>;
+                        var svItem = new Dictionary<string, object>();
+                        svItem["dbItemID"] = dict["_id"].ToString();
+                        svItem["StockCode"] = dict["StockCode"];
+                        svItem["StockName"] = dict["StockName"];
+                        svItem["日期"] = Convert.ToDateTime(srcItem["日期"]);
+                        svItem["开盘价"] = float.Parse(srcItem["开盘价"].ToString());
+                        svItem["最高价"] = float.Parse(srcItem["最高价"].ToString());
+                        svItem["收盘价"] = float.Parse(srcItem["收盘价"].ToString());
+                        svItem["最低价"] = float.Parse(srcItem["最低价"].ToString());
+                        svItem["交易量(股)"] = long.Parse(srcItem["交易量(股)"].ToString());
+                        svItem["交易金额(元)"] = long.Parse(srcItem["交易金额(元)"].ToString());
+                        svItem["ItemArrayIndex"] = itemArrayIndex++;
+                        svItem["Source"] = "SINA日线";
+
+                        mongo.Save("DataSource2D", "DataKLine2D", svItem);
+
+                        //var paramList = new List<KeyValuePair<string, object>>();
+                        //paramList.Add(new KeyValuePair<string, object>("@dbItemID", svItem["dbItemID"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@StockCode", svItem["StockCode"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@StockName", svItem["StockName"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@TradingDate", svItem["TradingDate"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@Price", svItem["Price"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@Volume", svItem["Volume"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@PrevPrice", svItem["PrevPrice"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@Kind", svItem["Kind"]));
+                        //paramList.Add(new KeyValuePair<string, object>("@ItemArrayIndex", svItem["ItemArrayIndex"]));
+
+                        //mssql.Save(sql, paramList);
+                    }
+                     
+                }
+
+                if(lscjmx is Array)
+                {
+                    var itemArrayIndex = 0;
+ 
+                    foreach (var item in lscjmx)
+                    { 
+                        var svItem = new Dictionary<string, object>();
+                        svItem["dbItemID"] = dict["_id"].ToString();
+                        svItem["StockCode"] = dict["StockCode"];
+                        svItem["StockName"] = dict["StockName"]; 
+                        svItem["ItemArrayIndex"] = itemArrayIndex++; 
+                        svItem["Source"] = "要下载的SINA日线历史成交明细页面";
+                        svItem["下载URL"] = item;
+                        svItem["父页面URL"] = dict["Url"];
+                        svItem["当前状态"] = "未开始下载页面";
+                        svItem["下一步任务"] = "下载页面";
+                        svItem["作业创建日期"] =DateTime.Now;
+
+                        mongo.Save("Jobs", "DownloadQueue", svItem);
+ 
+                    }
+                }
+
+                Console.WriteLine("成功插入" + dict["_id"] + " " + (++count));
+
+            };
+            mongo.Find("DataSource", "DataKLine", "{}");
+        }
+
+
 
         /// <summary>
         /// 进行任务检查
         /// </summary>
         /// <returns></returns>
-        public bool CheckTask()
+        public bool CheckDaDanTask()
         {
+            ///检查今日数据是否已经下载,联网获取页数,比较数据中的数据量
             return false;
         }
         public void Run()

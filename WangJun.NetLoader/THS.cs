@@ -85,7 +85,8 @@ namespace WangJun.NetLoader
         /// <summary>
         /// 获取所有的股票代码 必须休市后再用 因为 股价变动造成排名变动
         /// </summary>
-        public void GetALLStockCode()
+        /// <param name="needForceUpdate">是否强制更新</param>
+        public void GetALLStockCode(bool needForceUpdate=false)
         {
             ///先检查本地或数据库是否有,若有就用,否则从网络获取
             Console.WriteLine("初始化股票代码\t{0}",DateTime.Now);
@@ -755,10 +756,12 @@ namespace WangJun.NetLoader
  
         }
 
- 
+
         #endregion
 
  
+
+
         /// <summary>
         /// 获取今日新数据
         /// </summary>
