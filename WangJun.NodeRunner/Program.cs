@@ -8,6 +8,7 @@ using WangJun.BizCore;
 using WangJun.Data;
 using WangJun.DB;
 using WangJun.NetLoader;
+using WangJun.Stock;
 using WangJun.Tools;
 
 namespace WangJun.NodeRunner
@@ -19,8 +20,12 @@ namespace WangJun.NodeRunner
    
 
             TaskManager taskMgr = new TaskManager();
-            taskMgr.Run();
+            //taskMgr.Run();
             //taskMgr.CreateTaskTemplate();
+            DataSourceSINA sina = DataSourceSINA.CreateInstance();
+            DataSourceTHS ths = DataSourceTHS.CreateInstance();
+            
+            var html = ths.GetGGLHBMX("002230","2013-06-26","3");
 
             Console.WriteLine("全部结束");
             Console.ReadKey();

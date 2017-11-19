@@ -64,6 +64,10 @@
       <Project>{ee3a5a9f-20b3-4555-9a40-609c3641a7e0}</Project>
       <Name>WangJun.NetLoader</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WangJun.Stock\WangJun.Stock.csproj">
+      <Project>{73325152-D226-46CB-B333-B5EEA545209B}</Project>
+      <Name>WangJun.Stock</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
       <Project>{79474114-39e0-4fec-a040-f2e867ca82a7}</Project>
       <Name>WangJun.Tools</Name>

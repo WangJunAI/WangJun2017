@@ -106,5 +106,79 @@ namespace WangJun.Stock
         }
         #endregion
 
+        #region 下载指定股票的资金流向
+        /// <summary>
+        /// 下载指定股票的资金流向
+        /// </summary>
+        /// <param name="stockcode"></param>
+        /// <returns></returns>
+        public string GetJZLX(string stockcode)
+        {
+            var httpdownloader = new HTTP();
+            string url = string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", stockcode);
+
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add( HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+            headers.Add(HttpRequestHeader.Host, "stockpage.10jqka.com.cn");
+            headers.Add(HttpRequestHeader.Referer, "http://www.10jqka.com.cn/");
+            headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+            var html = httpdownloader.GetGzip2(url, Encoding.UTF8, headers);
+
+            return html;
+        }
+        #endregion
+
+        #region 下载个股龙虎榜
+        /// <summary>
+        /// 下载个股龙虎榜
+        /// </summary>
+        /// <returns></returns>
+        public string GetGGLHB(string stockcode)
+        {
+            var httpdownloader = new HTTP();
+            
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+            headers.Add(HttpRequestHeader.Host, "data.10jqka.com.cn");
+            headers.Add(HttpRequestHeader.Referer, "http://data.10jqka.com.cn/market/longhu/");
+            headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+
+            var url = string.Format("http://data.10jqka.com.cn/market/lhbgg/code/{0}/", stockcode);
+            var html = httpdownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);///下载的个股龙虎榜页面
+            return html;
+        }
+        #endregion
+
+        #region 下载个股龙虎榜明细
+        /// <summary>
+        /// 下载个股龙虎榜明细
+        /// </summary>
+        /// <param name="stockcode"></param>
+        /// <param name="date"></param>
+        /// <param name="rid"></param>
+        /// <returns></returns>
+        public string GetGGLHBMX(string stockcode,string date , string rid)
+        {
+            var httpdownloader = new HTTP();
+
+            var url = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", stockcode, date, rid); ///个股龙虎榜明细
+            var headers = new Dictionary<string, string>();
+            headers.Add("Accept", "*/*");
+            headers.Add("Accept-Encoding", "gzip, deflate");
+            headers.Add("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+            headers.Add("Host", "data.10jqka.com.cn");
+            headers.Add("Referer", string.Format("http://data.10jqka.com.cn/market/lhbgg/code/{0}/", stockcode));
+            headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+            headers.Add("X-Requested-With", "XMLHttpRequest");
+
+            ///下载明细
+            var html = httpdownloader.GetGzip(url, Encoding.GetEncoding("GBK"), headers);
+            return html;
+        }
+        #endregion
     }
 }
