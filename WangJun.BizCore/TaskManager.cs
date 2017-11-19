@@ -78,6 +78,9 @@ namespace WangJun.BizCore
             return taskList;
         }
 
+        /// <summary>
+        /// 运行任务
+        /// </summary>
         public void Run()
         {
             var taskList = this.GetTaskList();
@@ -106,7 +109,9 @@ namespace WangJun.BizCore
             Console.WriteLine("完成一个任务 {0} {1}",typeFullName,methodName);
         }
 
-
+        /// <summary>
+        /// 初始化任务 用
+        /// </summary>
         public void  CreateTaskTemplate()
         {
             #region 创建

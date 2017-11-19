@@ -20,12 +20,9 @@ namespace WangJun.NodeRunner
    
 
             TaskManager taskMgr = new TaskManager();
-            //taskMgr.Run();
-            //taskMgr.CreateTaskTemplate();
-            DataSourceSINA sina = DataSourceSINA.CreateInstance();
-            DataSourceTHS ths = DataSourceTHS.CreateInstance();
-            
-            var html = ths.GetGGLHBMX("002230","2013-06-26","3");
+            var task = StockTask.CreateInstance();
+            task.CreateTask();
+            taskMgr.Run();
 
             Console.WriteLine("全部结束");
             Console.ReadKey();

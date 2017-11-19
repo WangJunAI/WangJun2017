@@ -12,7 +12,7 @@ namespace WangJun.Stock
     /// <summary>
     /// 同花顺数据源
     /// </summary>
-    public  class DataSourceTHS
+    public class DataSourceTHS
     {
         public static DataSourceTHS CreateInstance()
         {
@@ -72,7 +72,7 @@ namespace WangJun.Stock
                             throw new Exception("数据重复");
                         }
                         Console.WriteLine("正在添加 {0}\t{1}", stockCode, stockName);
-                        
+
                     }
                 }
                 #endregion
@@ -118,7 +118,7 @@ namespace WangJun.Stock
             string url = string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", stockcode);
 
             var headers = new Dictionary<HttpRequestHeader, string>();
-            headers.Add( HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
             headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
             headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
             headers.Add(HttpRequestHeader.Host, "stockpage.10jqka.com.cn");
@@ -138,7 +138,7 @@ namespace WangJun.Stock
         public string GetGGLHB(string stockcode)
         {
             var httpdownloader = new HTTP();
-            
+
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
             headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
@@ -153,6 +153,54 @@ namespace WangJun.Stock
         }
         #endregion
 
+        #region 
+        public List<string> GetUrlGGLHBMX(string pagegglhbHtml)
+        {
+            var list = new List<string>();
+            #region 分析个股龙虎榜明细
+            var tableStartIndex = pagegglhbHtml.IndexOf("<tbody>"); ///个股龙虎榜表格数据开始位置
+            var tableEndIndex = pagegglhbHtml.IndexOf("</tbody>");///个股龙虎榜表格数据结束位置
+            var tableHtml = pagegglhbHtml.Substring(tableStartIndex, tableEndIndex - tableStartIndex);
+            var tdArray = tableHtml.Split(new string[] { "<td>", "</td>" }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var td in tdArray)
+            {
+                if (td.Contains("rid") && td.Contains("date"))
+                {
+                    var paramArray = td.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    var date = string.Empty;
+                    var rid = string.Empty;
+                    var code = string.Empty;
+                    foreach (var param in paramArray)
+                    {
+                        if (param.Contains("code="))
+                        {
+                            code = param.Substring(6, 6);
+                        }
+                        else if (param.Contains("date="))
+                        {
+                            date = param.Substring(6, 10);
+                        }
+                        else if (param.Contains("rid="))
+                        {
+                            rid = param.Substring(5, 2).Replace("\"", string.Empty);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(date) && !string.IsNullOrWhiteSpace(rid))
+                        {
+                            var urlgglhbmx = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", code, date, rid); ///个股龙虎榜明细
+                            list.Add(urlgglhbmx);
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            return list;
+        }
+
+        #endregion
+
         #region 下载个股龙虎榜明细
         /// <summary>
         /// 下载个股龙虎榜明细
@@ -161,11 +209,11 @@ namespace WangJun.Stock
         /// <param name="date"></param>
         /// <param name="rid"></param>
         /// <returns></returns>
-        public string GetGGLHBMX(string stockcode,string date , string rid)
+        public string GetGGLHBMX(string stockcode,string url)
         {
             var httpdownloader = new HTTP();
 
-            var url = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", stockcode, date, rid); ///个股龙虎榜明细
+            //var url = string.Format("http://data.10jqka.com.cn/ifmarket/getnewlh/code/{0}/date/{1}/rid/{2}/", stockcode, date, rid); ///个股龙虎榜明细
             var headers = new Dictionary<string, string>();
             headers.Add("Accept", "*/*");
             headers.Add("Accept-Encoding", "gzip, deflate");
@@ -177,6 +225,30 @@ namespace WangJun.Stock
 
             ///下载明细
             var html = httpdownloader.GetGzip(url, Encoding.GetEncoding("GBK"), headers);
+            return html;
+        }
+        #endregion
+
+        #region
+        public string GetPage(string contentType , string stockcode, string url=null)
+        {
+            var html = string.Empty;
+            if("首页概览" == contentType)
+            {
+                html = this.GetSYGL(stockcode);
+            }
+            else if ("资金流向" == contentType)
+            {
+                html = this.GetJZLX(stockcode);
+            }
+            else if ("个股龙虎榜" == contentType)
+            {
+                html = this.GetGGLHB(stockcode);
+            }
+            else if ("个股龙虎榜明细" == contentType)
+            {
+                html = this.GetGGLHBMX(stockcode,url);
+            }
             return html;
         }
         #endregion
