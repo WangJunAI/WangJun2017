@@ -428,7 +428,25 @@ namespace WangJun.Data
             throw new NotImplementedException();
         }
 
-
+        /// <summary>
+        /// 添加股票代码前缀
+        /// </summary>
+        /// <param name="stockcode"></param>
+        /// <returns></returns>
+        public static string AddStockCodePrefix(string stockcode)
+        {
+            if (stockcode.StartsWith("600")
+                || stockcode.StartsWith("601")
+                || stockcode.StartsWith("603"))
+            {
+                return "sh" + stockcode;
+            }  
+            else if (stockcode.StartsWith("000") || stockcode.StartsWith("002") || stockcode.StartsWith("300"))
+            {
+                return "sz" + stockcode;
+            }
+            throw new Exception("股票代码转换出错");
+        }
 
     }
 }

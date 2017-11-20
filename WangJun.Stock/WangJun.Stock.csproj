@@ -43,8 +43,8 @@
     <Compile Include="DataSourceSINA.cs" />
     <Compile Include="DataSourceTHS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StockTask.cs" />
-    <Compile Include="StockTaskRunner.cs" />
+    <Compile Include="StockTaskCreator.cs" />
+    <Compile Include="StockTaskExecutor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WangJun.BizCore\WangJun.BizCore.csproj">

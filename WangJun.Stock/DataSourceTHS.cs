@@ -76,7 +76,7 @@ namespace WangJun.Stock
                     }
                 }
                 #endregion
-                Thread.Sleep(2000);
+                Thread.Sleep(new Random().Next( 1000, 3000));
             }
 
             return stockCodeDict;

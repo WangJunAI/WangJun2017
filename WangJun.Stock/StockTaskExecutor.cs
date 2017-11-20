@@ -12,16 +12,9 @@ namespace WangJun.Stock
     /// <summary>
     /// 
     /// </summary>
-    public class StockTaskRunner
+    public class StockTaskExecutor
     {
- 
-
-        #region 准备技术数据 股票代码
-        public void PrepareData()
-        {
-
-        }
-        #endregion
+  
 
         #region 更新股票代码信息
         /// <summary>
@@ -43,6 +36,7 @@ namespace WangJun.Stock
 
                 db.Save(item, "BaseInfo", "StockTask");
             }
+            Console.WriteLine("已成功更新今日股票代码");
         }
         #endregion
          
@@ -104,7 +98,34 @@ namespace WangJun.Stock
             }
         }
         #endregion
-         
+
+        #region 下载大单数据
+        /// <summary>
+        /// 下载大单数据
+        /// </summary>
+        public void GetDaDanPage()
+        {
+            ///获取页码码数
+            ///下载每一页数据
+            var db = DataStorage.GetInstance();
+            var webSource  = DataSourceSINA.CreateInstance();
+            var pageCount = webSource.GetDaDanPageCount();
+            for (int i = 1; i < pageCount; i++)
+            {
+                var html = webSource.GetDaDan(i);
+                var item = new {
+                    Page=html,
+                    ContentType = "SINA大单页面",
+                    CreateTime =DateTime.Now,
+                    MD5=Convertor.Encode_MD5(html),
+                };
+
+                db.Save(item, "PageDaDan", "PageSource");
+
+            }
+        }
+        #endregion
+
 
 
     }

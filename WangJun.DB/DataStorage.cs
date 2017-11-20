@@ -40,9 +40,9 @@ namespace WangJun.DB
         /// 存储一个数据，若数据存在，则更新
         /// </summary>
         /// <param name="data"></param>
-        public void Save(object data,string tableName , string dbName,string instanceName="140")
+        public void Save(object data,string tableName , string dbName,string instanceName="140",string key=null)
         {
-            this.mongo.Save(dbName, tableName, data);
+            this.mongo.Save(dbName, tableName, data, key);
         }
         #endregion
 
@@ -65,13 +65,26 @@ namespace WangJun.DB
         }
         #endregion
 
-        #region 基于Linq的查询
+        #region 基于Json的查询
         /// <summary>
         /// 基于Linq的查询
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns></returns>
         public List<Dictionary<string, object>> Find(string dbName, string tableName, string jsonString, int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            var res = mongo.Find(dbName, tableName, jsonString, pageIndex, pageSize);
+            return res;
+        }
+        #endregion
+
+        #region 基于Json的查询
+        /// <summary>
+        /// 基于Linq的查询
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns></returns>
+        public List<Dictionary<string, object>> Find(string dbName, string tableName, string jsonString,string protection,Dictionary<string,object> updateData, int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var res = mongo.Find(dbName, tableName, jsonString, pageIndex, pageSize);
             return res;
