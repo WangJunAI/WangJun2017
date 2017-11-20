@@ -11,6 +11,7 @@ using System.Web;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using MongoDB.Bson;
 
 namespace WangJun.Data
 {
@@ -446,6 +447,21 @@ namespace WangJun.Data
                 return "sz" + stockcode;
             }
             throw new Exception("股票代码转换出错");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string ObjectIDToString(Dictionary<string,object> input)
+        { 
+            var timestamp = int.Parse(input["Timestamp"].ToString());
+            var machine = int.Parse(input["Machine"].ToString());
+            var pid = short.Parse(input["Pid"].ToString());
+            var increment = int.Parse(input["Increment"].ToString());
+            var id = new ObjectId(timestamp, machine, pid, increment);
+            return id.ToString();
         }
 
     }

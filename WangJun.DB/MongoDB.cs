@@ -105,7 +105,10 @@ namespace WangJun.DB
                 var value = dict[key];
                 var filterBuilder = Builders<BsonDocument>.Filter;
                 var filter = filterBuilder.Eq(key, value);
-                var res = collection.FindOneAndReplace(filter, dat);
+                FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();
+                option.IsUpsert = true;///找不到就添加
+
+                var res = collection.FindOneAndReplace(filter, dat,option);
             }
         }
         #endregion

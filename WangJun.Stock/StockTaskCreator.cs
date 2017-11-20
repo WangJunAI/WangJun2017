@@ -115,6 +115,7 @@ namespace WangJun.Stock
                 inst.ExData["DLLPath"] = @"E:\WangJun2017\WangJun.Stock\bin\Debug\WangJun.Stock.dll";
                 inst.ExData["Param"] = new object[] { item.Key, item.Value, "资金流向", string.Empty };
                 inst.Save();
+                Console.WriteLine(" 添加任务 {0} {1} {2}", "资金流向", item.Key, item.Value);
             }
         }
 

@@ -116,7 +116,54 @@ namespace WangJun.Net
             string data = this.http.DownloadString(url);
             return data;
         }
-         
+
+        #region 通过POST方法获取结果
+        public string Post(string url,Encoding encoding, string postData, Dictionary<string, string> headers = null)
+        {
+            string res = string.Empty;
+            try
+            {
+                this.SetHeaders(headers);
+                byte[] byteArray = this.http.UploadData(url, encoding.GetBytes(postData));
+                // 处理　gzip   
+                string sContentEncoding = this.http.ResponseHeaders["Content-Encoding"];
+                if (sContentEncoding == "gzip")
+                {
+                    var sourceStream = new MemoryStream(byteArray);
+                    var targetStream = new MemoryStream();
+                    int count = 0;
+                    // 解压  
+                    GZipStream gzip = new GZipStream(sourceStream, CompressionMode.Decompress);
+                    byte[] buf = new byte[512];
+                    while ((count = gzip.Read(buf, 0, buf.Length)) > 0)
+                    {
+                        targetStream.Write(buf, 0, count);
+                    }
+                    res = encoding.GetString(targetStream.GetBuffer());
+                    sourceStream.Close();
+                    targetStream.Close();
+
+                    return res;
+                }
+                else if (string.IsNullOrWhiteSpace(sContentEncoding))
+                {
+                    res = encoding.GetString(byteArray);
+                    return res;
+                }
+            }
+            catch (Exception e)
+            {
+                var dict = new Dictionary<string, object>();
+                dict["Url"] = url;
+                dict["Exception"] = e.Message;
+                dict["CreateTime"] = DateTime.Now;
+                EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
+
+            }
+            return string.Empty;
+
+        }
+        #endregion
 
         #region 通过POST方法获取结果
         public string PostGZip(string url,string postData)
