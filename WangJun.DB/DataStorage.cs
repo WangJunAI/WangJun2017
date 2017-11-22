@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Tools;
 
 namespace WangJun.DB
 {
@@ -13,7 +14,10 @@ namespace WangJun.DB
     public class DataStorage
     {
         protected MongoDB mongo = null;
-         public static DataStorage GetInstance()
+
+        public event EventHandler EventTraverse = null;
+
+        public static DataStorage GetInstance()
         {
             DataStorage.Register();
             DataStorage inst = new DataStorage();
@@ -40,10 +44,21 @@ namespace WangJun.DB
         /// 存储一个数据，若数据存在，则更新
         /// </summary>
         /// <param name="data"></param>
-        public void Save(object data,string tableName , string dbName,string instanceName="140",string key=null)
+        public void Save(object data, string tableName, string dbName, string instanceName = "140", string key = null)
         {
             this.mongo.Save(dbName, tableName, data, key);
         }
+        #endregion
+
+        #region 存储一个数据，若数据存在，则更新
+        /// <summary>
+        /// 存储一个数据，若数据存在，则更新
+        /// </summary>
+        /// <param name="data"></param>
+        public void Save2(string dbName, string tableName, string jsonFilter, object data, string instanceName = "140")
+        {
+            this.mongo.Save2(dbName, tableName, jsonFilter, data);
+        } 
         #endregion
 
         #region 删除数据
@@ -75,6 +90,30 @@ namespace WangJun.DB
         {
             var res = mongo.Find(dbName, tableName, jsonString, pageIndex, pageSize);
             return res;
+        }
+        #endregion
+
+        #region 遍历处理
+        /// <summary>
+        /// 遍历处理
+        /// </summary>
+        /// <param name="dbName"></param>
+        /// <param name="tableName"></param>
+        /// <param name="jsonString"></param>
+        public void Traverse(string dbName, string tableName, string jsonString)
+        {
+            var list = mongo.Find(dbName, tableName, jsonString, 0, 100);
+            var hasData = (0 < list.Count) ? true : false;
+            var index = 0;
+            while (hasData)
+            {
+                foreach (var item in list)
+                {
+                    EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(item));
+                }
+                list = mongo.Find(dbName, tableName, jsonString, index++, 100);
+                hasData = (0 < list.Count) ? true : false;
+            }
         }
         #endregion
 

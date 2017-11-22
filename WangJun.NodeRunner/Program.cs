@@ -13,11 +13,20 @@ namespace WangJun.NodeRunner
     { 
         static void Main(string[] args)
         {
-            StockTaskCreator creator =   StockTaskCreator.CreateInstance();
+            StockTaskCreator creator = StockTaskCreator.CreateInstance();
             //creator.CreateTaskZJLX();
+            //creator.CreateTaskSYGL();
+            //creator.CreateTaskUpdatePageData();
+            //creator.CreateTaskDataTo2D();
+            //creator.CreateTaskGGLHB();
+            //creator.CreateTaskGGLHBMX();
 
             StockTaskExecutor exe = new StockTaskExecutor();
-            exe.UpdateData("5a12bde7487bdc4c40e57656");
+            //exe.UpdateData2D("5a15b4f0487bdc5230dc0b5f");
+
+
+            TaskRunner runner = new TaskRunner();
+            runner.Run();
 
             Console.WriteLine("全部结束");
             Console.ReadKey();

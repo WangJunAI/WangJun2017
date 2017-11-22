@@ -157,8 +157,12 @@ namespace WangJun.Stock
         }
         #endregion
 
-        #region 
-        
+        #region 更新指定股票的数据
+        /// <summary>
+        /// 更新指定股票的数据
+        /// </summary>
+        /// <param name="_id"></param>
+
         public void UpdateData(string _id)
         {
             var srcData = this.GetDataFromPage(_id);
@@ -166,18 +170,116 @@ namespace WangJun.Stock
             {
                 var svItem = (srcData["RES"] as Dictionary<string, object>);
                 var db = DataStorage.GetInstance();
-                ///二维化
+                 
                 var id = Convertor.ObjectIDToString(svItem["PageID"] as Dictionary<string, object>);
                 svItem["PageID"] = id;
                 var filter = string.Format("{{\"PageID\":\"{0}\"}}", id);
                 svItem["CreateTime"] = DateTime.Now;
-
-                db.Remove("DataSource", "PageData", filter);
-                db.Save(srcData["RES"], "PageData", "DataSource");
+                db.Remove("DataSource", "DataOfPage", filter);
+                db.Save(srcData["RES"], "DataOfPage", "DataSource");
+                 
             }
         }
 
         #endregion
+
+        #region 将数据二维化
+        public void UpdateData2D(string _id)
+        {
+            var db = DataStorage.GetInstance();
+
+            var srcData = db.Find("DataSource", "DataOfPage", string.Format("{{\"_id\":\"{0}\"}}", _id),0,1).First();
+            var contentType = srcData["ContentType"].ToString();
+            ///首页概览
+            #region 首页概览
+            if ("首页概览" == contentType){
+                var company = srcData["公司概况"] as Dictionary<string,object>;
+                company["StockCode"] = srcData["StockCode"];
+                company["StockName"] = srcData["StockName"];
+
+                var jsonFilter = string.Format("{{\"StockCode\":\"{0}\"}}", company["StockCode"]);
+ 
+                db.Save2("StockData", "Summary", jsonFilter, company);
+
+            }
+            #endregion
+
+             
+            #region 资金流向
+            else if("资金流向" == contentType)
+            {
+                var rows = (Array)srcData["Rows"];
+
+                foreach (Dictionary<string, object> row in rows)
+                {
+                    var svItem = new Dictionary<string, object>();
+
+                    svItem["StockCode"] = srcData["StockCode"];
+                    svItem["StockName"] = srcData["StockName"];
+                    svItem["ContentType"] = srcData["ContentType"];
+                    foreach (var key in row.Keys)
+                    {
+                        svItem[key] = row[key];
+                    }
+
+                    var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"C1\":\"{1}\"}}", svItem["StockCode"], svItem["C1"]);
+
+                    db.Save2("StockData", "Funds", jsonFilter, svItem);
+                }
+
+            }
+            #endregion
+
+            ///个股龙虎榜
+            #region 个股龙虎榜
+            else if("个股龙虎榜" == contentType)
+            {
+                var rows = (Array)srcData["Data"];
+
+                foreach (Dictionary<string, object> row in rows)
+                {
+                    var svItem = new Dictionary<string, object>();
+
+                    svItem["StockCode"] = srcData["StockCode"];
+                    svItem["StockName"] = srcData["StockName"];
+                    svItem["ContentType"] = srcData["ContentType"];
+                    foreach (var key in row.Keys)
+                    {
+                        svItem[key] = row[key];
+                    }
+
+                    var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"C1\":\"{1}\"}}", svItem["StockCode"], svItem["C1"]);
+
+                    db.Save2("StockData", "GGLHB", jsonFilter, svItem);
+                }
+            }
+            #endregion
+            ///龙虎榜明细
+            else if ("个股龙虎榜明细" == contentType)
+            {
+                var rows = (Array)srcData["Rows"];
+
+                foreach (Dictionary<string, object> row in rows)
+                {
+                    var svItem = new Dictionary<string, object>();
+
+                    svItem["StockCode"] = srcData["StockCode"];
+                    svItem["StockName"] = srcData["StockName"];
+                    svItem["ContentType"] = srcData["ContentType"];
+                    svItem["TradingDate"] = (srcData["Summary"] as Dictionary<string, object>)["日期"];
+                    foreach (var key in row.Keys)
+                    {
+                        svItem[key] = row[key];
+                    }
+
+                    var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"TradingDate\":\"{1}\",\"C1\":\"{2}\"}}", svItem["StockCode"], svItem["TradingDate"], svItem["C1"]);
+
+                    db.Save2("StockData", "GGLHBMX", jsonFilter, svItem);
+                }
+            }
+            #endregion
+        }
+ 
 
     }
 }

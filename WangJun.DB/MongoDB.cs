@@ -132,6 +132,30 @@ namespace WangJun.DB
         }
         #endregion
 
+        #region 保存一个数据实体
+        /// <summary>
+        /// 保存一个数据实体
+        /// </summary>
+        public void Save2(string dbName, string collectionName, string jsonfilter, object data)
+        {
+ 
+            if (null != data) ///若数据有效
+            {
+                var dict = Convertor.FromObjectToDictionary(data);
+                var dat = new BsonDocument(dict);
+
+                var db = this.client.GetDatabase(dbName);
+                var collection = db.GetCollection<BsonDocument>(collectionName);
+
+                var filter = this.FilterConvertor(jsonfilter);
+                FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();
+                option.IsUpsert = true;///找不到就添加
+
+                var res = collection.FindOneAndReplace(filter, dat, option);
+            }
+        }
+        #endregion
+
         #region 查找结果
         /// <summary>
         /// 根据条件查找结果
@@ -193,8 +217,40 @@ namespace WangJun.DB
             return null;
         }
         #endregion
-     
 
+        #region 移动数据
+        /// <summary>
+        /// 移动数据
+        /// </summary>
+        /// <param name="sourceKeyName"></param>
+        /// <param name="sourceDbName"></param>
+        /// <param name="sourceCollectionName"></param>
+        /// <param name="sourceFilter"></param>
+        /// <param name="targetKeyName"></param>
+        /// <param name="targetDbName"></param>
+        /// <param name="targetCollectionName"></param>
+        /// <param name="needDeleteSource"></param>
+        public static void MoveCollection(string sourceKeyName,string sourceDbName,string sourceCollectionName , string sourceFilter , string targetKeyName, string targetDbName, string targetCollectionName,bool needDeleteSource=false)
+        {
+            var sourceInst = MongoDB.GetInst(sourceKeyName);
+            var targetInst = MongoDB.GetInst(sourceKeyName);
+            sourceInst.EventTraverse += (object sender, EventArgs e) =>
+            {
+                var ee = e as EventProcEventArgs;
+                var dict = ee.DataDict;
+                var filter = string.Format("{{\"_id\":\"{0}\"}}", dict["_id"]);
+                targetInst.Save2(targetDbName, targetCollectionName, filter, dict);
+
+                if(true == needDeleteSource)
+                {
+                    sourceInst.Delete(sourceDbName, sourceCollectionName, filter);
+                }
+            };
+
+            sourceInst.Find(sourceDbName, sourceCollectionName, sourceFilter);
+
+        }
+        #endregion
 
 
         #region 获取集合的统计信息
