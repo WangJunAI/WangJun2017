@@ -237,10 +237,10 @@ namespace WangJun.DB
             sourceInst.EventTraverse += (object sender, EventArgs e) =>
             {
                 var ee = e as EventProcEventArgs;
-                var dict = ee.DataDict;
+                var dict = ee.Default as Dictionary<string,object>;
                 var filter = string.Format("{{\"_id\":\"{0}\"}}", dict["_id"]);
                 targetInst.Save2(targetDbName, targetCollectionName, filter, dict);
-
+                Console.WriteLine("正在转移数据 {0}", dict["_id"]);
                 if(true == needDeleteSource)
                 {
                     sourceInst.Delete(sourceDbName, sourceCollectionName, filter);

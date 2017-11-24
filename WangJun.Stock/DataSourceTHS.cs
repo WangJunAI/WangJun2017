@@ -230,7 +230,7 @@ namespace WangJun.Stock
         #endregion
 
         #region
-        public string GetPage(string contentType , string stockcode, string url=null)
+        public string GetPage(string contentType , string stockcode, string url=null, Dictionary<string, object> exData = null)
         {
             var html = string.Empty;
             if("首页概览" == contentType)
@@ -249,6 +249,14 @@ namespace WangJun.Stock
             {
                 html = this.GetGGLHBMX(stockcode,url);
             }
+            else if("SINA个股历史交易" == contentType)
+            {
+                var sina = DataSourceSINA.CreateInstance();
+                var year = (int)exData["Year"];
+                var jidu = (int)exData["JiDu"];
+                html = sina.GetLSJY(stockcode, year, jidu);
+            }
+
             return html;
         }
         #endregion

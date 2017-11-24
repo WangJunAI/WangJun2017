@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WangJun.BizCore;
+using WangJun.Data;
 using WangJun.DB;
 using WangJun.Tools;
 
@@ -70,7 +71,7 @@ namespace WangJun.Stock
         /// <summary>
         /// 创建任务 - 下载指定股票的首页概览
         /// </summary>
-        public void CreateTaskSYGL()
+        public void CreateTaskDownloadPageSYGL()
         {
             foreach (var item in this.dict)
             {
@@ -97,7 +98,7 @@ namespace WangJun.Stock
         #endregion
 
         #region 创建任务 - 下载指定股票的资金流向
-        public void CreateTaskZJLX()
+        public void CreateTaskDownloadPageZJLX()
         {
             foreach (var item in this.dict)
             {
@@ -128,7 +129,7 @@ namespace WangJun.Stock
         /// 创建任务 - 下载指定股票的个股龙虎榜
         /// </summary>
         /// <param name="_id"></param>
-        public void CreateTaskGGLHB()
+        public void CreateTaskDwonloadPageGGLHB()
         {
             foreach (var item in this.dict)
             {
@@ -158,7 +159,7 @@ namespace WangJun.Stock
         /// 创建任务 - 下载指定股票的个股龙虎榜
         /// </summary>
         /// <param name="_id"></param>
-        public void CreateTaskGGLHBMX()
+        public void CreateTaskDownloadPageGGLHBMX()
         {
             var db = DataStorage.GetInstance();
             var jsonFilter = string.Format("{{\"ContentType\":\"{0}\"}}", "个股龙虎榜明细");
@@ -202,7 +203,7 @@ namespace WangJun.Stock
             inst.CreateTime = DateTime.Now;
             inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
             inst.ExpireTime = inst.StartTime.AddDays(2);
-
+            inst.PauseSeconds = new Random().Next(1000, 3000);
             inst.ExData = new Dictionary<string, object>();
             inst.ExData["MethodName"] = "GetDaDanPage";
             inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
@@ -210,6 +211,47 @@ namespace WangJun.Stock
             inst.ExData["Param"] = new object[] { };
             inst.Save();
         }
+        #endregion
+        #region 创建任务 - SINA个股历史交易
+        /// <summary>
+        /// 创建任务 - SINA个股历史交易
+        /// </summary>
+        public void CreateTaskSINALSJY()
+        {
+            var year = 2017;
+            foreach (var item in this.dict)
+            {
+                for (int jidu = 1; jidu <= 4; jidu++)
+                {
+                    var stockCode = item.Key;
+                    var stockName = item.Value;
+                    
+                    var inst = new TaskItem();
+                    inst.ID = Guid.NewGuid();
+                    inst.Status = "待执行";
+                    inst.Description = "下载SINA个股历史交易";
+                    inst.Type = "一次性任务";
+                    inst.CreateTime = DateTime.Now;
+                    inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                    inst.ExpireTime = inst.StartTime.AddDays(2);
+                    inst.PauseSeconds = new Random().Next(1000, 3000);
+                    inst.ExData = new Dictionary<string, object>();
+                    inst.ExData["MethodName"] = "UpdatePage";
+                    inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
+                    inst.ExData["DLLPath"] = @"E:\WangJun2017\WangJun.Stock\bin\Debug\WangJun.Stock.dll";
+                    inst.ExData["Param"] = new object[] { stockCode, stockName, "SINA个股历史交易", string.Empty, new Dictionary<string, object> { { "Year", year }, { "JiDu", jidu } } };
+                    inst.Save();
+                    Console.WriteLine(" 添加任务 {0} {1} {2}", "SINA个股历史交易", stockCode, stockName);
+
+                }
+
+            }
+
+        }
+
+
+
+
         #endregion
 
         #region 创建任务 - 获取页面数据 - 首页概览,资金流向,龙虎榜,龙虎榜明细

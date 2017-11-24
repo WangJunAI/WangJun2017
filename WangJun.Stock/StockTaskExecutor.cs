@@ -51,11 +51,11 @@ namespace WangJun.Stock
         /// <param name="url"></param>
         /// <param name="date"></param>
         /// <param name="rid"></param>
-        public void UpdatePage(string stockCode, string stockName, string contentType, string url = null)
+        public void UpdatePage(string stockCode, string stockName, string contentType, string url = null,Dictionary<string,object> exData=null)
         {
             var webSource = DataSourceTHS.CreateInstance();
             var db = DataStorage.GetInstance();
-            var html = webSource.GetPage(contentType, stockCode, url);///获取页面
+            var html = webSource.GetPage(contentType, stockCode, url,exData);///获取页面
             var subLinkArray = new List<string>();
 
             var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\"}}", stockCode, contentType);
@@ -71,6 +71,14 @@ namespace WangJun.Stock
             {
                 jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\",\"Url\":\"{2}\"}}", stockCode, contentType, url);
             }
+            else if("SINA个股历史交易" == contentType)
+            {
+                var year = exData["Year"];
+                var jidu = exData["JiDu"];
+                jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\",\"Year\":\"{2}\",\"JiDu\":\"{3}\"}}", stockCode, contentType, year, jidu);
+            }
+
+
 
 
             var list = db.Find("PageSource", "PageStock", jsonFilter);
@@ -278,6 +286,7 @@ namespace WangJun.Stock
                 }
             }
             #endregion
+             
         }
  
 

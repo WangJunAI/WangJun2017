@@ -117,6 +117,24 @@ namespace WangJun.DB
         }
         #endregion
 
+        #region 转移集合
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourceKeyName"></param>
+        /// <param name="sourceDbName"></param>
+        /// <param name="sourceCollectionName"></param>
+        /// <param name="sourceFilter"></param>
+        /// <param name="targetKeyName"></param>
+        /// <param name="targetDbName"></param>
+        /// <param name="targetCollectionName"></param>
+        /// <param name="needDeleteSource"></param>
+        public static void MoveCollection(string sourceKeyName, string sourceDbName, string sourceCollectionName, string sourceFilter, string targetKeyName, string targetDbName, string targetCollectionName, bool needDeleteSource = false)
+        {
+            MongoDB.MoveCollection( sourceKeyName, sourceDbName,   sourceCollectionName,   sourceFilter,   targetKeyName,   targetDbName,   targetCollectionName,   needDeleteSource );
+        }
+        #endregion
+
         #region 基于Json的查询
         /// <summary>
         /// 基于Linq的查询

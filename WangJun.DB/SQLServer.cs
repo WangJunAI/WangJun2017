@@ -60,6 +60,10 @@ namespace WangJun.DB
         #endregion
 
         #region 获取数据库系统信息
+        /// <summary>
+        /// 获取数据库系统信息
+        /// </summary>
+        /// <param name="forceUpdate">是否强制更新</param>
         public void UpdateSysObject(bool forceUpdate= false)
         {
             if (null == this.systemObjects || true == forceUpdate)
@@ -206,7 +210,7 @@ namespace WangJun.DB
         /// <param name="data"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public int Save(string tableName , object data, string filter)
+        public int Save(string dbName , string tableName , object data, string filter)
         {
             return 0;
         }

@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WangJun.Data;
 using WangJun.Net;
 
 namespace WangJun.Stock
@@ -27,6 +28,7 @@ namespace WangJun.Stock
         /// <param name="year"></param>
         /// <param name="jidu"></param>
         /// <returns></returns>
+        /// <example>view-source:http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/600617.phtml?year=2017&jidu=1</example>
         public string GetLSJY(string stockcode, int year, int jidu)
         {
             string url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/{0}.phtml?year={1}&jidu={2}", stockcode, year, jidu);
@@ -128,6 +130,13 @@ namespace WangJun.Stock
             return pageCount;
         }
         #endregion
+
+        /// <summary>
+        /// 获取大单数据
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <param name="volume"></param>
+        /// <returns></returns>
         public string GetDaDan(int pageIndex,int volume=100)
         {
             var httpDownloader = new HTTP();

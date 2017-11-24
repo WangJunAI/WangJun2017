@@ -442,7 +442,7 @@ namespace WangJun.Data
             {
                 return "sh" + stockcode;
             }  
-            else if (stockcode.StartsWith("000") || stockcode.StartsWith("002") || stockcode.StartsWith("300"))
+            else if (stockcode.StartsWith("000") || stockcode.StartsWith("001") || stockcode.StartsWith("002") || stockcode.StartsWith("300"))
             {
                 return "sz" + stockcode;
             }
