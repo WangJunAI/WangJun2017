@@ -76,7 +76,6 @@ namespace WangJun.BizCore
             method.Invoke(obj, param);
 
             ///执行完毕,删除任务,并生成新任务
-            task.Remove();
 
             Console.WriteLine("完成任务 {0} {1}", task.Description, DateTime.Now - startTime);
             Thread.Sleep(pauseSeconds);

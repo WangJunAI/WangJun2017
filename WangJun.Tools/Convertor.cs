@@ -450,6 +450,42 @@ namespace WangJun.Data
         }
 
         /// <summary>
+        /// 修正交易日
+        /// </summary>
+        /// <param name="createTime"></param>
+        /// <param name="ticktime"></param>
+        /// <returns></returns>
+        public static DateTime CalTradingDate(DateTime createTime, string ticktime)
+        {
+            if (createTime.DayOfWeek == DayOfWeek.Saturday)
+            {
+                ///若是周六,收盘时间为周五
+                createTime = createTime.AddDays(-1).Date;
+            }
+            else if (createTime.DayOfWeek == DayOfWeek.Sunday)
+            {
+                ///若是周日,收盘时间为周五
+                createTime = createTime.AddDays(-2).Date;
+            }
+            else if (createTime.Hour <= 15 && createTime.DayOfWeek == DayOfWeek.Monday)
+            {
+                ///周一收盘前,应该是周五
+                createTime = createTime.AddDays(-3).Date;
+            }
+            else if (createTime.Hour <= 15)
+            {
+                ///其余日期收盘前,应该是前一天的
+                createTime = createTime.AddDays(-1).Date;
+            }
+            else
+            {
+                createTime = createTime.Date;
+            }
+            createTime = DateTime.Parse(string.Format("{0}/{1}/{2} {3}", createTime.Year, createTime.Month, createTime.Day, ticktime));
+            return createTime;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="input"></param>

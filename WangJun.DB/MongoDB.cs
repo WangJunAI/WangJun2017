@@ -146,12 +146,20 @@ namespace WangJun.DB
 
                 var db = this.client.GetDatabase(dbName);
                 var collection = db.GetCollection<BsonDocument>(collectionName);
-
                 var filter = this.FilterConvertor(jsonfilter);
-                FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();
-                option.IsUpsert = true;///找不到就添加
+                if (null != filter)
+                {
+                    
+                    FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();
+                    option.IsUpsert = true;///找不到就添加
 
-                var res = collection.FindOneAndReplace(filter, dat, option);
+                    var res = collection.FindOneAndReplace(filter, dat, option);
+                }
+                else
+                {
+                    collection.InsertOne(dat);
+                }
+
             }
         }
         #endregion
@@ -306,30 +314,34 @@ namespace WangJun.DB
         /// <returns></returns>
         protected FilterDefinition<BsonDocument> FilterConvertor(string jsonString)
         {
-            var filterDict = Convertor.FromJsonToDict(jsonString); ///转化成字典
-            var filterBuilder = Builders<BsonDocument>.Filter;
-            var filter = filterBuilder.Empty;
-            foreach (var item in filterDict)
+            if (!string.IsNullOrWhiteSpace(jsonString) && jsonString.Contains("{") && jsonString.Contains("}")) ///若数据可以转换
             {
-                var key = item.Key;
-                var value = item.Value;
-                if ("_id" == key.ToLower())
+                var filterDict = Convertor.FromJsonToDict(jsonString); ///转化成字典
+                var filterBuilder = Builders<BsonDocument>.Filter;
+                var filter = filterBuilder.Empty;
+                foreach (var item in filterDict)
                 {
-                    value = ObjectId.Parse(value.ToString());
+                    var key = item.Key;
+                    var value = item.Value;
+                    if ("_id" == key.ToLower())
+                    {
+                        value = ObjectId.Parse(value.ToString());
+                    }
+                    else if (StringChecker.IsGUID(value.ToString()))
+                    {
+                        value = Guid.Parse(value.ToString());
+                    }
+                    filter &= filterBuilder.Eq(key, value);
                 }
-                else if (StringChecker.IsGUID(value.ToString()))
-                {
-                    value = Guid.Parse(value.ToString());
-                }
-                filter &= filterBuilder.Eq(key, value);
-            }
 
 
-            if("{}" == jsonString)
-            {
-                return Builders<BsonDocument>.Filter.Empty;
+                if ("{}" == jsonString)
+                {
+                    return Builders<BsonDocument>.Filter.Empty;
+                }
+                return filter;
             }
-            return filter;
+            return null;
         }
 
         #endregion

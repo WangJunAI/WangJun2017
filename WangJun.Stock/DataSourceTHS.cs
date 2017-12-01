@@ -130,6 +130,55 @@ namespace WangJun.Stock
         }
         #endregion
 
+        #region 获取指定日期的新闻列表
+        /// <summary>
+        /// 获取指定日期的新闻列表
+        /// </summary>
+        /// <param name="dateTime">格式：20171129</param>
+        /// <returns></returns>
+        public string GetNewsListCJYW(DateTime dateTime)
+        {
+            var httpdownloader = new HTTP();
+            string url = string.Format("http://news.10jqka.com.cn/today_list/{0}/", string.Format("{0:yyyyMMdd}", dateTime));
+
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+            headers.Add(HttpRequestHeader.Host, "news.10jqka.com.cn");
+            headers.Add(HttpRequestHeader.Referer, "http://news.10jqka.com.cn/today_list/");
+            headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+            var html = httpdownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+
+            return html;
+        }
+        #endregion
+
+        #region 下载指定的新闻内容
+        /// <summary>
+        /// 下载指定的新闻内容
+        /// </summary>
+        /// <param name="articleUrl">http://news.10jqka.com.cn/20171129/c601825811.shtml</param>
+        /// <param name="parentUrl">http://news.10jqka.com.cn/today_list/20171129/</param>
+        /// <returns></returns>
+        public string GetNewsArticle(string articleUrl,string parentUrl)
+        {
+            var httpdownloader = new HTTP();
+
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+            headers.Add(HttpRequestHeader.Host, "news.10jqka.com.cn");
+            headers.Add(HttpRequestHeader.Referer, parentUrl);
+            headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+            var html = httpdownloader.GetGzip2(articleUrl, Encoding.GetEncoding("GBK"), headers);
+
+            return html;
+        }
+
+        #endregion
+
         #region 下载个股龙虎榜
         /// <summary>
         /// 下载个股龙虎榜
@@ -229,7 +278,15 @@ namespace WangJun.Stock
         }
         #endregion
 
-        #region
+        #region 获取页面
+        /// <summary>
+        /// 获取页面
+        /// </summary>
+        /// <param name="contentType"></param>
+        /// <param name="stockcode"></param>
+        /// <param name="url"></param>
+        /// <param name="exData"></param>
+        /// <returns></returns>
         public string GetPage(string contentType , string stockcode, string url=null, Dictionary<string, object> exData = null)
         {
             var html = string.Empty;
@@ -256,7 +313,17 @@ namespace WangJun.Stock
                 var jidu = (int)exData["JiDu"];
                 html = sina.GetLSJY(stockcode, year, jidu);
             }
+            else if ("SINA个股历史交易明细" == contentType)
+            {
+                var sina = DataSourceSINA.CreateInstance();
+                var year = (int)exData["Year"];
+                var jidu = (int)exData["JiDu"];
+                html = sina.GetLSJY(stockcode, year, jidu);
+            }
+            else if("THS财经要闻列表" == contentType)
+            {
 
+            }
             return html;
         }
         #endregion

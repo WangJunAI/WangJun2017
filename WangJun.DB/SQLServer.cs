@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
 using WangJun.Data;
+using MongoDB.Bson;
 
 namespace WangJun.DB
 {
@@ -34,6 +35,11 @@ namespace WangJun.DB
         }
         #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyName"></param>
+        /// <returns></returns>
         public static SQLServer GetInstance(string keyName)
         {
             if(null !=SQLServer.regDict && SQLServer.regDict.ContainsKey(keyName))
@@ -80,7 +86,7 @@ namespace WangJun.DB
         /// </summary>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public bool IsExistUserTable(string tableName)
+        public bool IsExistUserTable(string tableName,Dictionary<string,object> exampleData=null)
         {
             this.UpdateSysObject();///获取最新数据
             if(!string.IsNullOrWhiteSpace(tableName))
@@ -157,9 +163,9 @@ namespace WangJun.DB
         }
         #endregion
 
-        #region 创建一个数据表
+        #region 根据样例数据 创建一个数据表
         /// <summary>
-        /// 创建一个数据表
+        /// 根据样例数据 创建一个数据表
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="exampleData"></param>
@@ -168,10 +174,34 @@ namespace WangJun.DB
             if(null != exampleData) ///若数据有效
             { 
                 var stringBuilder = new StringBuilder();
-                
+                int temp1 = 0;
+                var temp2 = DateTime.Now;
+                float temp3 = 0.0f;
                 foreach (var item in exampleData)
-                { 
-                    stringBuilder.AppendFormat(" {0} {1} ,",item.Key,"NVARCHAR(MAX)");
+                {
+
+                    if(int.TryParse(item.Value.ToString(),out temp1))
+                    {
+                        stringBuilder.AppendFormat(" {0} {1} ,", item.Key, "INT");
+                    }
+                    else if (float.TryParse(item.Value.ToString(),out temp3))
+                    {
+                        stringBuilder.AppendFormat(" {0} {1} ,", item.Key, "FLOAT");
+                    }
+                    else if (item.Value.ToString().Contains(":")&&DateTime.TryParse(item.Value.ToString(),out temp2))
+                    {
+                        stringBuilder.AppendFormat(" {0} {1} ,", item.Key, "DATETIME");
+                    }
+                    else if (typeof(ObjectId) == item.Value.GetType())
+                    {
+                        stringBuilder.AppendFormat(" {0} {1} ,", item.Key, "NVARCHAR(64)");
+                    }
+                    else if (typeof(string) ==item.Value.GetType())
+                    {
+                        stringBuilder.AppendFormat(" {0} {1} ,", item.Key, "NVARCHAR(MAX)");
+                    }
+
+                    
                 }
 
                 var sql = string.Format("CREATE TABLE {0} ({1})", tableName, stringBuilder.ToString());
@@ -210,9 +240,37 @@ namespace WangJun.DB
         /// <param name="data"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public int Save(string dbName , string tableName , object data, string filter)
+        public void Save(string dbName , string tableName , object data)
         {
-            return 0;
+            string sql = " INSERT INTO {0} ( {1} )  VALUES ( {2} ) ";
+            var dict = data as Dictionary<string, object>;
+            var paramList = new List<KeyValuePair<string, object>>();
+            StringBuilder builderCol = new StringBuilder();
+            StringBuilder builderParam = new StringBuilder();
+            foreach (var item in dict)
+            {
+                builderCol.AppendFormat(" [{0}],",item.Key);
+                builderParam.AppendFormat(" @{0},", item.Key);
+                object value = null;
+                if(typeof(ObjectId) == item.Value.GetType())
+                {
+                    value = item.Value.ToString();
+                }
+                else if (typeof(Decimal128) == item.Value.GetType())
+                {
+                    value =Convert.ToSingle( item.Value);
+                }
+                else
+                {
+                    value = item.Value;
+                }
+
+                paramList.Add(new KeyValuePair<string, object>("@" + item.Key, value));
+            }
+            sql = string.Format(sql, tableName, builderCol.ToString().TrimEnd(new char[] { ',' }), builderParam.ToString().TrimEnd(new char[] { ',' }));
+
+            this.Save(sql, paramList);
+
         }
         #endregion
 

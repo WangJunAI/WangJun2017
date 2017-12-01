@@ -65,8 +65,6 @@ namespace WangJun.Stock
         }
         #endregion
 
-
-
         #region 创建任务 - 下载指定股票的首页概览
         /// <summary>
         /// 创建任务 - 下载指定股票的首页概览
@@ -212,11 +210,12 @@ namespace WangJun.Stock
             inst.Save();
         }
         #endregion
+
         #region 创建任务 - SINA个股历史交易
         /// <summary>
         /// 创建任务 - SINA个股历史交易
         /// </summary>
-        public void CreateTaskSINALSJY()
+        public void CreateTaskDownloadPageSINALSJY()
         {
             var year = 2017;
             foreach (var item in this.dict)
@@ -254,9 +253,14 @@ namespace WangJun.Stock
 
         #endregion
 
-        #region 创建任务 - 获取页面数据 - 首页概览,资金流向,龙虎榜,龙虎榜明细
-        public void CreateTaskUpdatePageData()
+        #region 创建任务 - SINA历史交易明细
+
+        #endregion
+
+        #region 创建任务 - 获取页面数据 - 首页概览,资金流向,龙虎榜,龙虎榜明细,SINA个股历史交易
+        public void CreateTaskUpdatePageData(string contentType)
         {
+            var count = 0;
             ///获取页面数据,创建任务
             var db = DataStorage.GetInstance();
             db.EventTraverse += (object sender,EventArgs e) => {
@@ -265,7 +269,7 @@ namespace WangJun.Stock
                 var inst = new TaskItem();
                 inst.ID = Guid.NewGuid();
                 inst.Status = "待执行";
-                inst.Description = "获取指定股票的页面数据 - 首页概览,资金流向,龙虎榜,龙虎榜明细";
+                inst.Description = "获取指定股票的页面数据 - 首页概览,资金流向,龙虎榜,龙虎榜明细,SINA历史交易数据";
                 inst.Type = "一次性任务";
                 inst.CreateTime = DateTime.Now;
                 inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
@@ -275,12 +279,43 @@ namespace WangJun.Stock
                 inst.ExData = new Dictionary<string, object>();
                 inst.ExData["MethodName"] = "UpdateData";
                 inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
-                inst.ExData["DLLPath"] = @"E:\WangJun2017\WangJun.Stock\bin\Debug\WangJun.Stock.dll";
+                inst.ExData["DLLPath"] = @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
                 inst.ExData["Param"] = new object[] { listItem["_id"].ToString() };
                 inst.Save();
-                Console.WriteLine(" 添加任务 {0} {1} {2}", listItem["ContentType"], listItem["StockCode"], listItem["StockName"]);
+                Console.WriteLine(" 添加任务 {0} {1}", listItem["ContentType"], count++);
             };
-            db.Traverse("PageSource", "PageStock", "{\"ContentType\":\"个股龙虎榜明细\"}");
+            db.Traverse("PageSource", "PageStock", string.Format("{{\"ContentType\":\"{0}\"}}",contentType));
+        }
+        #endregion
+
+        #region 创建任务 - 获取页面数据 - 大单
+        public void CreateTaskUpdatePageDataDaDan()
+        {
+            var count = 0;
+            ///获取页面数据,创建任务
+            var db = DataStorage.GetInstance();
+            db.EventTraverse += (object sender, EventArgs e) => {
+                var ee = e as EventProcEventArgs;
+                var listItem = ee.Default as Dictionary<string, object>;
+                var inst = new TaskItem();
+                inst.ID = Guid.NewGuid();
+                inst.Status = "待执行";
+                inst.Description = "获取指定股票的页面数据 - 首页概览,资金流向,龙虎榜,龙虎榜明细,大单追踪实时数据";
+                inst.Type = "一次性任务";
+                inst.CreateTime = DateTime.Now;
+                inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                inst.ExpireTime = inst.StartTime.AddDays(2);
+                inst.PauseSeconds = 0;// new Random().Next(1000, 3000);
+
+                inst.ExData = new Dictionary<string, object>();
+                inst.ExData["MethodName"] = "UpdateDaDan";
+                inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
+                inst.ExData["DLLPath"] = @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
+                inst.ExData["Param"] = new object[] { listItem["_id"].ToString() };
+                inst.Save();
+                Console.WriteLine(" 添加任务 {0} {1}", listItem["ContentType"], count++);
+            };
+            db.Traverse("PageSource", "DaDan", "{\"ContentType\":\"大单追踪实时数据\"}");
         }
         #endregion
 
@@ -320,7 +355,78 @@ namespace WangJun.Stock
         }
         #endregion
 
+        #region 创建任务 - 将大单页面数据二维化
+        /// <summary>
+        /// 创建任务 - 将页面数据二维化
+        /// </summary>
+        public void CreateTaskDaDanTo2D()
+        {
+            var count = 0;
+            var db = DataStorage.GetInstance();
+            db.EventTraverse += (object sender, EventArgs e) =>
+            {
+                var ee = e as EventProcEventArgs;
+                var listItem = ee.Default as Dictionary<string, object>;
 
+                var inst = new TaskItem();
+                inst.ID = Guid.NewGuid();
+                inst.Status = "待执行";
+                inst.Description = "将大单数据2维化";
+                inst.Type = "一次性任务";
+                inst.CreateTime = DateTime.Now;
+                inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                inst.ExpireTime = inst.StartTime.AddDays(2);
+                inst.PauseSeconds = 0;// new Random().Next(1000, 3000);
+
+                inst.ExData = new Dictionary<string, object>();
+                inst.ExData["MethodName"] = "UpdateData2D";
+                inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
+                inst.ExData["DLLPath"] = @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
+                inst.ExData["Param"] = new object[] { listItem["_id"].ToString(), "DataSource", "DataOfDaDan" };
+                inst.Save();
+                Console.WriteLine(" 添加任务 将大单数据2维化 {0} {1} ", listItem["ContentType"], ++count);
+
+            };
+            db.Traverse("DataSource", "DataOfDaDan", "{}");
+
+        }
+        #endregion
+
+        #region 创建任务 - 将SINALSJY二维化
+        /// <summary>
+        /// 创建任务 - 将SINALSJY二维化
+        /// </summary>
+        public void CreateTaskSINALSJYTo2D()
+        {
+            var count = 0;
+            var db = DataStorage.GetInstance();
+            db.EventTraverse += (object sender, EventArgs e) =>
+            {
+                var ee = e as EventProcEventArgs;
+                var listItem = ee.Default as Dictionary<string, object>;
+
+                var inst = new TaskItem();
+                inst.ID = Guid.NewGuid();
+                inst.Status = "待执行";
+                inst.Description = "将SINA历史交易2维化";
+                inst.Type = "一次性任务";
+                inst.CreateTime = DateTime.Now;
+                inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                inst.ExpireTime = inst.StartTime.AddDays(2);
+                inst.PauseSeconds = 0;// new Random().Next(1000, 3000);
+
+                inst.ExData = new Dictionary<string, object>();
+                inst.ExData["MethodName"] = "UpdateData2D";
+                inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
+                inst.ExData["DLLPath"] = @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
+                inst.ExData["Param"] = new object[] { listItem["_id"].ToString(), "DataSource", "DataOfPage" };
+                inst.Save();
+                Console.WriteLine(" 添加任务 将大单数据2维化 {0} {1} ", listItem["ContentType"], ++count);
+
+            };
+            db.Traverse("DataSource", "DataOfPage", "{\"ContentType\":\"SINA个股历史交易\"}");
+        }
+        #endregion
 
 
     }

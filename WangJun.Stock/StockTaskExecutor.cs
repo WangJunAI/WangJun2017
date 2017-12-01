@@ -14,9 +14,7 @@ namespace WangJun.Stock
     /// 
     /// </summary>
     public class StockTaskExecutor
-    {
-
-
+    { 
         #region 更新股票代码信息
         /// <summary>
         /// 更新股票代码信息
@@ -51,11 +49,11 @@ namespace WangJun.Stock
         /// <param name="url"></param>
         /// <param name="date"></param>
         /// <param name="rid"></param>
-        public void UpdatePage(string stockCode, string stockName, string contentType, string url = null,Dictionary<string,object> exData=null)
+        public void UpdatePage(string stockCode, string stockName, string contentType, string url = null, Dictionary<string, object> exData = null)
         {
             var webSource = DataSourceTHS.CreateInstance();
             var db = DataStorage.GetInstance();
-            var html = webSource.GetPage(contentType, stockCode, url,exData);///获取页面
+            var html = webSource.GetPage(contentType, stockCode, url, exData);///获取页面
             var subLinkArray = new List<string>();
 
             var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\"}}", stockCode, contentType);
@@ -71,11 +69,17 @@ namespace WangJun.Stock
             {
                 jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\",\"Url\":\"{2}\"}}", stockCode, contentType, url);
             }
-            else if("SINA个股历史交易" == contentType)
+            else if ("SINA个股历史交易" == contentType)
             {
                 var year = exData["Year"];
                 var jidu = exData["JiDu"];
                 jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\",\"Year\":\"{2}\",\"JiDu\":\"{3}\"}}", stockCode, contentType, year, jidu);
+            }
+            else if ("SINA个股历史交易明细" == contentType)
+            {
+                //var year = exData["Year"];
+                //var jidu = exData["JiDu"];
+                //jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\",\"Year\":\"{2}\",\"JiDu\":\"{3}\"}}", stockCode, contentType, year, jidu);
             }
 
 
@@ -137,11 +141,11 @@ namespace WangJun.Stock
 
         #region 数据转换
         /// <summary>
-        /// 
+        /// 数据转换
         /// </summary>
         /// <param name="_id"></param>
         /// <returns></returns>
-        public Dictionary<string,object> GetDataFromPage(string _id)
+        public Dictionary<string, object> GetDataFromPage(string _id)
         {
             var db = DataStorage.GetInstance();
             var filter = string.Format("{{\"_id\":\"{0}\"}}", _id);
@@ -165,6 +169,37 @@ namespace WangJun.Stock
         }
         #endregion
 
+        #region 数据转换 大单
+        /// <summary>
+        /// 数据转换 大单
+        /// </summary>
+        /// <param name="_id"></param>
+        /// <returns></returns>
+        public Dictionary<string, object> GetDataFromPageDaDan(string _id)
+        {
+            var db = DataStorage.GetInstance();
+            var filter = string.Format("{{\"_id\":\"{0}\"}}", _id);
+            var src = db.Find("PageSource", "DaDan", filter, 0, 1);
+            if (1 == src.Count)
+            {
+                var context = new
+                {
+                    CMD = "同花顺",
+                    Method = "GetDataFromHtml",
+                    Args = src[0]
+                };
+
+                var httpdownloader = new HTTP();
+                var resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
+
+                var resData = Convertor.FromJsonToDict2(resString);
+                resData["TradingDate"] = Convertor.CalTradingDate(Convert.ToDateTime(src[0]["CreatTime"]).AddHours(8), "00:00:00");///注意:要添加时区
+                return resData;
+            }
+            return null;
+        }
+        #endregion
+
         #region 更新指定股票的数据
         /// <summary>
         /// 更新指定股票的数据
@@ -178,117 +213,261 @@ namespace WangJun.Stock
             {
                 var svItem = (srcData["RES"] as Dictionary<string, object>);
                 var db = DataStorage.GetInstance();
-                 
+
                 var id = Convertor.ObjectIDToString(svItem["PageID"] as Dictionary<string, object>);
                 svItem["PageID"] = id;
                 var filter = string.Format("{{\"PageID\":\"{0}\"}}", id);
                 svItem["CreateTime"] = DateTime.Now;
                 db.Remove("DataSource", "DataOfPage", filter);
                 db.Save(srcData["RES"], "DataOfPage", "DataSource");
-                 
+
+            }
+        }
+
+        #endregion
+
+        #region 更新指定股票的数据
+        /// <summary>
+        /// 更新指定股票的数据
+        /// </summary>
+        /// <param name="_id"></param>
+
+        public void UpdateDaDan(string _id)
+        {
+            var srcData = this.GetDataFromPageDaDan(_id);
+            if (null != srcData)
+            {
+                var svItem = (srcData["RES"] as Dictionary<string, object>);
+                svItem["TradingDate"] = srcData["TradingDate"];
+                var db = DataStorage.GetInstance();
+
+                var id = Convertor.ObjectIDToString(svItem["PageID"] as Dictionary<string, object>);
+                svItem["PageID"] = id;
+                var filter = string.Format("{{\"PageID\":\"{0}\"}}", id);
+                svItem["CreateTime"] = DateTime.Now;
+                db.Remove("DataSource", "DataOfDaDan", filter);
+                db.Save(srcData["RES"], "DataOfDaDan", "DataSource");
+
             }
         }
 
         #endregion
 
         #region 将数据二维化
-        public void UpdateData2D(string _id)
+        /// <summary>
+        /// 将数据二维化
+        /// </summary>
+        /// <param name="_id"></param>
+        /// <param name="srcDbName"></param>
+        /// <param name="srcTableName"></param>
+        public void UpdateData2D(string _id, string srcDbName, string srcTableName)
+        {
+            var srcdb = DataStorage.GetInstance();
+
+            var list = srcdb.Find(srcDbName, srcTableName, string.Format("{{\"_id\":\"{0}\"}}", _id), 0, 1);
+            if (1 == list.Count)
+            {
+                var srcData = list.First();
+                var contentType = srcData["ContentType"].ToString();
+
+                #region 首页概览
+                if ("首页概览" == contentType)
+                {
+                    var company = srcData["公司概况"] as Dictionary<string, object>;
+                    company["StockCode"] = srcData["StockCode"];
+                    company["StockName"] = srcData["StockName"];
+
+                    var jsonFilter = string.Format("{{\"StockCode\":\"{0}\"}}", company["StockCode"]);
+
+                    srcdb.Save2("StockData", "Summary", jsonFilter, company);
+
+                }
+                #endregion
+
+                #region 资金流向
+                else if ("资金流向" == contentType)
+                {
+                    var rows = (Array)srcData["Rows"];
+
+                    foreach (Dictionary<string, object> row in rows)
+                    {
+                        var svItem = new Dictionary<string, object>();
+
+                        svItem["StockCode"] = srcData["StockCode"];
+                        svItem["StockName"] = srcData["StockName"];
+                        svItem["ContentType"] = srcData["ContentType"];
+                        foreach (var key in row.Keys)
+                        {
+                            svItem[key] = row[key];
+                        }
+
+                        var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"C1\":\"{1}\"}}", svItem["StockCode"], svItem["C1"]);
+
+                        srcdb.Save2("StockData", "Funds", jsonFilter, svItem);
+                    }
+
+                }
+                #endregion
+
+                #region 个股龙虎榜
+                else if ("个股龙虎榜" == contentType)
+                {
+                    var rows = (Array)srcData["Data"];
+
+                    foreach (Dictionary<string, object> row in rows)
+                    {
+                        var svItem = new Dictionary<string, object>();
+
+                        svItem["StockCode"] = srcData["StockCode"];
+                        svItem["StockName"] = srcData["StockName"];
+                        svItem["ContentType"] = srcData["ContentType"];
+                        foreach (var key in row.Keys)
+                        {
+                            svItem[key] = row[key];
+                        }
+
+                        var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"C1\":\"{1}\"}}", svItem["StockCode"], svItem["C1"]);
+
+                        srcdb.Save2("StockData", "GGLHB", jsonFilter, svItem);
+                    }
+                }
+                #endregion
+
+                #region 个股龙虎榜明细
+
+                else if ("个股龙虎榜明细" == contentType)
+                {
+                    var rows = (Array)srcData["Rows"];
+                    foreach (Dictionary<string, object> row in rows)
+                    {
+                        var svItem = new Dictionary<string, object>();
+                        svItem["StockCode"] = srcData["StockCode"];
+                        svItem["StockName"] = srcData["StockName"];
+                        svItem["ContentType"] = srcData["ContentType"];
+                        svItem["TradingDate"] = (srcData["Summary"] as Dictionary<string, object>)["日期"];
+                        foreach (var key in row.Keys)
+                        {
+                            svItem[key] = row[key];
+                        }
+                        var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"TradingDate\":\"{1}\",\"C1\":\"{2}\"}}", svItem["StockCode"], svItem["TradingDate"], svItem["C1"]);
+
+
+                        srcdb.Save2("StockData", "GGLHBMX", jsonFilter, svItem);
+                    }
+                }
+                #endregion
+
+                #region 大单追踪实时数据
+
+                else if ("大单追踪实时数据" == contentType)
+                {
+                    if (srcData.ContainsKey("Rows") && srcData["Rows"] is Array)
+                    {
+                        var rows = (Array)srcData["Rows"];
+                        var rowIndex = 1;
+                        var targetDb = DataStorage.GetInstance("170");
+                        foreach (Dictionary<string, object> row in rows)
+                        {
+                            var svItem = new Dictionary<string, object>();
+                            svItem["PageID"] = srcData["PageID"];
+                            svItem["PageMD5"] = srcData["PageMD5"];
+                            svItem["ContentType"] = srcData["ContentType"];
+                            svItem["RowIndex"] = rowIndex++;
+                            svItem["TradingDate"] = ((DateTime)srcData["TradingDate"]).AddHours(8); ///处理时区
+                            svItem["TradingTime"] = DateTime.Parse(string.Format("{0} {1}", ((DateTime)svItem["TradingDate"]).ToShortDateString(), row["ticktime"]));
+                            svItem["StockCode"] = row["symbol"].ToString().Substring(2);
+                            svItem["StockName"] = row["name"];
+                            svItem["Price"] = Convert.ToDecimal(row["price"]);
+                            svItem["Volume"] = Convert.ToInt32(row["volume"]);
+                            svItem["PrevPrice"] = Convert.ToDecimal(row["prev_price"]);
+                            svItem["Kind"] = row["kind"];
+
+                            //var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"TradingTime\":\"{1}\",\"Volume\":\"{2}\"}}", svItem["StockCode"], svItem["TradingTime"], svItem["Volume"]);
+
+                            targetDb.Save2("StockData2D", "DaDan", null, svItem);
+                        }
+                    }
+                }
+                #endregion
+
+                #region SINA 个股历史交易
+
+                else if ("SINA个股历史交易" == contentType)
+                {
+                    if (srcData.ContainsKey("Rows") && srcData["Rows"] is Array)
+                    {
+                        var rows = (Array)srcData["Rows"];
+                        var rowIndex = 1;
+                        var targetDb = DataStorage.GetInstance("170");
+                        foreach (Dictionary<string, object> row in rows)
+                        {
+                            var svItem = new Dictionary<string, object>();
+                            svItem["PageID"] = srcData["PageID"];
+                            svItem["PageMD5"] = srcData["PageMD5"];
+                            svItem["ContentType"] = srcData["ContentType"];
+                            svItem["RowIndex"] = rowIndex++;
+                            svItem["日期"] =Convert.ToDateTime(row["日期"]);
+                            svItem["开盘价"] = Convert.ToSingle(row["开盘价"]);
+                            svItem["最高价"] = Convert.ToSingle(row["最高价"]);
+                            svItem["收盘价"] = Convert.ToSingle(row["收盘价"]);
+                            svItem["最低价"] = Convert.ToSingle(row["最低价"]);
+                            svItem["交易量(股)"] = Convert.ToInt64(row["交易量(股)"]);
+                            svItem["交易金额(元)"] = Convert.ToInt64(row["交易金额(元)"]);
+
+                            //var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"TradingTime\":\"{1}\",\"Volume\":\"{2}\"}}", svItem["StockCode"], svItem["TradingTime"], svItem["Volume"]);
+
+                            targetDb.Save2("StockData2D", "GGLSJY", null, svItem);
+                        }
+                    }
+                }
+                #endregion
+
+
+            }
+        }
+        #endregion
+
+        #region 获取指定日期的新闻
+        /// <summary>
+        /// 获取指定日期的新闻
+        /// </summary>
+        public void GetNewsListCJYW(string dateTime)
         {
             var db = DataStorage.GetInstance();
+            var webSrc = DataSourceTHS.CreateInstance();
 
-            var srcData = db.Find("DataSource", "DataOfPage", string.Format("{{\"_id\":\"{0}\"}}", _id),0,1).First();
-            var contentType = srcData["ContentType"].ToString();
-            ///首页概览
-            #region 首页概览
-            if ("首页概览" == contentType){
-                var company = srcData["公司概况"] as Dictionary<string,object>;
-                company["StockCode"] = srcData["StockCode"];
-                company["StockName"] = srcData["StockName"];
-
-                var jsonFilter = string.Format("{{\"StockCode\":\"{0}\"}}", company["StockCode"]);
- 
-                db.Save2("StockData", "Summary", jsonFilter, company);
-
-            }
-            #endregion
-
-             
-            #region 资金流向
-            else if("资金流向" == contentType)
+            var listHtml = webSrc.GetNewsListCJYW(Convert.ToDateTime(dateTime));
+            var context = new
             {
-                var rows = (Array)srcData["Rows"];
+                CMD = "同花顺",
+                Method = "GetDataFromHtml",
+                Args = new { ContentType= "THS财经要闻新闻列表" , Page=listHtml }
+            };
 
-                foreach (Dictionary<string, object> row in rows)
-                {
-                    var svItem = new Dictionary<string, object>();
+            var httpdownloader = new HTTP();
+            var resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
+            var res = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
 
-                    svItem["StockCode"] = srcData["StockCode"];
-                    svItem["StockName"] = srcData["StockName"];
-                    svItem["ContentType"] = srcData["ContentType"];
-                    foreach (var key in row.Keys)
-                    {
-                        svItem[key] = row[key];
-                    }
-
-                    var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"C1\":\"{1}\"}}", svItem["StockCode"], svItem["C1"]);
-
-                    db.Save2("StockData", "Funds", jsonFilter, svItem);
-                }
-
-            }
-            #endregion
-
-            ///个股龙虎榜
-            #region 个股龙虎榜
-            else if("个股龙虎榜" == contentType)
+        
+            foreach (var listItem in res)
             {
-                var rows = (Array)srcData["Data"];
-
-                foreach (Dictionary<string, object> row in rows)
+                var href = (listItem.Value as Dictionary<string, object>)["Href"].ToString();
+                var parentUrl = string.Format("http://news.10jqka.com.cn/today_list/{0}/", string.Format("{0:yyyyMMdd}", dateTime));
+                var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
+                context = new
                 {
-                    var svItem = new Dictionary<string, object>();
-
-                    svItem["StockCode"] = srcData["StockCode"];
-                    svItem["StockName"] = srcData["StockName"];
-                    svItem["ContentType"] = srcData["ContentType"];
-                    foreach (var key in row.Keys)
-                    {
-                        svItem[key] = row[key];
-                    }
-
-                    var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"C1\":\"{1}\"}}", svItem["StockCode"], svItem["C1"]);
-
-                    db.Save2("StockData", "GGLHB", jsonFilter, svItem);
-                }
+                    CMD = "同花顺",
+                    Method = "GetDataFromHtml",
+                    Args = new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }
+                };
+                
+                resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
+                res = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
             }
-            #endregion
-            ///龙虎榜明细
-            else if ("个股龙虎榜明细" == contentType)
-            {
-                var rows = (Array)srcData["Rows"];
+         
 
-                foreach (Dictionary<string, object> row in rows)
-                {
-                    var svItem = new Dictionary<string, object>();
-
-                    svItem["StockCode"] = srcData["StockCode"];
-                    svItem["StockName"] = srcData["StockName"];
-                    svItem["ContentType"] = srcData["ContentType"];
-                    svItem["TradingDate"] = (srcData["Summary"] as Dictionary<string, object>)["日期"];
-                    foreach (var key in row.Keys)
-                    {
-                        svItem[key] = row[key];
-                    }
-
-                    var jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"TradingDate\":\"{1}\",\"C1\":\"{2}\"}}", svItem["StockCode"], svItem["TradingDate"], svItem["C1"]);
-
-                    db.Save2("StockData", "GGLHBMX", jsonFilter, svItem);
-                }
-            }
-            #endregion
-             
         }
- 
+        #endregion
 
     }
 }
