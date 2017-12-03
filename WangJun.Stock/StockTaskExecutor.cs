@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WangJun.BizCore;
 using WangJun.Data;
@@ -433,7 +434,7 @@ namespace WangJun.Stock
         /// </summary>
         public void GetNewsListCJYW(string dateTime)
         {
-            var db = DataStorage.GetInstance();
+            var db = DataStorage.GetInstance("170");
             var webSrc = DataSourceTHS.CreateInstance();
 
             var listHtml = webSrc.GetNewsListCJYW(Convert.ToDateTime(dateTime));
@@ -446,23 +447,40 @@ namespace WangJun.Stock
 
             var httpdownloader = new HTTP();
             var resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
-            var res = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
-
+            var resList = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
+            resList.Remove("ContentType");
         
-            foreach (var listItem in res)
+            foreach (var listItem in resList)
             {
                 var href = (listItem.Value as Dictionary<string, object>)["Href"].ToString();
                 var parentUrl = string.Format("http://news.10jqka.com.cn/today_list/{0}/", string.Format("{0:yyyyMMdd}", dateTime));
                 var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
-                context = new
+                if (!string.IsNullOrWhiteSpace(newsHtml))
                 {
-                    CMD = "同花顺",
-                    Method = "GetDataFromHtml",
-                    Args = new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }
-                };
-                
-                resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
-                res = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
+                    context = new
+                    {
+                        CMD = "同花顺",
+                        Method = "GetDataFromHtml",
+                        Args = new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }
+                    };
+
+                    resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
+                    var resDetail = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
+
+                    var svItem = new
+                    {
+                        ContentType = "THS财经要闻",
+                        Title = resDetail["Title"].ToString().Trim(),
+                        SourceHref = resDetail["SourceHref"].ToString().Trim(),
+                        SourceName = resDetail["SourceName"].ToString().Trim(),
+                        NewsCreateTime = Convert.ToDateTime(resDetail["CreateTime"].ToString().Trim()),
+                        Content = resDetail["Content"].ToString().Trim()
+                    };
+
+                    db.Save2("PageSource", "PageOfNews", null, svItem);
+                    Console.WriteLine("保存一个新闻正文 {0}", svItem.Title);
+                    Thread.Sleep(5000);
+                }
             }
          
 

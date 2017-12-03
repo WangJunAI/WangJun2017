@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +27,26 @@ namespace WangJun.Tools
                 return dict[key];
             }
             return null; 
+        }
+
+        /// <summary>
+        /// 克隆一个对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static T Clone<T>(T t)where T : class
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                IFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(ms, t);
+                byte[] buffer = ms.GetBuffer();
+                var ms2 = new MemoryStream(buffer);
+                object temp = formatter.Deserialize(ms2);
+                ms2.Dispose();
+                return temp as T;
+            }
         }
     }
 }

@@ -60,6 +60,10 @@
       <Project>{73325152-D226-46CB-B333-B5EEA545209B}</Project>
       <Name>WangJun.Stock</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
+      <Project>{79474114-39E0-4FEC-A040-F2E867CA82A7}</Project>
+      <Name>WangJun.Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

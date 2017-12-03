@@ -7,6 +7,7 @@ using System.Text;
 using WangJun.BizCore;
 using WangJun.DB;
 using WangJun.Stock;
+using WangJun.Tools;
 
 namespace WangJun.NodeRunner
 {
@@ -35,9 +36,13 @@ namespace WangJun.NodeRunner
             //exe.UpdatePage("600521", "华海药业", "个股龙虎榜","");
             //exe.GetDataFromPageDaDan("59e87b23487bdc330458d069");
             //exe.GetDataFromPageDaDan("59e875da487bdc330458cd9a");
-            exe.GetNewsListCJYW("2017/12/01");
+            //exe.GetNewsListCJYW("2017/12/01");
             //TaskRunner runner = new TaskRunner();
             //runner.Run();
+
+            #region 分词环境
+            var res = FenCi.GetResult("今年7月26日，魅族在广东珠海歌剧院发布了自己的年度旗舰Pro7系列，与去年每月一场发布会相比，今年的魅族只推出了Pro7一款产品。早先魅族CMO杨柘也曾在微博表示，魅族品牌年内将不会推出新产品，作为一个互联网品牌，今年的魅族显得较为“低调”。");
+            #endregion
 
 
             ///MongoDB转移
