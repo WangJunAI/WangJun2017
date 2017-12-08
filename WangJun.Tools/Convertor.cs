@@ -200,6 +200,7 @@ namespace WangJun.Data
         /// <returns></returns>
         public static string FromObjectToJson(object data)
         {
+            js.MaxJsonLength = int.MaxValue;
             return js.Serialize(data);
         }
 
