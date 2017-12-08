@@ -58,7 +58,7 @@ namespace WangJun.DB
         { 
             if (null != data) ///若数据有效
             {
-                var dict = Convertor.FromObjectToDictionary(data);
+                var dict =Convertor.FromObjectToDictionary(data);
                 var dat = new BsonDocument(dict);
 
                 var db = this.client.GetDatabase(dbName);
@@ -172,7 +172,7 @@ namespace WangJun.DB
         public List<Dictionary<string, object>> Find(string dbName, string collectionName, string jsonString,int pageIndex=0,int pageSize=int.MaxValue)
         {
             List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
-            var filterDict = Convertor.FromJsonToDict(jsonString);
+            var filterDict = Convertor.FromJsonToDict2(jsonString);
             var filterBuilder = Builders<BsonDocument>.Filter; 
             var filter = this.FilterConvertor(jsonString);
 
@@ -241,14 +241,15 @@ namespace WangJun.DB
         public static void MoveCollection(string sourceKeyName,string sourceDbName,string sourceCollectionName , string sourceFilter , string targetKeyName, string targetDbName, string targetCollectionName,bool needDeleteSource=false)
         {
             var sourceInst = MongoDB.GetInst(sourceKeyName);
-            var targetInst = MongoDB.GetInst(sourceKeyName);
+            var targetInst = MongoDB.GetInst(targetKeyName);
+            var count = 0;
             sourceInst.EventTraverse += (object sender, EventArgs e) =>
             {
                 var ee = e as EventProcEventArgs;
                 var dict = ee.Default as Dictionary<string,object>;
                 var filter = string.Format("{{\"_id\":\"{0}\"}}", dict["_id"]);
                 targetInst.Save2(targetDbName, targetCollectionName, filter, dict);
-                Console.WriteLine("正在转移数据 {0}", dict["_id"]);
+                Console.WriteLine("正在转移数据 {0} 已转移 {1}", dict["_id"],++count);
                 if(true == needDeleteSource)
                 {
                     sourceInst.Delete(sourceDbName, sourceCollectionName, filter);
@@ -316,7 +317,7 @@ namespace WangJun.DB
         {
             if (!string.IsNullOrWhiteSpace(jsonString) && jsonString.Contains("{") && jsonString.Contains("}")) ///若数据可以转换
             {
-                var filterDict = Convertor.FromJsonToDict(jsonString); ///转化成字典
+                var filterDict = Convertor.FromJsonToDict2(jsonString); ///转化成字典
                 var filterBuilder = Builders<BsonDocument>.Filter;
                 var filter = filterBuilder.Empty;
                 foreach (var item in filterDict)
@@ -330,8 +331,38 @@ namespace WangJun.DB
                     else if (StringChecker.IsGUID(value.ToString()))
                     {
                         value = Guid.Parse(value.ToString());
+                    } 
+                    else if (value is string && value.ToString().Contains("new Date"))
+                    {
+                        value = Convert.ToDateTime(value.ToString().Replace("new Date", string.Empty).Replace("(", string.Empty).Replace(")", string.Empty).Replace("'", string.Empty));
                     }
-                    filter &= filterBuilder.Eq(key, value);
+
+
+                    if (value is Dictionary<string, object> && (value as Dictionary<string, object>).ContainsKey("$gt"))
+                    {
+                        var temp = (value as Dictionary<string, object>)["$gt"];
+                        var val = new object();
+                        if(temp is string && temp.ToString().Contains("new Date"))
+                        {
+                            val = Convert.ToDateTime(temp.ToString().Replace("new Date", string.Empty).Replace("(", string.Empty).Replace(")", string.Empty).Replace("'", string.Empty));
+                        }
+                        filter &= filterBuilder.Gt(key, val);
+                    }
+                    else if (value is Dictionary<string, object> && (value as Dictionary<string, object>).ContainsKey("$lt"))
+                    {
+                        var temp = (value as Dictionary<string, object>)["$lt"];
+                        var val = new object();
+                        if (temp is string && temp.ToString().Contains("new Date"))
+                        {
+                            val = Convert.ToDateTime(temp.ToString().Replace("new Date", string.Empty).Replace("(", string.Empty).Replace(")", string.Empty).Replace("'", string.Empty));
+                        }
+                        filter &= filterBuilder.Lt(key, val);
+                    }
+                    else
+                    {
+                        filter &= filterBuilder.Eq(key, value);
+                    }
+                    
                 }
 
 
@@ -339,11 +370,40 @@ namespace WangJun.DB
                 {
                     return Builders<BsonDocument>.Filter.Empty;
                 }
+
+                //filter = filterBuilder.Eq("Status", "待执行") & filterBuilder.Gt("StartTime", DateTime.Now);
                 return filter;
             }
             return null;
         }
 
+        #endregion
+
+        #region 聚合计算
+        public void Aggregate(string dbName, string collectionName, string jsonString, int pageIndex = 0, int pageSize = int.MaxValue)
+        {
+            //List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
+            //var filterDict = Convertor.FromJsonToDict2(jsonString);
+            //var filterBuilder = Builders<BsonDocument>.Filter;
+            //var filter = this.FilterConvertor(jsonString);
+
+            //var define =PipelineDefinitionBuilder.
+            //var db = this.client.GetDatabase(dbName);
+            //var collection = db.GetCollection<BsonDocument>(collectionName);
+            //var cursor = collection.Aggregate()
+            //foreach (var document in cursor.ToEnumerable())
+            //{
+            //    if (null == this.EventTraverse)
+            //    {
+            //        res.Add(document.ToDictionary());
+            //    }
+            //    else
+            //    {
+            //        EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
+            //    }
+            //}
+            //return res;
+        }
         #endregion
 
 

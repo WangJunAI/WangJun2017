@@ -35,6 +35,8 @@ namespace WangJun.Tools
             return res;
         }
 
+
+        #region 检测词汇重复情况
         /// <summary>
         /// 检测词汇重复情况
         /// </summary>
@@ -63,6 +65,7 @@ namespace WangJun.Tools
             }
             return res;
         }
+        #endregion
 
     }
 }

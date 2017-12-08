@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Data;
 using WangJun.Tools;
 
 namespace WangJun.DB
@@ -30,6 +31,7 @@ namespace WangJun.DB
             else if("sqlserver" == dbType)
             {
                 inst.sqlserver = SQLServer.GetInstance(keyName);
+                inst.sqlserver.UpdateSysObject(true);
             }
             return inst;
         }
@@ -40,7 +42,9 @@ namespace WangJun.DB
         {
             MongoDB.Register("140", "mongodb://192.168.0.140:27017");
             MongoDB.Register("170", "mongodb://192.168.0.170:27017");
+            MongoDB.Register("105", "mongodb://192.168.0.105:27017");
             SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=StockData2D;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
+            SQLServer.Register("aifuwu", @"Data Source=qds165298153.my3w.com;Initial Catalog=qds165298153_db;Persist Security Info=True;User ID=qds165298153;Password=75737573");
             MySQL.Register("140", @"server=192.168.0.140;user=root;database=WJBigData;port=3306;password=111qqq!!!");
 
         }
@@ -67,14 +71,33 @@ namespace WangJun.DB
         /// <param name="data"></param>
         public void Save2(string dbName, string tableName, string jsonFilter, object data, string instanceName = "140")
         {
-            this.mongo.Save2(dbName, tableName, jsonFilter, data);
+            if (null != this.mongo)
+            {
+                this.mongo.Save2(dbName, tableName, jsonFilter, data);
+            }
+            else if (null != this.sqlserver)
+            {
+                var dict = Convertor.FromObjectToDictionary(data);
+                this.sqlserver.Save(dbName, tableName, dict);
+            }
         } 
         #endregion
 
         #region 删除数据
-        public void Delete(string jsonFilter , string tableName, string dbName, string instanceName = "140")
+        public void Delete(string jsonFilter , string tableName, string dbName, string instanceName = "140", object exParam = null)
         {
-            this.mongo.DeleteMany(dbName, tableName, jsonFilter);
+            if (null != this.mongo)
+            {
+                this.mongo.DeleteMany(dbName, tableName, jsonFilter);
+            }
+            else if (null != this.sqlserver)
+            {
+                if(this.sqlserver.IsExistUserTable(tableName))
+                {
+                    this.sqlserver.Delete(jsonFilter, exParam as List<KeyValuePair<string, object>>);
+                }
+               
+            } 
         }
         #endregion
 
@@ -90,16 +113,26 @@ namespace WangJun.DB
         }
         #endregion
 
-        #region 基于Json的查询
+        #region 基于Json/SQLServer的查询
         /// <summary>
         /// 基于Linq的查询
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns></returns>
-        public List<Dictionary<string, object>> Find(string dbName, string tableName, string jsonString, int pageIndex = 0, int pageSize = int.MaxValue)
+        public List<Dictionary<string, object>> Find(string dbName, string tableName, string jsonString, int pageIndex = 0, int pageSize = int.MaxValue,object exParam=null)
         {
-            var res = mongo.Find(dbName, tableName, jsonString, pageIndex, pageSize);
-            return res;
+            if(null != this.mongo)
+            {
+                var res = mongo.Find(dbName, tableName, jsonString, pageIndex, pageSize);
+                return res;
+            }
+            else if(null != this.sqlserver)
+            {
+                var res = this.sqlserver.Find(jsonString, exParam as List<KeyValuePair<string,object>>);
+                return res;
+            }
+
+            return null;
         }
         #endregion
 
@@ -114,6 +147,8 @@ namespace WangJun.DB
         {
             var pageSize = 1000;
             var index = 0;
+            var startTime = DateTime.Now;
+            var prevTime = startTime;
             var list = mongo.Find(dbName, tableName, jsonString, ++index, pageSize);
             var hasData = (0 < list.Count) ? true : false;
             
@@ -121,6 +156,9 @@ namespace WangJun.DB
             queue.Enqueue(list);
             while (0< queue.Count)
             {
+                var cost = DateTime.Now - prevTime;
+                mongo.Save("LOG", "Traverse", new {ContentType="遍历耗时",StartTime=startTime, Cost = cost,PrevTime=prevTime,CreateTime = DateTime.Now });
+
                 list = queue.Dequeue();
                 foreach (var item in list)
                 {
@@ -128,7 +166,8 @@ namespace WangJun.DB
                 }
 
                 var task = Task.Factory.StartNew <object>(() => {
-                    Console.WriteLine(" 准备查找第{0}页数据 ",index);
+                    prevTime=DateTime.Now;
+                    Console.WriteLine(" 准备查找第{0}页数据 页面大小:{1} 上次耗时:{2}",index,pageSize,cost);
                     var resList = mongo.Find(dbName, tableName, jsonString, ++index, pageSize);
                     return resList;
                 });
@@ -162,6 +201,16 @@ namespace WangJun.DB
         public static void MoveCollection(string sourceKeyName, string sourceDbName, string sourceCollectionName, string sourceFilter, string targetKeyName, string targetDbName, string targetCollectionName, bool needDeleteSource = false)
         {
             MongoDB.MoveCollection( sourceKeyName, sourceDbName,   sourceCollectionName,   sourceFilter,   targetKeyName,   targetDbName,   targetCollectionName,   needDeleteSource );
+        }
+        #endregion
+
+        #region 移动一个数据库
+        /// <summary>
+        /// 
+        /// </summary>
+        public static void MoveDatabase(string sourceKeyName, string sourceDbName,string targetKeyName, string targetDbName, bool needDeleteSource = false)
+        {
+
         }
         #endregion
 

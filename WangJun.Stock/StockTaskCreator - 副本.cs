@@ -28,20 +28,12 @@ namespace WangJun.Stock
         {
             if (0 == this.dict.Count)
             {
-                var db = DataStorage.GetInstance("170");
+                var db = DataStorage.GetInstance();
                 var jsonFilter = string.Format("{{\"ContentType\":\"股票代码\"}}");
                 var res = db.Find("StockTask", "BaseInfo", jsonFilter);
-                if (0 == res.Count) ///先查找数据库中的数据
+                foreach (var item in res)
                 {
-                    StockTaskExecutor.CreateInstance().UpdateAllStockCode();
-                    res = db.Find("StockTask", "BaseInfo", jsonFilter);
-                }
-                else if(0< res.Count)
-                {
-                    foreach (var item in res)
-                    {
-                        this.dict.Add(item["StockCode"].ToString(), item["StockName"].ToString());
-                    }
+                    this.dict.Add(item["StockCode"].ToString(), item["StockName"].ToString());
                 }
             }
         }
@@ -59,8 +51,8 @@ namespace WangJun.Stock
             inst.Description = "更新股票代码";
             inst.Type = "一次性任务";
             inst.CreateTime = DateTime.Now;
-            inst.StartTime = DateTime.Now.Date.AddHours(16);
-            inst.ExpireTime = DateTime.Now.Date.AddHours(23);
+            inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+            inst.ExpireTime = inst.StartTime.AddDays(2);
 
             inst.ExData = new Dictionary<string, object>();
             inst.ExData["MethodName"] = "UpdateAllStockCode";
@@ -87,15 +79,15 @@ namespace WangJun.Stock
                 inst.Description = "下载指定股票的首页概览";
                 inst.Type = "一次性任务";
                 inst.CreateTime = DateTime.Now;
-                inst.StartTime = DateTime.Now.Date.AddHours(16);
-                inst.ExpireTime = DateTime.Now.Date.AddHours(23);
+                inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                inst.ExpireTime = inst.StartTime.AddDays(2);
                 inst.PauseSeconds = new Random().Next(1000, 3000);
 
                 inst.ExData = new Dictionary<string, object>();
                 inst.ExData["MethodName"] = "UpdatePage";
                 inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
                 inst.ExData["DLLPath"] = CONST.DLLPath;
-                inst.ExData["Param"] = new object[] { item.Key, item.Value, "首页概览", string.Empty,new Dictionary<string,object>() };
+                inst.ExData["Param"] = new object[] { item.Key, item.Value, "首页概览", string.Empty };
                 inst.Save();
                 Console.WriteLine(" 添加任务 {0} {1} {2}", "首页概览", item.Key, item.Value);
             }
@@ -114,15 +106,15 @@ namespace WangJun.Stock
                 inst.Description = "下载指定股票的资金流向";
                 inst.Type = "一次性任务";
                 inst.CreateTime = DateTime.Now;
-                inst.StartTime = DateTime.Now.Date.AddHours(16);
-                inst.ExpireTime = DateTime.Now.Date.AddHours(23);
+                inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                inst.ExpireTime = inst.StartTime.AddDays(2);
                 inst.PauseSeconds = new Random().Next(1000, 3000);
 
                 inst.ExData = new Dictionary<string, object>();
                 inst.ExData["MethodName"] = "UpdatePage";
                 inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
                 inst.ExData["DLLPath"] = CONST.DLLPath;
-                inst.ExData["Param"] = new object[] { item.Key, item.Value, "资金流向", string.Empty , new Dictionary<string, object>()};
+                inst.ExData["Param"] = new object[] { item.Key, item.Value, "资金流向", string.Empty };
                 inst.Save();
                 Console.WriteLine(" 添加任务 {0} {1} {2}", "资金流向", item.Key, item.Value);
             }
@@ -145,26 +137,60 @@ namespace WangJun.Stock
                 inst.Description = "下载指定股票的个股龙虎榜";
                 inst.Type = "一次性任务";
                 inst.CreateTime = DateTime.Now;
-                inst.StartTime = DateTime.Now.Date.AddHours(16);
-                inst.ExpireTime = DateTime.Now.Date.AddHours(23);
+                inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                inst.ExpireTime = inst.StartTime.AddDays(2);
                 inst.PauseSeconds = new Random().Next(1000, 3000);
 
                 inst.ExData = new Dictionary<string, object>();
                 inst.ExData["MethodName"] = "UpdatePage";
                 inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
                 inst.ExData["DLLPath"] = CONST.DLLPath;
-                inst.ExData["Param"] = new object[] { item.Key, item.Value, "个股龙虎榜", string.Empty , new Dictionary<string, object>()};
+                inst.ExData["Param"] = new object[] { item.Key, item.Value, "个股龙虎榜", string.Empty };
                 inst.Save();
                 Console.WriteLine(" 添加任务 {0} {1} {2}", "个股龙虎榜", item.Key, item.Value);
             }
         }
         #endregion
 
+        #region [已作废]创建任务 - 下载指定股票的个股龙虎榜明细
+        /// <summary>
+        /// 创建任务 - 下载指定股票的个股龙虎榜
+        /// </summary>
+        /// <param name="_id"></param>
+        public void CreateTaskDownloadPageGGLHBMX()
+        {
+            var db = DataStorage.GetInstance();
+            var jsonFilter = string.Format("{{\"ContentType\":\"{0}\"}}", "个股龙虎榜明细");
+            db.EventTraverse += (object sender, EventArgs e) =>
+            {
+                var ee = e as EventProcEventArgs;
+                var listItem = ee.Default as Dictionary<string, object>;
+
+                var inst = new TaskItem();
+                inst.ID = Guid.NewGuid();
+                inst.Status = "待执行";
+                inst.Description = "下载指定股票的个股龙虎榜明细";
+                inst.Type = "一次性任务";
+                inst.CreateTime = DateTime.Now;
+                inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+                inst.ExpireTime = inst.StartTime.AddDays(2);
+                inst.PauseSeconds = new Random().Next(1000, 3000);
+
+                inst.ExData = new Dictionary<string, object>();
+                inst.ExData["MethodName"] = "UpdatePage";
+                inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
+                inst.ExData["DLLPath"] = CONST.DLLPath;
+                inst.ExData["Param"] = new object[] { listItem["StockCode"], listItem["StockName"], "个股龙虎榜明细", string.Empty };
+                inst.Save();
+                Console.WriteLine(" 添加任务 {0} {1} {2}", "个股龙虎榜明细", listItem["StockCode"], listItem["StockName"]);
+
+            };
+            db.Traverse("PageSource", "PageStock", jsonFilter);
+        } 
+         
+        #endregion
 
         #region 创建SINA大单任务
-        /// <summary>
-        /// 创建SINA大单任务
-        /// </summary>
         public void CreateTaskSINADaDan()
         {
             var inst = new TaskItem();
@@ -173,8 +199,8 @@ namespace WangJun.Stock
             inst.Description = "下载SINA大单";
             inst.Type = "一次性任务";
             inst.CreateTime = DateTime.Now;
-            inst.StartTime = DateTime.Now.Date.AddHours(16);
-            inst.ExpireTime = DateTime.Now.Date.AddHours(23);
+            inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+            inst.ExpireTime = inst.StartTime.AddDays(2);
             inst.PauseSeconds = new Random().Next(1000, 3000);
             inst.ExData = new Dictionary<string, object>();
             inst.ExData["MethodName"] = "GetDaDanPage";
@@ -402,10 +428,11 @@ namespace WangJun.Stock
         }
         #endregion
 
-
         #region 创建每日任务
         public void CreateTaskEveryDay()
         {
+            ///更新股票代码
+            this.CreateTaskUpdateStockCode();
 
             ///更新股票首页概览
             this.CreateTaskDownloadPageSYGL();
@@ -420,46 +447,21 @@ namespace WangJun.Stock
             this.CreateTaskSINADaDan();
 
             ///创建明日任务清单
-            //var inst = new TaskItem();
-            //inst.ID = Guid.NewGuid();
-            //inst.Status = "待执行";
-            //inst.Description = "明日任务";
-            //inst.Type = "一次性任务";
-            //inst.CreateTime = DateTime.Now;
-            //inst.StartTime = DateTime.Now.Date.AddDays(1).AddHours(8);
-            //inst.ExpireTime = DateTime.Now.Date.AddDays(1).AddHours(12);
-            //inst.PauseSeconds = new Random().Next(1000, 3000);
-            //inst.ExData = new Dictionary<string, object>();
-            //inst.ExData["MethodName"] = "CreateTaskEveryDay";
-            //inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
-            //inst.ExData["DLLPath"] = CONST.DLLPath;
-            //inst.ExData["Param"] = new object[] { };
-            //inst.Save();
-        }
-        #endregion
-
-        #region 添加任务 大单行为分析
-        /// <summary>
-        /// 添加任务 大单行为分析
-        /// </summary>
-        public void CreateTaskAnalyseDaDan()
-        {
             var inst = new TaskItem();
             inst.ID = Guid.NewGuid();
             inst.Status = "待执行";
-            inst.Description = "大单行为分析";
+            inst.Description = "明日任务";
             inst.Type = "一次性任务";
             inst.CreateTime = DateTime.Now;
-            inst.StartTime = DateTime.Now.Date.AddDays(1).AddHours(8);
-            inst.ExpireTime = DateTime.Now.Date.AddDays(1).AddHours(12);
+            inst.StartTime = DateTime.Now.AddDays(new Random().Next(0, 23));
+            inst.ExpireTime = inst.StartTime.AddDays(2);
             inst.PauseSeconds = new Random().Next(1000, 3000);
             inst.ExData = new Dictionary<string, object>();
-            inst.ExData["MethodName"] = "AnalyseDaDan";
-            inst.ExData["TypeFullName"] = "WangJun.Stock.StockAnalyser";
+            inst.ExData["MethodName"] = "GetDaDanPage";
+            inst.ExData["TypeFullName"] = "WangJun.Stock.StockTaskExecutor";
             inst.ExData["DLLPath"] = CONST.DLLPath;
-            inst.ExData["Param"] = new object[] { new Dictionary<string,object>()};
+            inst.ExData["Param"] = new object[] { };
             inst.Save();
-
         }
         #endregion
 

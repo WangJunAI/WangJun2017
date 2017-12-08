@@ -20,6 +20,7 @@ namespace WangJun.DB
         protected string keyName = string.Empty;
         protected string connectionString = string.Empty;
         protected List<Dictionary<string, object>> systemObjects = null;
+        protected Dictionary<string, Dictionary<string, object>> userTableDict = null;
 
         #region 注册连接
         ///<summary>
@@ -77,6 +78,8 @@ namespace WangJun.DB
                 string sql = "SELECT * FROM sysobjects";
                 var res = this.Find(sql);
                 this.systemObjects = res;
+                //this.userTableDict = this.systemObjects.ToDictionary(new Func<Dictionary<string, object>, string>((item)=> { return item["name"].ToString()}));
+                this.userTableDict = this.systemObjects.ToDictionary(p => p["name"].ToString());
             }
         }
         #endregion  
@@ -86,13 +89,14 @@ namespace WangJun.DB
         /// </summary>
         /// <param name="tableName"></param>
         /// <returns></returns>
-        public bool IsExistUserTable(string tableName,Dictionary<string,object> exampleData=null)
+        public bool IsExistUserTable(string tableName,Dictionary<string,object> exampleData=null,bool forceCheck=false)
         {
-            this.UpdateSysObject();///获取最新数据
+            this.UpdateSysObject(forceCheck);///获取最新数据
             if(!string.IsNullOrWhiteSpace(tableName))
             {
-                var res = from dictItem in this.systemObjects where dictItem["name"].ToString().ToUpper() == tableName.ToUpper()  select dictItem;
-                return 0 < res.Count();
+                //var res = from dictItem in this.systemObjects where  dictItem["name"].ToString().ToUpper() == tableName.ToUpper()  select dictItem;
+                //return 0 < res.Count();
+                return this.userTableDict.ContainsKey(tableName);
             }
             return false;
         }
@@ -127,10 +131,45 @@ namespace WangJun.DB
             }
         }
 
-        public void Delete()
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="paramList"></param>
+        public void Delete(string sql, List<KeyValuePair<string, object>> paramList = null)
         {
+            this.CUD(sql, paramList);
+        }
 
+        /// <summary>
+        /// 增删改
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="paramList"></param>
+        protected void CUD(string sql, List<KeyValuePair<string, object>> paramList = null)
+        {
+            var conn = this.GetConnection();
+            if (conn.State == System.Data.ConnectionState.Open)
+            {
+                var com = conn.CreateCommand();
+                com.CommandText = sql;
+                com.CommandType = System.Data.CommandType.Text;
 
+                if (null != paramList)
+                {
+                    foreach (var item in paramList)
+                    {
+                        com.Parameters.Add(new SqlParameter(item.Key, item.Value));
+                    }
+                }
+                var res = com.ExecuteNonQuery();
+
+                conn.Close();
+            }
+            else
+            {
+
+            }
         }
 
         public void Update()
@@ -220,6 +259,8 @@ namespace WangJun.DB
                 {
 
                 }
+
+                this.UpdateSysObject();
             }
         }
         #endregion
@@ -242,6 +283,12 @@ namespace WangJun.DB
         /// <returns></returns>
         public void Save(string dbName , string tableName , object data)
         {
+            if(!this.IsExistUserTable(tableName))
+            {
+                this.CreateTable(tableName, Convertor.FromObjectToDictionary(data));
+            }
+
+
             string sql = " INSERT INTO {0} ( {1} )  VALUES ( {2} ) ";
             var dict = data as Dictionary<string, object>;
             var paramList = new List<KeyValuePair<string, object>>();

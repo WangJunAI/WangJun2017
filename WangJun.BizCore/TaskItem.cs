@@ -10,6 +10,7 @@ namespace WangJun.BizCore
 
     public class TaskItem
     { 
+
         public Guid ID { get; set; }
         public string Sender { get; set; }
         public string Recver { get; set; }
@@ -46,14 +47,14 @@ namespace WangJun.BizCore
 
         public void Save()
         {
-            var db = DataStorage.GetInstance();
+            var db = DataStorage.GetInstance("170");
             this.UpdateTime = DateTime.Now;
             db.Save(this, "Task", "StockTask", key: "ID");
         }
 
         public void Remove()
         {
-            var db = DataStorage.GetInstance();
+            var db = DataStorage.GetInstance("170");
             string jsonFilter = string.Format("{{\"ID\":\"{0}\"}}", this.ID);
             db.Remove("StockTask", "Task", jsonFilter);
         }

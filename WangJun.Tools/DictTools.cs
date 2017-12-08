@@ -48,5 +48,19 @@ namespace WangJun.Tools
                 return temp as T;
             }
         }
+
+        public static bool IsDictionary(object data)
+        {
+            var res = true;
+            if(null != data)
+            {
+                var propertyArray = data.GetType().GetProperties();
+                res = res && "KeyCollection" == data.GetType().GetProperty("KeyCollection").Name;
+                res = res && "ValueCollection" == data.GetType().GetProperty("ValueCollection").Name;
+                res = res && "Count" == data.GetType().GetProperty("Count").Name;
+                res = res && "Item" == data.GetType().GetProperty("Item").Name;
+            }
+            return false;
+        }
     }
 }

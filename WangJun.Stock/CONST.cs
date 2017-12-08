@@ -11,7 +11,13 @@ namespace WangJun.Stock
     /// </summary>
     public class CONST
     {
-
+        public static string DLLPath
+        {
+            get
+            {
+                return @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
+            }
+        }
 
     }
 }

@@ -16,12 +16,14 @@ namespace WangJun.BizCore
     public class TaskRunner
     {
          
-        public List<TaskItem> GetTaskList(int count=1)
+        public List<TaskItem> GetNextTask(int count=1)
         {
             List<TaskItem> taskList = new List<TaskItem>();
 
-            var db = DataStorage.GetInstance();
-            var res = db.Find("StockTask", "Task", "{\"Status\":\"待执行\"}", 0, count);
+            var db = DataStorage.GetInstance("170");
+            //var filter = "{\"Status\":\"待执行\",\"StartTime\":{\"$gt\":\"new Date('"+DateTime.Now.Date+"')\" }}";
+            var filter = "{\"Status\":\"待执行\"}";
+            var res = db.Find("StockTask", "Task", filter, 0, count);
 
             taskList = Convertor.FromDictionaryToObject<TaskItem>(res);
  
@@ -35,22 +37,27 @@ namespace WangJun.BizCore
         {
             while (true)
             {
-                var taskList = this.GetTaskList();
-
-                if(0 == taskList.Count)
+                try
                 {
-                    Console.WriteLine("暂无新任务 {0}",DateTime.Now);
-                    Thread.Sleep(5000);
-                }
+                    var taskList = this.GetNextTask();
 
-                foreach (var task in taskList)
-                {
-                    task.Status = "执行中";
-                    //task.Save();
-                    this.ExecuteTask(task);
-                    task.Remove(); 
+                    if (0 == taskList.Count)
+                    {
+                        Console.WriteLine("暂无新任务 {0}", DateTime.Now);
+                        Thread.Sleep(10*1000);
+                    }
+
+                    foreach (var task in taskList)
+                    {
+                        this.ExecuteTask(task);
+                        task.Remove();
+                    }
                 }
-                 
+                catch (Exception e) {
+                    Console.WriteLine("Task Runner 异常 {0} {1} ",e.Message,DateTime.Now);
+                    Console.WriteLine("Task Runner 异常 {0} {1} ", e.InnerException.Message, DateTime.Now);
+                    Console.WriteLine("Task Runner 异常 {0} {1} ", e.StackTrace, DateTime.Now);
+                }
             }
 
         }
@@ -74,11 +81,14 @@ namespace WangJun.BizCore
             //obj.GetType().InvokeMember(methodName,BindingFlags.InvokeMethod,null,obj,null);
             var method = obj.GetType().GetMethod(methodName);
             method.Invoke(obj, param);
-
+            ass = null;
             ///执行完毕,删除任务,并生成新任务
 
             Console.WriteLine("完成任务 {0} {1}", task.Description, DateTime.Now - startTime);
-            Thread.Sleep(pauseSeconds);
+            if (0 < pauseSeconds)
+            {
+                Thread.Sleep(pauseSeconds);
+            }
         }
          
     }
