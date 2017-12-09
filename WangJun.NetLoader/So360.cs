@@ -31,7 +31,7 @@ namespace WangJun.NetLoader
             headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36");
             headers.Add(HttpRequestHeader.Host, "www.so.com");
 
-            var html = httpdownloader.GetGzip2(url, Encoding.UTF8, headers);
+            var html = httpdownloader.GetGzip2(url, Encoding.UTF8, headers); 
             var tbodyIndex1 = html.IndexOf("<tbody>") + "<tbody>".Length;
             var tbodyIndex2 = html.IndexOf("</tbody>") - html.IndexOf("<tbody>") - "</tbody>".Length + 1;
             var trArray = html.Substring(tbodyIndex1, tbodyIndex2).Replace("</tr><tr>", "；").Split(new char[] { '；' });
