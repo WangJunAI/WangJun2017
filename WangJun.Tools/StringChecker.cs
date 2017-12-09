@@ -104,5 +104,61 @@ namespace WangJun.Data
             }
         }
         #endregion
+
+        #region 判断是否是汉字
+        public static bool IsHanZi(string input,bool onlyHanZi=true)
+        {
+            var res =true;
+
+            for (int k = 0; k < input.Length; k++)
+            {
+                var charItem = input[k];
+                if (onlyHanZi) ///全都是汉字
+                {
+                    res = res && (0x4e00 <= charItem && charItem <= 0x9fbb);
+                    if(!res) ///为负就返回不再计算
+                    {
+                        return res;
+                    }
+                }
+                else ///包含汉字
+                {
+                    res = res || (0x4e00 <= charItem && charItem <= 0x9fbb); ///包含汉字
+                }
+            }
+            return res;
+        }
+        #endregion
+
+        #region 判断是否是英文
+        /// <summary>
+        /// 判断是否是英文
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="onlyEnglish"></param>
+        /// <returns></returns>
+        public static bool IsEnglish(string input, bool onlyEnglish = true)
+        {
+            var res = true;
+
+            for (int k = 0; k < input.Length; k++)
+            {
+                var charItem = input[k];
+                if (onlyEnglish) ///全都是英文
+                {
+                    res = res && ((0x0041 <= charItem && charItem <= 0x005A) || (0x0061 <= charItem && charItem <= 0x007A));
+                    if (!res) ///为负就返回不再计算
+                    {
+                        return res;
+                    }
+                }
+                else ///包含英文
+                {
+                    res = res || ((0x0041 <= charItem && charItem <= 0x005A) || (0x0061 <= charItem && charItem <= 0x007A)); ///包含英文
+                }
+            }
+            return res;
+        }
+        #endregion
     }
 }

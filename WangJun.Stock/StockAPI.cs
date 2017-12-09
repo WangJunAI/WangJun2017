@@ -54,7 +54,7 @@ namespace WangJun.Stock
         {
             var tag = Convert.ToInt32(string.Format("{0:yyyyMMdd}", DateTime.Now));
             var db = DataStorage.GetInstance("aifuwu", "sqlserver");
-            var sql = "SELECT [MD5] ,[Word],[Count],[CreateTime] FROM  [FenCi] WHERE CreateTime BETWEEN @Time1 AND @Time2";
+            var sql = "SELECT  TOP 20 PERCENT [MD5] ,[Word],[Count],[CreateTime] FROM  [FenCi] WHERE CreateTime BETWEEN @Time1 AND @Time2  ORDER BY [Count] DESC";
             var paramList = new List<KeyValuePair<string, object>>();
             paramList.Add(new KeyValuePair<string, object>("@Time1", DateTime.Now.Date));
             paramList.Add(new KeyValuePair<string, object>("@Time2", DateTime.Now.Date.AddDays(1).AddSeconds(-1)));

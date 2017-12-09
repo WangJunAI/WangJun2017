@@ -18,6 +18,6 @@ namespace WangJun.Stock
                 return @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
             }
         }
-
+         
     }
 }

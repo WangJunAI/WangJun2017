@@ -527,6 +527,9 @@ namespace WangJun.Stock
         #endregion
 
         #region 不断更新最新的新闻
+        /// <summary>
+        /// 不断更新最新的新闻
+        /// </summary>
         public void SyncStockNews()
         {
             var tag = Convert.ToInt32(string.Format("{0:yyyyMMdd}", DateTime.Now));
@@ -598,5 +601,8 @@ namespace WangJun.Stock
         }
 
         #endregion
+
+
+
     }
 }

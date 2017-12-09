@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Data;
 
 namespace WangJun.Tools
 {
@@ -17,17 +18,22 @@ namespace WangJun.Tools
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static  Dictionary<string, int> GetResult(string input,string mode="",bool checkRepetitiveWord=false) {
+        public static Dictionary<string, int> GetResult(string input, string mode = "", bool checkRepetitiveWord = false)
+        {
             Dictionary<string, int> res = new Dictionary<string, int>();
 
             var segmenter = new JiebaSegmenter();
-            
+
             var words = segmenter.Cut(input);
 
             var wordDict = new Dictionary<string, int>();
             foreach (var word in words)
             {
-                wordDict[word] = 0 ;
+                if (2<=word.Length&& StringChecker.IsHanZi(word) || StringChecker.IsEnglish(word))
+                {
+                    wordDict[word] = 0;
+                }
+
             }
 
             res = FenCi.GetRepetitiveWordCount(input, wordDict);
@@ -41,7 +47,7 @@ namespace WangJun.Tools
         /// 检测词汇重复情况
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, int> GetRepetitiveWordCount(string input , Dictionary<string, int> words)
+        public static Dictionary<string, int> GetRepetitiveWordCount(string input, Dictionary<string, int> words)
         {
             var res = DictTools.Clone<Dictionary<string, int>>(words);
             if (!string.IsNullOrWhiteSpace(input) && null != words)
@@ -65,7 +71,14 @@ namespace WangJun.Tools
             }
             return res;
         }
+
+        #endregion
+
+        #region 无用汉字
+
         #endregion
 
     }
 }
+
+     

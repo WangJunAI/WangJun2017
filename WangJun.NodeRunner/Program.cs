@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using WangJun.BizCore;
 using WangJun.DB;
+using WangJun.NetLoader;
 using WangJun.Stock;
 using WangJun.Tools;
 
@@ -38,9 +39,9 @@ namespace WangJun.NodeRunner
             //exe.GetDataFromPageDaDan("59e87b23487bdc330458d069");
             //exe.GetDataFromPageDaDan("59e875da487bdc330458cd9a");
             //exe.GetNewsListCJYW("2017/12/01");
-            exe.SyncStockNews();
+            //exe.SyncStockNews();
 
-
+            So360.GetHolidayArrangement();
             var analyser = StockAnalyser.GetInstance();
             //analyser.AnalyseDaDan();
 

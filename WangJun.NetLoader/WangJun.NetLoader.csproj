@@ -52,6 +52,7 @@
     <Compile Include="JRJ.cs" />
     <Compile Include="NodeService.cs" />
     <Compile Include="SinaFin.cs" />
+    <Compile Include="So360.cs" />
     <Compile Include="THS.cs" />
     <Compile Include="WebLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
