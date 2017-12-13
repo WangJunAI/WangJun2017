@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WangJun.BizCore;
 using WangJun.Data;
 using WangJun.DB;
+using WangJun.Debug;
 using WangJun.Net;
 using WangJun.Tools;
 
@@ -27,21 +28,25 @@ namespace WangJun.Stock
         /// <summary>
         /// 更新股票代码信息
         /// </summary>
-        public void UpdateAllStockCode(string dataSourceName = "THS")
+        public void UpdateAllStockCode()
         {
-            var db = DataStorage.GetInstance("170");
+            var mongo = DataStorage.GetInstance("170");
             var dataSource = new Dictionary<string, string>();
-            db.Delete("{\"ContentType\":\"股票代码\"}", "BaseInfo", "StockTask");
-            if ("THS".ToUpper() == dataSourceName.ToUpper())
-            {
-                dataSource = DataSourceTHS.CreateInstance().GetAllStockCode();
-            }
+
+            Console.WriteLine("准备从网络获取股票代码");
+            dataSource = WebDataSource.GetInstance().GetAllStockCode();
+            
+            #region 删除旧数据
+            mongo.Delete("{\"ContentType\":\"股票代码\"}","BaseInfo", "StockService");
+            mongo.Delete("{\"ContentType\":\"股票代码\"}", "BaseInfo", "StockTask");
+            #endregion
 
             foreach (var srcItem in dataSource)
             {
                 var item = new { ContentType = "股票代码", StockCode = srcItem.Key, StockName = srcItem.Value, CreateTime = DateTime.Now };
 
-                db.Save(item, "BaseInfo", "StockTask");
+                mongo.Save(item, "BaseInfo", "StockTask");
+                mongo.Save(item, "BaseInfo", "StockService");
             }
             Console.WriteLine("已成功更新今日股票代码");
         }
@@ -89,6 +94,7 @@ namespace WangJun.Stock
                 //var jidu = exData["JiDu"];
                 //jsonFilter = string.Format("{{\"StockCode\":\"{0}\",\"ContentType\":\"{1}\",\"Year\":\"{2}\",\"JiDu\":\"{3}\"}}", stockCode, contentType, year, jidu);
             } 
+
             var list = db.Find("PageSource", "PageStock", jsonFilter);
 
             if (1 == list.Count) ///若已经存储
@@ -438,7 +444,7 @@ namespace WangJun.Stock
         public void GetNewsListCJYW(string dateTime)
         {
             var formatDate = string.Format("{0:yyyyMMdd}", Convert.ToDateTime(dateTime));
-            var db = DataStorage.GetInstance("170");
+            var mongo= DataStorage.GetInstance(DBType.MongoDB);
             var webSrc = DataSourceTHS.CreateInstance();
             var newNewsList = new List<object>();
             var listHtml = webSrc.GetNewsListCJYW(Convert.ToDateTime(dateTime));
@@ -452,116 +458,79 @@ namespace WangJun.Stock
             var httpdownloader = new HTTP();
             var resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
             var resList = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
-            resList.Remove("ContentType");
+            if (null == resList)
+            {
+                resList.Remove("ContentType");
+
+                foreach (var listItem in resList)
+                {
+                    var href = (listItem.Value as Dictionary<string, object>)["Href"].ToString().Trim();
+                    var parentUrl = string.Format("http://news.10jqka.com.cn/today_list/{0}/", formatDate).Trim();
+                    var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
+                    if (!string.IsNullOrWhiteSpace(newsHtml))
+                    {
+                        context = new
+                        {
+                            CMD = "同花顺",
+                            Method = "GetDataFromHtml",
+                            Args = new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }
+                        };
+
+                        resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
+                        var resDetail = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
+
+                        var svItem = new
+                        {
+                            ContentType = "THS财经要闻",
+                            Title = resDetail["Title"].ToString().Trim(),
+                            Url = href,
+                            ParentUrl = parentUrl,
+                            SourceHref = resDetail["SourceHref"].ToString().Trim(),
+                            SourceName = resDetail["SourceName"].ToString().Trim(),
+                            NewsCreateTime = Convert.ToDateTime(resDetail["CreateTime"].ToString().Trim()),
+                            Content = resDetail["Content"].ToString().Trim(),
+                            Tag = Convert.ToInt32(formatDate.Replace("/", string.Empty)),
+                            CreateTime = DateTime.Now,
+                            PageMD5 = Convertor.Encode_MD5(resString)
+                        };
+                        newNewsList.Add(svItem);
+                        LOGGER.Log(string.Format("获取一个新闻正文 {0}", svItem.Title));
+                        Thread.Sleep(new Random().Next(1000, 3000));
+
+                        ///分词
+                        var task = Task.Factory.StartNew(() =>
+                        {
+                            var fcZStartTime = DateTime.Now;
+                            this.SaveFenCi(svItem.Content, svItem.Url);
+                            LOGGER.Log(string.Format("分词花费时间 开始时间：{0} 花费时间：{1}", fcZStartTime, DateTime.Now - fcZStartTime));
+                        });
+                    }
+                }
+
+                ///删除旧
+                var deleteFilter = "{\"Tag\":" + Convert.ToInt32(formatDate.Replace("/", string.Empty)) + "}";
+                mongo.Delete(deleteFilter, "News", "StockService");///删除旧数据
+
+
+                #region 同步到服务器上
+                var sql = "DELETE FROM News WHERE Tag=@Tag";
+                var paramList = new List<KeyValuePair<string, object>>();
+                paramList.Add(new KeyValuePair<string, object>("@Tag", Convert.ToInt32(formatDate.Replace("/", string.Empty))));
+                var mssql = DataStorage.GetInstance(DBType.SQLServer);
+                mssql.Delete(sql, "News", "StockService", exParam: paramList);
+                #endregion
+                var index = 0;
+                foreach (var svItem in newNewsList)
+                {
+                    mongo.Save2("StockService", "News", null, svItem);
+                    //mssql.Save2("StockService", "News", null, svItem);//数据库太小不存
+                }
+            }
+        }
+        #endregion
+ 
+
         
-            foreach (var listItem in resList)
-            {
-                var href = (listItem.Value as Dictionary<string, object>)["Href"].ToString();
-                var parentUrl = string.Format("http://news.10jqka.com.cn/today_list/{0}/", formatDate);
-                var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
-                if (!string.IsNullOrWhiteSpace(newsHtml))
-                {
-                    context = new
-                    {
-                        CMD = "同花顺",
-                        Method = "GetDataFromHtml",
-                        Args = new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }
-                    };
-
-                    resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
-                    var resDetail = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
-
-                    var svItem = new
-                    {
-                        ContentType = "THS财经要闻",
-                        Title = resDetail["Title"].ToString().Trim(),
-                        SourceHref = resDetail["SourceHref"].ToString().Trim(),
-                        SourceName = resDetail["SourceName"].ToString().Trim(),
-                        NewsCreateTime = Convert.ToDateTime(resDetail["CreateTime"].ToString().Trim()),
-                        Content = resDetail["Content"].ToString().Trim(),
-                        Tag = Convert.ToInt32(formatDate.Replace("/", string.Empty)),
-                        CreateTime = DateTime.Now,
-                        PageMD5 = Convertor.Encode_MD5(resString)
-                    };
-                    newNewsList.Add(svItem);
-                    Console.WriteLine("获取一个新闻正文 {0}", svItem.Title);
-                    Thread.Sleep(new Random().Next(1000, 3000));
-
-                    ///分词
-                    var task = Task.Factory.StartNew(() =>
-                    {
-                        var fcZStartTime = DateTime.Now;
-                        this.SaveFenCi(svItem.Content, svItem.PageMD5);
-                        Console.WriteLine("分词花费时间 开始时间：{0} 花费时间：{1}", fcZStartTime, DateTime.Now - fcZStartTime);
-                    });
-                }
-            }
-
-            ///删除旧
-            var deleteFilter = "{\"Tag\":"+ Convert.ToInt32(formatDate.Replace("/", string.Empty)) + "}";
-            db.Delete(deleteFilter, "News", "StockService");///删除旧数据
-
-
-            #region 同步到服务器上
-            var sql = "DELETE FROM News WHERE Tag=@tag";
-            var paramList = new List<KeyValuePair<string, object>>();
-            paramList.Add(new KeyValuePair<string, object> ("@tag", Convert.ToInt32(formatDate.Replace("/", string.Empty))));
-            var mssql = DataStorage.GetInstance("aifuwu","sqlserver");
-            mssql.Delete(sql, "News", "StockService", exParam:paramList);
-            #endregion
-            var index = 0;
-            foreach (var svItem in newNewsList)
-            {
-                db.Save2("StockService", "News", null, svItem);
-                mssql.Save2("StockService", "News", null, svItem);
-                 
-            }
-        }
-        #endregion
-
-        #region 添加同步和分发
-        public void SyncData()
-        {
-
-        }
-        #endregion
-
-        #region 不断更新最新的新闻
-        /// <summary>
-        /// 不断更新最新的新闻
-        /// </summary>
-        public void SyncStockNews()
-        {
-            var tag = Convert.ToInt32(string.Format("{0:yyyyMMdd}", DateTime.Now));
-            var count = 0;
-            var startTime = DateTime.Now;
-            while (true)
-            {
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Saturday
-                    || DateTime.Now.DayOfWeek == DayOfWeek.Sunday
-                    || DateTime.Now.Hour < 9 || DateTime.Now.Hour > 15)
-                {
-                    this.GetNewsListCJYW(DateTime.Now.ToShortDateString());
-                    ///非交易时间
-                    if (DateTime.Now.Hour < 6 || DateTime.Now.Hour > 23) ///6点前,23点后
-                    {
-                        Thread.Sleep(new Random().Next(20 * 60 * 1000, 30 * 60 * 1000));///20-30分钟更新一次新闻         
-                    }
-                    else
-                    {
-                        Thread.Sleep(new Random().Next(5 * 60 * 1000, 10 * 60 * 1000));///5-10分钟更新一次新闻         
-                    }
-                }
-                else
-                {
-                    this.GetNewsListCJYW(DateTime.Now.ToShortDateString());///交易时间
-                    Thread.Sleep(new Random().Next(1 * 60 * 1000, 2 * 60 * 1000));///1-2分钟更新一次新闻     
-                }
-
-                Console.WriteLine("自动新闻更新 已运行时间 {0} 次数:{1}", DateTime.Now - startTime, ++count);
-            }
-        }
-        #endregion
 
 
         #region 计算分词结果
@@ -570,32 +539,30 @@ namespace WangJun.Stock
         /// </summary>
         /// <param name="content"></param>
         /// <param name="MD5"></param>
-        public void SaveFenCi(string content,string MD5)
+        public void SaveFenCi(string content,string url)
         {
             if(!string.IsNullOrWhiteSpace(content)&& !string.IsNullOrWhiteSpace(content))
             {
                 var res = FenCi.GetResult(content);
-                var db1 = DataStorage.GetInstance("170");
-                var db2 = DataStorage.GetInstance("aifuwu", "sqlserver");
-                var filter = "{\"MD5\":\""+MD5+"\"}";
-                db1.Delete(filter, "FenCi", "StockService");
-                var sql = "DELETE FROM FenCi WHERE MD5=@MD5";
+                var mongo = DataStorage.GetInstance(DBType.MongoDB);
+                var mssql = DataStorage.GetInstance(DBType.SQLServer);
+                var filter = "{\"Url\":\""+ url.Trim() + "\"}";
+                mongo.Delete(filter, "FenCi", "StockService");
+                var sql = "DELETE FROM FenCi WHERE Url=@Url";
                 var paramList = new List<KeyValuePair<string, object>>();
-                paramList.Add(new KeyValuePair<string, object> ("@MD5", MD5));
-                db2.Delete(sql, "FenCi", "StockService",exParam:paramList);
+                paramList.Add(new KeyValuePair<string, object> ("@Url", url));
+                mssql.Delete(sql, "", "",exParam:paramList);
                 foreach (var item in res)
                 {
                     var svItem = new {
-                        MD5=MD5,
+                        Url=url,
                         Word=item.Key,
                         Count=item.Value,
                         CreateTime=DateTime.Now
                     };
 
-                    db1.Save2("StockService", "FenCi", null, svItem);
-
-
-                    db2.Save2("StockService", "FenCi", null, svItem);
+                    mongo.Save2("StockService", "FenCi", null, svItem);
+                    mssql.Save2("", "FenCi", null, svItem);
                 }
             }
         }

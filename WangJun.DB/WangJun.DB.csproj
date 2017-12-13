@@ -59,6 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DBType.cs" />
+    <Compile Include="YunConfig.cs" />
     <Compile Include="DataStorage.cs" />
     <Compile Include="IAdmin.cs" />
     <Compile Include="IDB.cs" />
@@ -72,6 +74,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\WangJun.Debug\WangJun.Debug.csproj">
+      <Project>{0232ECA8-2266-4B23-A59F-66EC9308260A}</Project>
+      <Name>WangJun.Debug</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
+      <Project>{952A70F6-06A9-405A-A3E6-62B24C218DAF}</Project>
+      <Name>WangJun.Net</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
       <Project>{79474114-39e0-4fec-a040-f2e867ca82a7}</Project>
       <Name>WangJun.Tools</Name>

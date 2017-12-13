@@ -17,7 +17,7 @@ namespace WangJun.NodeRunner
         static void Main(string[] args)
         {
             #region 任务创建测试
-            //StockTaskCreator creator = StockTaskCreator.CreateInstance();
+            StockTaskCreator creator = StockTaskCreator.CreateInstance();
             //creator.CreateTaskUpdateStockCode();///更新股票代码
 
             //creator.CreateTaskDownloadPageSYGL();///下载首页概览页面
@@ -33,7 +33,7 @@ namespace WangJun.NodeRunner
             //creator.CreateTaskAnalyseDaDan();
             #endregion
 
-            //StockTaskExecutor exe = new StockTaskExecutor();
+            StockTaskExecutor exe = new StockTaskExecutor();
             //exe.UpdateData2D("5a19a9df487bdc2bf0e4ea71", "DataSource", "DataOfDaDan");
             //exe.UpdatePage("600521", "华海药业", "个股龙虎榜","");
             //exe.GetDataFromPageDaDan("59e87b23487bdc330458d069");
@@ -41,7 +41,8 @@ namespace WangJun.NodeRunner
             //exe.GetNewsListCJYW("2017/12/01");
             //exe.SyncStockNews();
 
-            //var analyser = StockAnalyser.GetInstance();
+            So360.GetHolidayArrangement();
+            var analyser = StockAnalyser.GetInstance();
             //analyser.AnalyseDaDan();
 
             //TaskRunner runner = new TaskRunner();
@@ -61,15 +62,6 @@ namespace WangJun.NodeRunner
             //DataStorage.MoveCollection("105", "WYGeQu", "ZhuanJi6", "{}", "170", "WYGeQu", "ZhuanJi", false);
             //DataStorage.MoveCollection("105", "WYGeQu", "GeQu6", "{}", "170", "WYGeQu", "GeQu", false);
             //DataStorage.MoveCollection("105", "Job51", "All2", "{}", "170", "Job51", "All", false);
-
-
-            #region 宿主进程
-            StockSynchronizer sync = StockSynchronizer.GetInstance();
-            //sync.SyncStockCode();
-            //sync.SyncStockNews();
-            sync.SyncCWZY();
-            #endregion
-
             Console.WriteLine("全部结束");
             Console.ReadKey();
         }

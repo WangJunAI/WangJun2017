@@ -106,7 +106,7 @@ namespace WangJun.Data
         /// <param name="rootPath"></param>
         public void TraverseFiles()
         {
-            LOGGER.Output("TraverseFiles遍历线程启动");
+            LOGGER.Log("TraverseFiles遍历线程启动");
             CollectionTools.AddToQueue(this.fileQueue,this.GetFiles(this.rootPath));///获取该目录下文件信息
             var rootSubFolders = this.GetSubFolder(this.rootPath);
             CollectionTools.AddToQueue<FolderFileInfo>(this.folderQueue, rootSubFolders);
@@ -119,7 +119,7 @@ namespace WangJun.Data
                     CollectionTools.AddToQueue(this.fileQueue, files);
                     var subFolders = this.GetSubFolder(folder.Path);
                     CollectionTools.AddToQueue<FolderFileInfo>(this.folderQueue, subFolders);
-                    LOGGER.Output(string.Format("TraverseFiles遍历线程 文件夹队列长度:{0}\t文件队列长度:{1}", this.FolderCount, this.FileCount));
+                    LOGGER.Log(string.Format("TraverseFiles遍历线程 文件夹队列长度:{0}\t文件队列长度:{1}", this.FolderCount, this.FileCount));
                 }
 
  
@@ -129,7 +129,7 @@ namespace WangJun.Data
                 }
  
             }
-            LOGGER.Output("TraverseFiles遍历线程结束");
+            LOGGER.Log("TraverseFiles遍历线程结束");
         }
         #endregion
 

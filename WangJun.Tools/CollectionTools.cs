@@ -66,5 +66,26 @@ namespace WangJun.Tools
             return target;
         }
         #endregion
+
+        #region 转换为队列
+        /// <summary>
+        /// 转换为队列
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static Queue<T> ToQueue<T>(IEnumerable<T> source)
+        {
+            var q = new Queue<T>();
+            if (null != source)
+            {
+                foreach (var item in source)
+                {
+                    q.Enqueue(item);
+                }
+            }
+            return q;
+        }
+        #endregion
     }
 }

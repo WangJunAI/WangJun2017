@@ -48,6 +48,7 @@ namespace WangJun.DB
                 SQLServer inst = new SQLServer();
                 inst.keyName = keyName;
                 inst.connectionString = SQLServer.regDict[keyName];
+                inst.UpdateSysObject(true);
                 return inst;
             }
             return null;

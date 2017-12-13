@@ -44,5 +44,11 @@
     <Compile Include="DocManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
+      <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
+      <Name>WangJun.DB</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

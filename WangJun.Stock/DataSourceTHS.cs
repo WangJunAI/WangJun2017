@@ -71,12 +71,12 @@ namespace WangJun.Stock
                         {
                             throw new Exception("数据重复");
                         }
-                        Console.WriteLine("正在添加 {0}\t{1}", stockCode, stockName);
+                        Console.WriteLine("正在添加 {0}\t{1} 当前第{2}页 共{3}页", stockCode, stockName, i + 1, pageCount);
 
                     }
                 }
                 #endregion
-                Thread.Sleep(new Random().Next( 1000, 3000));
+                Thread.Sleep(new Random().Next(1000, 3000));
             }
 
             return stockCodeDict;

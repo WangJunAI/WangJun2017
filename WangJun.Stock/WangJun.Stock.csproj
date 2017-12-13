@@ -49,6 +49,7 @@
     <Compile Include="StockSynchronizer.cs" />
     <Compile Include="StockTaskCreator.cs" />
     <Compile Include="StockTaskExecutor.cs" />
+    <Compile Include="WebDataSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WangJun.BizCore\WangJun.BizCore.csproj">
@@ -58,6 +59,14 @@
     <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
       <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
       <Name>WangJun.DB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WangJun.Debug\WangJun.Debug.csproj">
+      <Project>{0232ECA8-2266-4B23-A59F-66EC9308260A}</Project>
+      <Name>WangJun.Debug</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WangJun.NetLoader\WangJun.NetLoader.csproj">
+      <Project>{EE3A5A9F-20B3-4555-9A40-609C3641A7E0}</Project>
+      <Name>WangJun.NetLoader</Name>
     </ProjectReference>
     <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
       <Project>{952A70F6-06A9-405A-A3E6-62B24C218DAF}</Project>

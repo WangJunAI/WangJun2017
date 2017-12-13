@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WangJun.Data;
+using WangJun.Debug;
+using WangJun.Net;
 using WangJun.Tools;
 
 namespace WangJun.DB
@@ -20,6 +22,14 @@ namespace WangJun.DB
 
         public event EventHandler EventTraverse = null;
 
+        private static DateTime initialTime = DateTime.MinValue;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyName"></param>
+        /// <param name="dbType">mongo,sqlserver,mysql,redis</param>
+        /// <returns></returns>
         public static DataStorage GetInstance(string keyName="140",string dbType="mongo")
         {
             DataStorage.Register();
@@ -35,23 +45,61 @@ namespace WangJun.DB
             }
             return inst;
         }
+        
+        /// <summary>
+        /// 获取一个可操作性的实例
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="exData"></param>
+        /// <returns></returns>
+        public static DataStorage GetInstance(DBType dbType, object exData=null)
+        {
+            DataStorage.Register();
+            DataStorage inst = new DataStorage();
+            if (DBType.MongoDB == dbType)
+            {
+                inst.mongo = MongoDB.GetInst("mongodb");
+            }
+            else if (DBType.SQLServer == dbType)
+            {
+                inst.sqlserver = SQLServer.GetInstance("sqlserver");
+            }
+            return inst;
+        }
+
+        #region 数据库注册
         /// <summary>
         /// 数据注册
         /// </summary>
         public static void Register()
         {
-            MongoDB.Register("140", "mongodb://192.168.0.140:27017");
-            MongoDB.Register("170", "mongodb://192.168.0.170:27017");
-            MongoDB.Register("105", "mongodb://192.168.0.105:27017");
-            SQLServer.Register("140", @"Data Source=192.168.0.140\sql2016;Initial Catalog=StockData2D;Persist Security Info=True;User ID=sa;Password=111qqq!!!");
-            SQLServer.Register("aifuwu", @"Data Source=qds165298153.my3w.com;Initial Catalog=qds165298153_db;Persist Security Info=True;User ID=qds165298153;Password=75737573");
-            MySQL.Register("140", @"server=192.168.0.140;user=root;database=WJBigData;port=3306;password=111qqq!!!");
-
+            if (DateTime.MinValue == DataStorage.initialTime)
+            {
+                var configJson = new HTTP().GetGzip2(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.DB.YunConfig&m=Load&p={0}",YunConfig.CurrentGroupID), Encoding.UTF8);
+                if (!string.IsNullOrWhiteSpace(configJson))
+                {
+                    var configDict = Convertor.FromJsonToDict2(configJson); ///加载当前的配置信息
+                    foreach (var item in configDict)
+                    {
+                        if (item.Value.ToString().Contains("mongodb://"))
+                        {
+                            MongoDB.Register(item.Key, item.Value.ToString());
+                        }
+                        else if (item.Value.ToString().Contains("Data Source="))
+                        {
+                            SQLServer.Register(item.Key, item.Value.ToString());
+                        }
+                        else if (item.Value.ToString().Contains("server="))
+                        {
+                            MySQL.Register(item.Key, item.Value.ToString());
+                        }
+                    }
+                    DataStorage.initialTime = DateTime.Now;
+                    LOGGER.Log("数据库组件配置信息初始化完毕 初始化为 "+YunConfig.CurrentGroupID);
+                }
+            }
         }
-
-        #region
-
-        #endregion
+        #endregion  
 
         #region 存储一个数据，若数据存在，则更新
         /// <summary>

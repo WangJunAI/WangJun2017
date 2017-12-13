@@ -131,6 +131,7 @@ namespace WangJun.Stock
         }
         #endregion
 
+        #region 获取大单数据
         /// <summary>
         /// 获取大单数据
         /// </summary>
@@ -154,5 +155,30 @@ namespace WangJun.Stock
 
             return pageContent;
         }
+        #endregion
+
+        #region 获取财务摘要
+        /// <summary>
+        /// 获取财务摘要
+        /// http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/601888.phtml
+        /// </summary>
+        /// <param name="stockCode"></param>
+        public string GetCWZY(string stockCode)
+        {
+            var url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/{0}.phtml",stockCode);
+            var httpDownloader = new HTTP();
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+            headers.Add(HttpRequestHeader.Host, "money.finance.sina.com.cn");
+            headers.Add(HttpRequestHeader.Referer, string.Format("http://money.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/{0}/displaytype/4.phtml",stockCode));
+            headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0(Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36");
+
+            var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+            return strData;
+
+        }
+        #endregion
     }
 }

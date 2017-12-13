@@ -60,6 +60,7 @@ namespace WangJun.Net
         public HTTP()
         {
             this.http.Encoding = Encoding.UTF8;
+            
         }
         public HTTP(Encoding coder)
         {
@@ -321,6 +322,7 @@ namespace WangJun.Net
                 dict["Exception"] = e.Message;
                 dict["CreateTime"] = DateTime.Now;
                 EventProc.TriggerEvent(this.EventException, this, EventProcEventArgs.Create(dict));
+                Console.WriteLine("异常：{0}",e.Message);
             }
             return string.Empty;
         }
