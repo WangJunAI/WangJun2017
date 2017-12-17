@@ -15,7 +15,7 @@ namespace WangJun.Stock
         {
             get
             {
-                return @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
+                return @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll"; 
             }
         }
         /// <summary>
