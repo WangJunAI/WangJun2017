@@ -72,7 +72,7 @@ namespace WangJun.NodeRunner
             //sync.SyncStockNews();
             //sync.SyncCWZY();
             //sync.SyncSINADaDan();
-            sync.SyncKLineDay();
+            sync.SyncKLineDay();   
             #endregion
 
             Console.WriteLine("全部结束");
