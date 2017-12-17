@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using WangJun.BizCore;
+using WangJun.Data;
 using WangJun.DB;
 using WangJun.NetLoader;
 using WangJun.Stock;
@@ -61,13 +62,17 @@ namespace WangJun.NodeRunner
             //DataStorage.MoveCollection("105", "WYGeQu", "ZhuanJi6", "{}", "170", "WYGeQu", "ZhuanJi", false);
             //DataStorage.MoveCollection("105", "WYGeQu", "GeQu6", "{}", "170", "WYGeQu", "GeQu", false);
             //DataStorage.MoveCollection("105", "Job51", "All2", "{}", "170", "Job51", "All", false);
+            //$(trArray[10]).find("td").last().text().trim().replace("元","").replace(/,/g,"")
 
+            //Convertor.CalTradingDate(new DateTime(2017, 12, 15, 1, 23, 0), "15:00:00");
 
             #region 宿主进程
             StockSynchronizer sync = StockSynchronizer.GetInstance();
             //sync.SyncStockCode();
             //sync.SyncStockNews();
-            sync.SyncCWZY();
+            //sync.SyncCWZY();
+            //sync.SyncSINADaDan();
+            sync.SyncKLineDay();
             #endregion
 
             Console.WriteLine("全部结束");

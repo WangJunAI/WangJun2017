@@ -116,6 +116,16 @@ namespace WangJun.Data
                             value = Convertor.FromObjectToDictionary(value);
                             dict.Add(name, value);
                         }
+                        else if (null != value && (typeof(ArrayList) == value.GetType()))
+                        {
+                            var list = new List<object>();
+                            foreach (var arrayItem in (value as ArrayList))
+                            {
+                                var arrayItemValue = Convertor.FromObjectToDictionary(arrayItem);
+                                list.Add(arrayItemValue);
+                            }
+                            dict.Add(name, list);
+                        }
                         else if(null == value)
                         {
                             dict.Add(name, value);

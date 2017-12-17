@@ -62,6 +62,10 @@
       <Project>{af918729-03e8-443f-bd76-79bc604e286e}</Project>
       <Name>WangJun.DB</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WangJun.Debug\WangJun.Debug.csproj">
+      <Project>{0232ECA8-2266-4B23-A59F-66EC9308260A}</Project>
+      <Name>WangJun.Debug</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
       <Project>{952a70f6-06a9-405a-a3e6-62b24c218daf}</Project>
       <Name>WangJun.Net</Name>

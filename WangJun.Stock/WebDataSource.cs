@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,7 +48,7 @@ namespace WangJun.Stock
             if ("SINA" == source.ToUpper()&& !string.IsNullOrWhiteSpace(stockCode))//  //WebDataSource.GetDataFromHttpAgent("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceSINA&m=GetCWZY&p=6018888");//
             {
                 var html = DataSourceSINA.CreateInstance().GetCWZY(stockCode);
-                var resDict = NodeService.Get("http://localhost:8990", "新浪", "GetDataFromHtml", new { ContentType = "SINA财务摘要", Page=html });
+                var resDict = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA财务摘要", Page=html });
                 return resDict;
             }
 
@@ -55,6 +56,21 @@ namespace WangJun.Stock
         }
 
         #endregion
+
+        #region 获取SINA大单数据
+        public object GetSINADaDan()
+        {
+            return "";
+        }
+        #endregion
+
+        public Dictionary<string,object> GetSINAKLineDay(string stockCode, int year ,int jidu,string source = "SINA")
+        {
+            var html = DataSourceSINA.CreateInstance().GetLSJY(stockCode, year, jidu);
+            var res = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA历史交易", Page = html });// 
+            var resDict= res as Dictionary<string, object>;
+            return resDict["PageData"] as Dictionary<string, object>;
+        }
 
     }
 }

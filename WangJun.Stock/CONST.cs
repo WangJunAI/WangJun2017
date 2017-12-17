@@ -18,6 +18,16 @@ namespace WangJun.Stock
                 return @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll";
             }
         }
+        /// <summary>
+        /// Node服务Url
+        /// </summary>
+        public static string NodeServiceUrl
+        {
+            get
+            {
+                return "http://localhost:8990";
+            }
+        }
 
         /// <summary>
         /// 判断是否是交易日

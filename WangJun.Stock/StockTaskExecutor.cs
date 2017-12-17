@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ using WangJun.Data;
 using WangJun.DB;
 using WangJun.Debug;
 using WangJun.Net;
+using WangJun.NetLoader;
 using WangJun.Tools;
 
 namespace WangJun.Stock
@@ -126,25 +128,74 @@ namespace WangJun.Stock
         /// <summary>
         /// 下载大单数据
         /// </summary>
-        public void GetDaDanPage()
+        public void GetDaDanData()
         {
             ///获取页码码数
             ///下载每一页数据
-            var db = DataStorage.GetInstance("170");
+            ///查找最近一个交易日的数据是否存在,若存在则不下载
+            ///
+
+
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var webSource = DataSourceSINA.CreateInstance();
             var pageCount = webSource.GetDaDanPageCount();
-            for (int i = 1; i < pageCount; i++)
+            var dbName = "StockService";
+            var collectionName = "SINADaDan";
+            ///数据检查
+            var lastTradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00");
+            var checkFilter = "{\"ContentType\" :\"SINA大单\",\"TradingDate\":\"new Date('" + lastTradingDate + "')\"}";
+            var checkRes = mongo.Find(dbName, collectionName, checkFilter);
+
+            if (0 == checkRes.Count) ///若没有查找到数据 
             {
-                var html = webSource.GetDaDan(i);
-                var item = new {
-                    Page = html,
-                    ContentType = "SINA大单页面",
-                    CreateTime = DateTime.Now,
-                    MD5 = Convertor.Encode_MD5(html),
-                };
+                for (int i = 1; i < pageCount; i++)
+                {
+                    var html = webSource.GetDaDan(i);
 
-                db.Save(item, "PageDaDan", "PageSource");
+                    var res = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA大单", Page = html });
 
+                    if (res is Dictionary<string, object>)
+                    {
+                        var item = new
+                        {
+                            PageData = (res as Dictionary<string, object>)["PageData"],
+                            ContentType = "SINA大单",
+                            CreateTime = DateTime.Now,
+                            TradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00"),
+                            PageIndex = i,
+                            PageCount = pageCount,
+                        };
+
+                        mongo.Save(item, "SINADaDan", "StockService");
+                        LOGGER.Log(string.Format("SINA大单保存 {0} {1}", i, pageCount));
+
+                        var arrayList = item.PageData as ArrayList;
+                        ///数据二维化，计算可以计算的，剩下的再想办法计算
+                        for (int k = 0; k < arrayList.Count; k++)
+                        {
+                            var arrItem = arrayList[k] as Dictionary<string, object>;
+                            var item2D = new
+                            {
+                                StockCode = arrItem["StockCode"],
+                                StockName = arrItem["StockName"],
+                                TickTime = arrItem["交易时间"],
+                                Price = arrItem["成交价"],
+                                Turnover = arrItem["成交量"],
+                                PrevPrice = arrItem["之前价格"],
+                                Kind = arrItem["成交类型"],
+                                TradingTime = Convertor.CalTradingDate(item.TradingDate, arrItem["交易时间"].ToString()),
+                                CreateTime = item.CreateTime,
+                                PageIndex = i,
+                                PageCount = pageCount,
+                                RowIndex = k
+                            };
+                            mongo.Save(item2D, "SINADaDan2D", "StockService");
+                            LOGGER.Log(string.Format("SINA大单2D保存 {0} {1} {2}", i, k, pageCount));
+
+                        }
+                    }
+                    Thread.Sleep(new Random().Next(2000, 5000));
+                }
             }
         }
         #endregion
@@ -448,17 +499,10 @@ namespace WangJun.Stock
             var webSrc = DataSourceTHS.CreateInstance();
             var newNewsList = new List<object>();
             var listHtml = webSrc.GetNewsListCJYW(Convert.ToDateTime(dateTime));
-            var context = new
-            {
-                CMD = "同花顺",
-                Method = "GetDataFromHtml",
-                Args = new { ContentType= "THS财经要闻新闻列表" , Page=listHtml }
-            };
+ 
+            var resList = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻列表", Page = listHtml }) as Dictionary<string, object>;
 
-            var httpdownloader = new HTTP();
-            var resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
-            var resList = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
-            if (null == resList)
+            if (null != resList)
             {
                 resList.Remove("ContentType");
 
@@ -469,41 +513,36 @@ namespace WangJun.Stock
                     var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
                     if (!string.IsNullOrWhiteSpace(newsHtml))
                     {
-                        context = new
+          
+                        var resDetail = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }) as Dictionary<string,object>;
+                        if (null != resDetail)
                         {
-                            CMD = "同花顺",
-                            Method = "GetDataFromHtml",
-                            Args = new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }
-                        };
+                            var svItem = new
+                            {
+                                ContentType = "THS财经要闻",
+                                Title = resDetail["Title"].ToString().Trim(),
+                                Url = href,
+                                ParentUrl = parentUrl,
+                                SourceHref = resDetail["SourceHref"].ToString().Trim(),
+                                SourceName = resDetail["SourceName"].ToString().Trim(),
+                                NewsCreateTime = Convert.ToDateTime(resDetail["CreateTime"].ToString().Trim()),
+                                Content = resDetail["Content"].ToString().Trim(),
+                                Tag = Convert.ToInt32(formatDate.Replace("/", string.Empty)),
+                                CreateTime = DateTime.Now,
+                                PageMD5 = "无"
+                            };
+                            newNewsList.Add(svItem);
+                            LOGGER.Log(string.Format("获取一个新闻正文 {0}", svItem.Title));
+                            Thread.Sleep(new Random().Next(1000, 3000));
 
-                        resString = httpdownloader.Post("http://localhost:8990", Encoding.UTF8, Convertor.FromObjectToJson(context));
-                        var resDetail = (Convertor.FromJsonToDict2(resString)["RES"] as Dictionary<string, object>);
-
-                        var svItem = new
-                        {
-                            ContentType = "THS财经要闻",
-                            Title = resDetail["Title"].ToString().Trim(),
-                            Url = href,
-                            ParentUrl = parentUrl,
-                            SourceHref = resDetail["SourceHref"].ToString().Trim(),
-                            SourceName = resDetail["SourceName"].ToString().Trim(),
-                            NewsCreateTime = Convert.ToDateTime(resDetail["CreateTime"].ToString().Trim()),
-                            Content = resDetail["Content"].ToString().Trim(),
-                            Tag = Convert.ToInt32(formatDate.Replace("/", string.Empty)),
-                            CreateTime = DateTime.Now,
-                            PageMD5 = Convertor.Encode_MD5(resString)
-                        };
-                        newNewsList.Add(svItem);
-                        LOGGER.Log(string.Format("获取一个新闻正文 {0}", svItem.Title));
-                        Thread.Sleep(new Random().Next(1000, 3000));
-
-                        ///分词
-                        var task = Task.Factory.StartNew(() =>
-                        {
-                            var fcZStartTime = DateTime.Now;
-                            this.SaveFenCi(svItem.Content, svItem.Url);
-                            LOGGER.Log(string.Format("分词花费时间 开始时间：{0} 花费时间：{1}", fcZStartTime, DateTime.Now - fcZStartTime));
-                        });
+                            ///分词
+                            var task = Task.Factory.StartNew(() =>
+                            {
+                                var fcZStartTime = DateTime.Now;
+                                this.SaveFenCi(svItem.Content, svItem.Url);
+                                LOGGER.Log(string.Format("分词花费时间 开始时间：{0} 花费时间：{1}", fcZStartTime, DateTime.Now - fcZStartTime));
+                            });
+                        }
                     }
                 }
 
@@ -529,9 +568,6 @@ namespace WangJun.Stock
         }
         #endregion
  
-
-        
-
 
         #region 计算分词结果
         /// <summary>
@@ -562,7 +598,7 @@ namespace WangJun.Stock
                     };
 
                     mongo.Save2("StockService", "FenCi", null, svItem);
-                    mssql.Save2("", "FenCi", null, svItem);
+                    //mssql.Save2("", "FenCi", null, svItem);
                 }
             }
         }

@@ -49,6 +49,7 @@ namespace WangJun.Stock
         #region 历史成交明细 页数
         /// <summary>
         /// 历史成交明细 页数
+        /// http://market.finance.sina.com.cn/transHis.php?date=2017-10-13&symbol=sh600036
         /// </summary>
         public int GetLSCJMXCount(string stockcode, string date)
         {
@@ -75,6 +76,7 @@ namespace WangJun.Stock
         #region  历史成交明细
         /// <summary>
         /// 历史成交明细
+        /// http://vip.stock.finance.sina.com.cn/quotes_service/view/vMS_tradehistory.php?symbol=sh600036&date=2017-10-13
         /// </summary>
         /// <param name="stockcode">类似于 sz300668</param>
         /// <param name="date"></param>
@@ -109,7 +111,7 @@ namespace WangJun.Stock
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "*/*");
             headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
-            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
             headers.Add(HttpRequestHeader.ContentType, "application/x-www-form-urlencoded");
             headers.Add(HttpRequestHeader.Host, "vip.stock.finance.sina.com.cn");
             headers.Add(HttpRequestHeader.Referer, "http://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill_all.php");
@@ -138,20 +140,20 @@ namespace WangJun.Stock
         /// <param name="pageIndex"></param>
         /// <param name="volume"></param>
         /// <returns></returns>
-        public string GetDaDan(int pageIndex,int volume=100)
+        public string GetDaDan(object pageIndex)
         {
+            int volume = 100;
             var httpDownloader = new HTTP();
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "*/*");
             headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
-            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
             headers.Add(HttpRequestHeader.ContentType, "application/x-www-form-urlencoded");
             headers.Add(HttpRequestHeader.Host, "vip.stock.finance.sina.com.cn");
             headers.Add(HttpRequestHeader.Referer, "http://vip.stock.finance.sina.com.cn/quotes_service/view/cn_bill_all.php");
             headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
-
             var url = string.Format("http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_Bill.GetBillList?num=100&page={0}&sort=ticktime&asc=0&volume={1}&type=0", pageIndex, volume);
-             var pageContent = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+            var pageContent = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
 
             return pageContent;
         }
