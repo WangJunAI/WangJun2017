@@ -67,12 +67,28 @@ namespace WangJun.NodeRunner
             //Convertor.CalTradingDate(new DateTime(2017, 12, 15, 1, 23, 0), "15:00:00");
 
             #region 宿主进程
+            var json =Convertor.FromJsonToDict2( File.ReadAllText("config.js"));
+            var serviceName = json["ServiceName"].ToString();
             StockSynchronizer sync = StockSynchronizer.GetInstance();
+            var analysor = StockAnalyser.GetInstance();
             //sync.SyncStockCode();
-            //sync.SyncStockNews();
+            if("Test" == serviceName)
+            {
+                //var mongo = MongoDB.GetInst("mongodb");
+                //mongo.Distinct("StockService", "SINADaDan2D", "StockCode");
+                analysor.AnalyseDaDan();
+            }
+            else if ("SyncStockNews" == serviceName)
+            {
+                sync.SyncStockNews();
+            }
+            else if("SyncSINADaDan" == serviceName)
+            {
+                sync.SyncSINADaDan();
+            }
             //sync.SyncCWZY();
             //sync.SyncSINADaDan();
-            sync.SyncKLineDay();   
+            //sync.SyncKLineDay();   
             #endregion
 
             Console.WriteLine("全部结束");

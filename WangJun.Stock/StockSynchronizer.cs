@@ -92,7 +92,7 @@ namespace WangJun.Stock
                     else
                     {
                         exe.GetNewsListCJYW(DateTime.Now.ToShortDateString());///交易时间
-                        Thread.Sleep(new Random().Next(1 * 60 * 1000, 2 * 60 * 1000));///1-2分钟更新一次新闻     
+                        Thread.Sleep(new Random().Next(2 * 60 * 1000, 5 * 60 * 1000));///1-2分钟更新一次新闻     
                     }
 
                     Console.WriteLine("自动新闻更新 已运行时间 {0} 次数:{1}", DateTime.Now - startTime, ++count);

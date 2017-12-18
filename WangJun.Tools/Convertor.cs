@@ -126,7 +126,7 @@ namespace WangJun.Data
                             }
                             dict.Add(name, list);
                         }
-                        else if(null == value)
+                        else if(null != value)
                         {
                             dict.Add(name, value);
                         }

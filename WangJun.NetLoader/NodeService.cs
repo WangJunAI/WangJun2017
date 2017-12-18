@@ -37,9 +37,9 @@ namespace WangJun.NetLoader
             catch (Exception e)
             {
                 LOGGER.Log(string.Format("调用NodeService的时候,发生异常：{0} {1}",e.Message,DateTime.Now));
-                LOGGER.Log(string.Format("参数：", json));
+                LOGGER.Log(string.Format("参数：", args));
                 var db = DataStorage.GetInstance(DBType.MongoDB);
-                db.Save(new { Context = context, CreateTime = DateTime.Now,Message= e.Message },"Exception","StockService");
+                db.Save(new { Args = args, CreateTime = DateTime.Now,Message= e.Message },"Exception","StockService");
 
                 Thread.Sleep(new TimeSpan(1, 0, 0));
             }

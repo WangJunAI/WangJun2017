@@ -405,6 +405,30 @@ namespace WangJun.DB
             //return res;
         }
         #endregion
+        #region Distinct
+        /// <summary>
+        /// Distinct
+        /// </summary>
+        /// <param name="dbName"></param>
+        /// <param name="collectionName"></param>
+        /// <param name="filed"></param>
+        /// <returns></returns>
+        public List<object> Distinct(string dbName, string collectionName,string filed,string queryFilter)
+        {
+            var resList = new List<object>();
+            var db = this.client.GetDatabase(dbName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            FieldDefinition<BsonDocument> fd = filed;
+            FilterDefinition < BsonDocument > filter = queryFilter;
+            var res = collection.Distinct<object>(filed, filter);
+            res.MoveNext();
+            foreach (var item in res.Current)
+            {
+                resList.Add(item);
+            }
+            return resList;
+        }
+        #endregion
 
 
     }
