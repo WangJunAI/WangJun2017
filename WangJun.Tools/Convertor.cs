@@ -511,5 +511,27 @@ namespace WangJun.Data
             return id.ToString();
         }
 
+        public static int GetJidu(DateTime dateTime)
+        {
+            var month = dateTime.Month;
+            if(month<=3)
+            {
+                return 1;
+            }
+            else if ( 3<month && month<=6)
+            {
+                return 2;
+            }
+            else if (6 < month && month <=9)
+            {
+                return 3;
+            }
+            else if (9 < month && month <= 12)
+            {
+                return 4;
+            }
+            return -1;
+        }
+
     }
 }

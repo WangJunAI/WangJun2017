@@ -200,29 +200,29 @@ namespace WangJun.DB
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns></returns>
-        public List<Dictionary<string, object>> Find2(string dbName, string collectionName, string jsonString, string protection="{}", Dictionary<string, object> updateData=null, int pageIndex = 0, int pageSize = int.MaxValue)
+        public List<Dictionary<string, object>> Find2(string dbName, string collectionName, string query, string protection="{}", Dictionary<string, object> updateData=null, int pageIndex = 0, int pageSize = int.MaxValue)
         {
-            //List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
-            //var filterDict = Convertor.FromJsonToDict(jsonString);
+            List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
+            //var filterDict = Convertor.FromJsonToDict2(jsonString);
             //var filterBuilder = Builders<BsonDocument>.Filter;
             //var filter = this.FilterConvertor(jsonString);
-
-            //var db = this.client.GetDatabase(dbName);
-            //var collection = db.GetCollection<BsonDocument>(collectionName);
-            //var cursor = collection.FindOneAndUpdate(filter).,
-            //foreach (var document in cursor.ToEnumerable())
-            //{
-            //    if (null == this.EventTraverse)
-            //    {
-            //        res.Add(document.ToDictionary());
-            //    }
-            //    else
-            //    {
-            //        EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
-            //    }
-            //}
-            //return res;
-            return null;
+            FilterDefinition<BsonDocument> filter = query;
+            ProjectionDefinition<BsonDocument> protectionD = protection;
+            var db = this.client.GetDatabase(dbName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            var cursor = collection.Find(filter).Project(protectionD).Skip(pageIndex * pageSize).Limit(pageSize).ToCursor();
+            foreach (var document in cursor.ToEnumerable())
+            {
+                if (null == this.EventTraverse)
+                {
+                    res.Add(document.ToDictionary());
+                }
+                else
+                {
+                    EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
+                }
+            }
+            return res;
         }
         #endregion
 

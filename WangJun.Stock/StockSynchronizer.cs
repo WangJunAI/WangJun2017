@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WangJun.Data;
 using WangJun.DB;
 using WangJun.Debug;
 using WangJun.Tools;
@@ -186,63 +187,87 @@ namespace WangJun.Stock
             var collectionName = "SINAKLine";
             //while(true)
             //{
-                while(0<q.Count)
+            var year = DateTime.Now.Year;
+            var jidu = Convertor.GetJidu(DateTime.Now); ///获取当前季度数据
+
+            while (0 < q.Count)
+            {
+                var stockCode = q.Dequeue();
+                var stockName = this.stockCodeDict[stockCode];
+                var resDict = exe.GetSINAKLineDay(stockCode, year, jidu);
+                if (null != resDict && resDict.ContainsKey("Rows") && (resDict["Rows"] is ArrayList))
                 {
-                    var stockCode = q.Dequeue();
-                    var stockName = this.stockCodeDict[stockCode];
-                    var year = DateTime.Now.Year;
-                    var jidu = 4;
-                    var resDict = exe.GetSINAKLineDay(stockCode, year, jidu);
-                    if(null != resDict && resDict.ContainsKey("Rows") && (resDict["Rows"] is ArrayList))
+                    var svItem = new
                     {
-                        var svItem = new {
+                        StockCode = stockCode,
+                        StockName = this.stockCodeDict[stockCode],
+                        ContentType = "SINA历史交易",
+                        Year = year,
+                        Jidu = jidu,
+                        Rows = resDict["Rows"],
+                        CreateTime = DateTime.Now,
+                        UpdateTime=DateTime.Now
+                    };
+                    mongo.Save(svItem, collectionName, dbName);
+                    LOGGER.Log(string.Format("保存 {0} {1} SINA历史交易", stockCode, stockName));
+                    var rows = resDict["Rows"] as ArrayList;
+                    for (var k = 0; k < rows.Count; k++)
+                    {
+                        var row = rows[k] as Dictionary<string, object>;
+                        var prevClose = 0.0f;
+                        if (1 <= k)
+                        {
+                            prevClose = Convert.ToSingle((rows[k - 1] as Dictionary<string, object>)["收盘价"]);
+                        }
+                        var svItem2D = new
+                        {
                             StockCode = stockCode,
                             StockName = this.stockCodeDict[stockCode],
                             ContentType = "SINA历史交易",
-                            Year=year,
-                            Rows=resDict["Rows"],
-                            CreateTime=DateTime.Now
+                            Year = year,
+                            CreateTime = DateTime.Now,
+                            UpdateTime = DateTime.Now,
+                            TradingDate = Convert.ToDateTime(row["日期"]),
+                            Open = row["开盘价"],
+                            High = row["最高价"],
+                            Close = row["收盘价"],
+                            Low = row["最低价"],
+                            Volume = row["交易量(股)"],
+                            Turnover = row["交易金额(元)"],
+                            Amplitude = (k == 0) ? -1 : (Convert.ToSingle(row["最高价"]) - Convert.ToSingle(row["最低价"])) / prevClose, ///振幅
+                            Increase = (k == 0) ? -1 : ((Convert.ToSingle(row["收盘价"]) - prevClose) / prevClose),///涨幅
+                            AveragePrice = Convert.ToSingle(row["交易金额(元)"]) / Convert.ToSingle(row["交易量(股)"]),///成交均价
                         };
-                        mongo.Save(svItem, collectionName, dbName);
-                        LOGGER.Log(string.Format("保存 {0} {1} SINA历史交易",stockCode,stockName));
-                        var rows = resDict["Rows"] as ArrayList;
-                        for (var k=0;k<rows.Count;k++)
-                        {
-                            var row = rows[k] as Dictionary<string,object>;
-                            var prevClose = 0.0f;
-                            if(1<=k)
-                            {
-                                prevClose = Convert.ToSingle((rows[k - 1] as Dictionary<string, object>)["收盘价"]);
-                            }
-                            var svItem2D = new
-                            {
-                                StockCode = stockCode,
-                                StockName = this.stockCodeDict[stockCode],
-                                ContentType = "SINA历史交易",
-                                Year = year,
-                                CreateTime = DateTime.Now,
-                                TradingDate = Convert.ToDateTime(row["日期"]),
-                                Open = row["开盘价"],
-                                High = row["最高价"],
-                                Close = row["收盘价"],
-                                Low = row["最低价"],
-                                Volume = row["交易量(股)"],
-                                Turnover = row["交易金额(元)"],
-                                Amplitude=(k==0)?-1:(Convert.ToSingle(row["最高价"])- Convert.ToSingle(row["最低价"]))/prevClose, ///振幅
-                                Increase= (k == 0) ? -1 : ((Convert.ToSingle(row["收盘价"]) - prevClose) / prevClose),///涨幅
-                                AveragePrice= Convert.ToSingle(row["交易金额(元)"])/Convert.ToSingle(row["交易量(股)"]),///成交均价
-                            };
 
 
-                            mongo.Save(svItem2D, collectionName+"2D", dbName);
-                            LOGGER.Log(string.Format("保存 {0} {1} SINA历史交易2D", stockCode, stockName));
-                        }
-                         
+                        mongo.Save(svItem2D, collectionName + "2D", dbName);
+                        LOGGER.Log(string.Format("保存 {0} {1} SINA历史交易2D", stockCode, stockName));
                     }
 
-                    Thread.Sleep(new Random().Next(1000, 5000));
                 }
-                Thread.Sleep(new TimeSpan(24,0,0));
+
+                Thread.Sleep(new Random().Next(1000, 5000));
+
+                if (0 == q.Count && jidu == Convertor.GetJidu(DateTime.Now) && 1<jidu)//当年2,3,4季度 当季度
+                {
+                    jidu = jidu - 1;
+                    q = this.PrepareData();
+                }
+                else if (0 == q.Count && jidu == Convertor.GetJidu(DateTime.Now) && 1 == jidu)
+                {
+                    jidu = 4;///上一年第四季度
+                    year = year - 1;///上一年
+                    q = this.PrepareData();
+                }
+
+
+                #region 补充计算缺失
+
+                #endregion
+            }
+
+            LOGGER.Log("历史交易获取完毕 ,下一次将在24小时后开始");
+            Thread.Sleep(new TimeSpan(24,0,0));
             //}
         }
         #endregion
