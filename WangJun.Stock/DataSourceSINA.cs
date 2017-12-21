@@ -182,5 +182,52 @@ namespace WangJun.Stock
 
         }
         #endregion
+
+        #region 获取公司简介
+        /// <summary>
+        /// 获取公司简介
+        /// http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpInfo/stockid/600698.phtml
+        /// </summary>
+        /// <returns></returns>
+        public string GetGSJJ(string stockCode)
+        {
+            var url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpInfo/stockid/{0}.phtml", stockCode);
+            var httpDownloader = new HTTP();
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+            headers.Add(HttpRequestHeader.Host, "vip.stock.finance.sina.com.cn");
+            headers.Add(HttpRequestHeader.Referer, string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpOtherInfo/stockid/{0}/menu_num/2.phtml", stockCode));
+            headers.Add(HttpRequestHeader.UserAgent, CONST.UserAgent);
+
+            var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+            return strData;
+
+        }
+        #endregion
+
+        #region 获取板块概念
+        /// <summary>
+        /// 获取板块概念
+        /// </summary>
+        /// <param name="stockCode"></param>
+        /// <returns></returns>
+        public string GetBKGN(string stockCode)
+        {
+            var url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpOtherInfo/stockid/{0}/menu_num/5.phtml", stockCode);
+            var httpDownloader = new HTTP();
+            var headers = new Dictionary<HttpRequestHeader, string>();
+            headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+            headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+            headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+            headers.Add(HttpRequestHeader.Host, "vip.stock.finance.sina.com.cn");
+            headers.Add(HttpRequestHeader.Referer, string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpXiangGuan/stockid/{0}.phtml", stockCode));
+            headers.Add(HttpRequestHeader.UserAgent, CONST.UserAgent);
+
+            var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+            return strData;
+        }
+        #endregion
     }
 }

@@ -74,8 +74,8 @@ namespace WangJun.NodeRunner
             //sync.SyncStockCode();
             if("Test" == serviceName)
             {
-                var mongo = MongoDB.GetInst("mongodb");
-                var res = mongo.Find2("StockService", "SINADaDan2D", "{RowIndex:10}", "{Kind:0}");
+                //var mongo = MongoDB.GetInst("mongodb");
+                //var res = mongo.Find2("StockService", "SINADaDan2D", "{RowIndex:10}", "{Kind:0}");
                 //mongo.Distinct("StockService", "SINADaDan2D", "StockCode");
                 //analysor.AnalyseDaDan();
             }
@@ -90,6 +90,18 @@ namespace WangJun.NodeRunner
             else if ("SyncKLineDay" == serviceName)
             {
                 sync.SyncKLineDay();
+            }
+            else if("SyncGSJJ" == serviceName)
+            {
+                sync.SyncGSJJ();
+            }
+            else if("SyncBKGN" == serviceName)
+            {
+                sync.SyncBKGN();
+            }
+            else if("SyncZJLX" == serviceName)
+            {
+                sync.SyncZJLX();
             }
 
             //sync.SyncCWZY();

@@ -1,3 +1,3 @@
 ﻿{
-    "ServiceName":"Test"
+    "ServiceName":"SyncZJLX"
 }

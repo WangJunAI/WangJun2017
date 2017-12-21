@@ -92,7 +92,11 @@ namespace WangJun.Stock
 
         }
         #endregion
-        
+
+        #region 日线分析
+
+        #endregion
+
 
     }
 }

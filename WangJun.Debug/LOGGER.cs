@@ -25,10 +25,19 @@ namespace WangJun.Debug
             {
                 Console.WriteLine("{0}\t{1}\t{2}\t{3}", ++count, "异常", DateTime.Now, (message as Exception).Message);
                 Console.WriteLine("{0}\t{1}\t{2}\t{3}", ++count, "异常", DateTime.Now, (message as Exception).StackTrace);
+
             }
             else
             {
                 Console.WriteLine("类型异常,无法打印.{0}", message);
+            }
+        }
+
+        public static void Beep()
+        {
+            for (int k = 0; k < 10 * 1000; k++)
+            {
+                Console.Beep(new Random().Next(5000, 20000), 1 * 1000);
             }
         }
          

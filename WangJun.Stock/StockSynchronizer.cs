@@ -168,7 +168,7 @@ namespace WangJun.Stock
             while (true)
             {
                 exe.GetDaDanData();
-                Thread.Sleep(24 * 60 * 60 * 1000);
+                Thread.Sleep(new TimeSpan(24,0,0));
             }
             
         }
@@ -269,6 +269,153 @@ namespace WangJun.Stock
             LOGGER.Log("历史交易获取完毕 ,下一次将在24小时后开始");
             Thread.Sleep(new TimeSpan(24,0,0));
             //}
+        }
+        #endregion
+
+        #region SINA 公司简介
+        /// <summary>
+        /// SINA 公司简介
+        /// </summary>
+        public void SyncGSJJ()
+        {
+            var startTime = DateTime.Now;///开始运行时间
+            Console.Title = "SINA公司简介 更新进程 启动时间：" + startTime;
+
+            var exe = StockTaskExecutor.CreateInstance();
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            //var mssql = DataStorage.GetInstance(DBType.SQLServer);
+            while (true)
+            {
+                ///获取所有股票代码,遍历更新数据
+                var q = this.PrepareData();
+                while (0 < q.Count)
+                {
+                    var stockCode = q.Dequeue();
+                    var resObj = WebDataSource.GetInstance().GetGSJJ(stockCode);
+                    var resDict = (resObj is Dictionary<string, object>) ? (resObj as Dictionary<string, object>)["PageData"] : new Dictionary<string, object>();
+                    ///保存到数据库中 二维化
+                    var svItem = new
+                    {
+                        StockCode = stockCode,
+                        StockName = this.stockCodeDict[stockCode],
+                        Url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpInfo/stockid/{0}.phtml", stockCode),
+                        CreateTime = DateTime.Now,
+                        PageData = resDict
+                    };
+
+                    ///删除旧数据
+                    var filter = "{\"ContentType\":\"SINA公司简介\",\"StockCode\":\"" + stockCode + "\"}";
+                    mongo.Delete(filter, "SINAGSJJ", "StockService");
+                    ///添加新数据
+                    LOGGER.Log(string.Format("更新{0} {1}的公司简介 ", stockCode, svItem.StockName));
+                    mongo.Save2("StockService", "SINAGSJJ", filter, svItem);
+                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
+                    //Console.ReadKey();
+                    ///二维化
+                    ///同步到SQL数据库中
+                }
+                Thread.Sleep(24 * 60 * 60 * 1000);
+                q = this.PrepareData();
+            }
+
+        }
+        #endregion
+
+        #region SINA 板块概念
+        /// <summary>
+        /// SINA 板块概念
+        /// </summary>
+        public void SyncBKGN()
+        {
+            var startTime = DateTime.Now;///开始运行时间
+            Console.Title = "SINA板块概念 更新进程 启动时间：" + startTime;
+
+            var exe = StockTaskExecutor.CreateInstance();
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            //var mssql = DataStorage.GetInstance(DBType.SQLServer);
+            while (true)
+            {
+                ///获取所有股票代码,遍历更新数据
+                var q = this.PrepareData();
+                while (0 < q.Count)
+                {
+                    var stockCode = q.Dequeue();
+                    var resObj = WebDataSource.GetInstance().GetBKGN(stockCode);
+                    var resDict = (resObj is Dictionary<string, object>) ? (resObj as Dictionary<string, object>)["PageData"] : new Dictionary<string, object>();
+                    ///保存到数据库中 二维化
+                    var svItem = new
+                    {
+                        StockCode = stockCode,
+                        StockName = this.stockCodeDict[stockCode],
+                        Url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpOtherInfo/stockid/{0}/menu_num/5.phtml", stockCode),
+                        CreateTime = DateTime.Now,
+                        PageData = resDict
+                    };
+
+                    ///删除旧数据
+                    var filter = "{\"ContentType\":\"SINA板块概念\",\"StockCode\":\"" + stockCode + "\"}";
+                    mongo.Delete(filter, "SINAGSJJ", "StockService");
+                    ///添加新数据
+                    LOGGER.Log(string.Format("更新{0} {1}的板块概念 ", stockCode, svItem.StockName));
+                    mongo.Save2("StockService", "SINABKGN", filter, svItem);
+                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
+                    //Console.ReadKey();
+                    ///二维化
+                    ///同步到SQL数据库中
+                }
+                Thread.Sleep(24 * 60 * 60 * 1000);
+                q = this.PrepareData();
+            }
+
+        }
+        #endregion
+
+        #region THS资金流向
+        /// <summary>
+        /// THS资金流向
+        /// </summary>
+        public void SyncZJLX()
+        {
+            var startTime = DateTime.Now;///开始运行时间
+            Console.Title = "THS资金流向 更新进程 启动时间：" + startTime;
+
+            var exe = StockTaskExecutor.CreateInstance();
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            //var mssql = DataStorage.GetInstance(DBType.SQLServer);
+            while (true)
+            {
+                ///获取所有股票代码,遍历更新数据
+                var q = this.PrepareData();
+                while (0 < q.Count)
+                {
+                    var stockCode = q.Dequeue();
+                    var resObj = WebDataSource.GetInstance().GetZJLX(stockCode);
+                    var resDict = (resObj is Dictionary<string, object>) ? (resObj as Dictionary<string, object>)["PageData"] : new Dictionary<string, object>();
+                    ///保存到数据库中 二维化
+                    var svItem = new
+                    {
+                        StockCode = stockCode,
+                        StockName = this.stockCodeDict[stockCode],
+                        Url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpOtherInfo/stockid/{0}/menu_num/5.phtml", stockCode),
+                        CreateTime = DateTime.Now,
+                        PageData = resDict
+                    };
+
+                    ///删除旧数据
+                    var filter = "{\"ContentType\":\"THS资金流向\",\"StockCode\":\"" + stockCode + "\"}";
+                    mongo.Delete(filter, "SINAZJLX", "StockService");
+                    ///添加新数据
+                    LOGGER.Log(string.Format("更新{0} {1}的板块概念 ", stockCode, svItem.StockName));
+                    mongo.Save2("StockService", "SINAZJLX", filter, svItem);
+                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
+                    //Console.ReadKey();
+                    ///二维化
+                    ///同步到SQL数据库中
+                }
+                Thread.Sleep(24 * 60 * 60 * 1000);
+                q = this.PrepareData();
+            }
+
         }
         #endregion
 
