@@ -75,14 +75,14 @@ namespace WangJun.Stock
                 }
             };
 
-            mongo.Traverse(dbName, collectionName, "{\"TradingDate\":\"new Date('2017-12-18 00:00:00.000')\"}");
+            mongo.Traverse(dbName, collectionName, "{\"TradingDate\":new Date('2017/12/18')}");
 
             ///保存结果
             ///
             var total =Convert.ToSingle( temp1 + temp2 + temp3 + temp4);
             var res = new { ContentType = "大单行为分析"
-                , 交易日期 = string.Format("{0:yyyyMMdd}",DateTime.Now)
-                ,成交额100万以下 = temp1/total
+                , 交易日期 = "2017/12/18",
+                成交额100万以下 = temp1/total
                 , 成交额100万到500万 = temp2/total
                 , 成交额500万到1000万 = temp3 / total
                 , 成交额1000万以上 = temp4 / total

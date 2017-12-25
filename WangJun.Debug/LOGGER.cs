@@ -37,7 +37,7 @@ namespace WangJun.Debug
         {
             for (int k = 0; k < 10 * 1000; k++)
             {
-                Console.Beep(new Random().Next(5000, 20000), 1 * 1000);
+                Console.Beep(new Random().Next(5000, 15000), 1 * 1000);
             }
         }
          

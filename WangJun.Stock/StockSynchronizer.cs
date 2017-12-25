@@ -69,7 +69,7 @@ namespace WangJun.Stock
             Console.Title = "同花顺财经要闻 更新进程 启动时间：" + startTime;
 
             var exe = StockTaskExecutor.CreateInstance();
-            var tag = Convert.ToInt32(string.Format("{0:yyyyMMdd}", DateTime.Now));
+            var tag = Convert.ToInt32(string.Format("{0:yyyyMMdd}", DateTime.Now));///时间标记
             var count = 0;
             while (true)
             {
@@ -83,25 +83,28 @@ namespace WangJun.Stock
                         ///非交易时间
                         if (DateTime.Now.Hour < 6 || DateTime.Now.Hour > 23) ///6点前,23点后
                         {
-                            Thread.Sleep(new Random().Next(20 * 60 * 1000, 30 * 60 * 1000));///20-30分钟更新一次新闻         
+                            ThreadManager.Pause(hours: 1); ///凌晨一小时更新一次   
                         }
                         else
                         {
-                            Thread.Sleep(new Random().Next(5 * 60 * 1000, 10 * 60 * 1000));///5-10分钟更新一次新闻         
+                            ThreadManager.Pause(minutes: 10); ///10分钟更新一次新闻         
                         }
                     }
                     else
                     {
                         exe.GetNewsListCJYW(DateTime.Now.ToShortDateString());///交易时间
-                        Thread.Sleep(new Random().Next(2 * 60 * 1000, 5 * 60 * 1000));///1-2分钟更新一次新闻     
+                        ThreadManager.Pause(minutes: 3); ///3分钟更新一次新闻         
                     }
 
-                    Console.WriteLine("自动新闻更新 已运行时间 {0} 次数:{1}", DateTime.Now - startTime, ++count);
+                    LOGGER.Log(string.Format("自动新闻更新 已运行时间 {0} 次数:{1}", DateTime.Now - startTime, ++count));
                 }
                 catch(Exception e)
-                {
-                    Console.WriteLine("异常：{0}",e.Message);
-                    Console.WriteLine("位置：{0}",e.StackTrace);
+                { 
+                    LOGGER.Log(string.Format("异常：{0}",e.Message));
+                    LOGGER.Log(string.Format("位置：{0}", e.StackTrace));
+                    LOGGER.Beep();
+                    ThreadManager.Pause(minutes: 1); ///停一分钟        
+
                 }
 
             }
@@ -390,26 +393,57 @@ namespace WangJun.Stock
                 {
                     var stockCode = q.Dequeue();
                     var resObj = WebDataSource.GetInstance().GetZJLX(stockCode);
-                    var resDict = (resObj is Dictionary<string, object>) ? (resObj as Dictionary<string, object>)["PageData"] : new Dictionary<string, object>();
+                    var resList = (resObj is Dictionary<string, object>) ? (resObj as Dictionary<string, object>)["PageData"] : new ArrayList();
+                    var stockName = this.stockCodeDict[stockCode];
                     ///保存到数据库中 二维化
                     var svItem = new
                     {
                         StockCode = stockCode,
-                        StockName = this.stockCodeDict[stockCode],
-                        Url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpOtherInfo/stockid/{0}/menu_num/5.phtml", stockCode),
+                        StockName = stockName,
+                        Url = string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", stockCode),
                         CreateTime = DateTime.Now,
-                        PageData = resDict
+                        PageData = resList
                     };
 
                     ///删除旧数据
                     var filter = "{\"ContentType\":\"THS资金流向\",\"StockCode\":\"" + stockCode + "\"}";
                     mongo.Delete(filter, "SINAZJLX", "StockService");
                     ///添加新数据
-                    LOGGER.Log(string.Format("更新{0} {1}的板块概念 ", stockCode, svItem.StockName));
+                    LOGGER.Log(string.Format("更新{0} {1}THS资金流向 ", stockCode, svItem.StockName));
                     mongo.Save2("StockService", "SINAZJLX", filter, svItem);
-                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
                     //Console.ReadKey();
                     ///二维化
+                     if(resList is ArrayList)
+                    {
+                        var rows = (resList as ArrayList);
+                        foreach (Dictionary<string,object> row in rows)
+                        {
+                            var svItem2D = new
+                            {
+                                StockCode = stockCode,
+                                StockName = stockName,
+                                Url = string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", stockCode),
+                                CreateTime = DateTime.Now,
+                                TradingDate = row["日期"],
+                                Close = row["收盘价"],
+                                Increase = row["涨跌幅"],
+                                NetInflow = row["资金净流入"],
+                                NetLarge5Day = row["5日主力净额"],
+                                NetLarge = row["大单(主力)净额"],
+                                NetLargeProportion = row["大单(主力)净占比"],
+                                NetMedium = row["中单净额"],
+                                NetMediumProportion = row["中单净占比"],
+                                NetSmall = row["小单净额"],
+                                NetSmallProportion = row["小单净占比"],
+                            };
+
+                            mongo.Save2("StockService", "SINAZJLX"+"2D", filter, svItem2D);
+
+                        }
+                    }
+
+                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
+
                     ///同步到SQL数据库中
                 }
                 Thread.Sleep(24 * 60 * 60 * 1000);

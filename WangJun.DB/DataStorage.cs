@@ -191,13 +191,13 @@ namespace WangJun.DB
         /// <param name="dbName"></param>
         /// <param name="tableName"></param>
         /// <param name="jsonString"></param>
-        public void Traverse(string dbName, string tableName, string jsonString)
+        public void Traverse(string dbName, string tableName, string query)
         {
             var pageSize = 1000;
             var index = 0;
             var startTime = DateTime.Now;
             var prevTime = startTime;
-            var list = mongo.Find(dbName, tableName, jsonString, ++index, pageSize);
+            var list = mongo.Find2(dbName, tableName, query,"{}", ++index, pageSize);
             var hasData = (0 < list.Count) ? true : false;
             
             var queue = new Queue<List<Dictionary<string, object>>>();
@@ -216,7 +216,7 @@ namespace WangJun.DB
                 var task = Task.Factory.StartNew <object>(() => {
                     prevTime=DateTime.Now;
                     Console.WriteLine(" 准备查找第{0}页数据 页面大小:{1} 上次耗时:{2}",index,pageSize,cost);
-                    var resList = mongo.Find(dbName, tableName, jsonString, ++index, pageSize);
+                    var resList = mongo.Find2(dbName, tableName, query,"{}", ++index, pageSize);
                     return resList;
                 });
 

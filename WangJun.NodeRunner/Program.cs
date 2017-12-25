@@ -74,10 +74,11 @@ namespace WangJun.NodeRunner
             //sync.SyncStockCode();
             if("Test" == serviceName)
             {
-                //var mongo = MongoDB.GetInst("mongodb");
-                //var res = mongo.Find2("StockService", "SINADaDan2D", "{RowIndex:10}", "{Kind:0}");
+                var mongo = MongoDB.GetInst("mongodb");
+                var filter = ""; 
+                //var res = mongo.Find2("StockService", "SINADaDan2D","{\"TradingDate\":new Date(\"2017/12/18\")}", "{}");
                 //mongo.Distinct("StockService", "SINADaDan2D", "StockCode");
-                //analysor.AnalyseDaDan();
+                analysor.AnalyseDaDan();
             }
             else if ("SyncStockNews" == serviceName)
             {

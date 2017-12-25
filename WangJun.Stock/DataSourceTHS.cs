@@ -149,7 +149,10 @@ namespace WangJun.Stock
             headers.Add(HttpRequestHeader.Referer, "http://news.10jqka.com.cn/today_list/");
             headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
             var html = httpdownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+            if(string.IsNullOrWhiteSpace(html))
+            {
 
+            }
             return html;
         }
         #endregion

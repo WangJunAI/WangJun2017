@@ -160,5 +160,19 @@ namespace WangJun.Data
             return res;
         }
         #endregion
+
+        #region 是否是日期
+        /// <summary>
+        /// 是否是日期
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static bool IsDateTime(string input)
+        {
+            var val = DateTime.MinValue;
+            var res = DateTime.TryParse(input, out val);
+            return res;
+        }
+        #endregion
     }
 }

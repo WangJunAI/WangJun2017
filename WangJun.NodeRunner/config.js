@@ -1,3 +1,3 @@
 ﻿{
-    "ServiceName":"SyncZJLX"
+    "ServiceName":"SyncStockNews"
 }

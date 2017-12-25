@@ -83,6 +83,7 @@ namespace WangJun.Stock
             return res;
         }
         #endregion
+
         #region 获取SINA大单数据
         public object GetSINADaDan()
         {
@@ -160,6 +161,10 @@ namespace WangJun.Stock
 
             return res;
         }
+        #endregion
+        
+        #region 获取THS新闻
+
         #endregion
     }
 }

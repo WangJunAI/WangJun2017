@@ -200,7 +200,7 @@ namespace WangJun.DB
         /// </summary>
         /// <param name="filter">过滤器</param>
         /// <returns></returns>
-        public List<Dictionary<string, object>> Find2(string dbName, string collectionName, string query, string protection="{}", Dictionary<string, object> updateData=null, int pageIndex = 0, int pageSize = int.MaxValue)
+        public List<Dictionary<string, object>> Find2(string dbName, string collectionName, string query, string protection="{}", int pageIndex = 0, int pageSize = int.MaxValue, Dictionary<string, object> updateData=null)
         {
             List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
             //var filterDict = Convertor.FromJsonToDict2(jsonString);

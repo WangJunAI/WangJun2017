@@ -36,7 +36,7 @@ namespace WangJun.Stock
          public static bool IsTradingDay()
         {
             var res = false;
-            if(DateTime.Now.DayOfWeek == DayOfWeek.Saturday|| DateTime.Now.DayOfWeek == DayOfWeek.Saturday)
+            if(DateTime.Now.DayOfWeek == DayOfWeek.Saturday|| DateTime.Now.DayOfWeek == DayOfWeek.Saturday) ///周六,周日非交易日
             {
                 return false;
             }
@@ -69,8 +69,9 @@ namespace WangJun.Stock
         /// <param name="updateCost"></param>
         /// <returns></returns>
         public static bool IsSafeUpdateTime(int updateCost)
-        {
+        {//非交易日 或交易日前1小时 或交易时间结束
             return true;
+
         }
 
         public static string UserAgent

@@ -495,82 +495,89 @@ namespace WangJun.Stock
         /// </summary>
         public void GetNewsListCJYW(string dateTime)
         {
-            var formatDate = string.Format("{0:yyyyMMdd}", Convert.ToDateTime(dateTime));
-            var mongo = DataStorage.GetInstance(DBType.MongoDB);
-            var webSrc = DataSourceTHS.CreateInstance();
-            var newNewsList = new List<object>();
-            var listHtml = webSrc.GetNewsListCJYW(Convert.ToDateTime(dateTime));
-            if (!string.IsNullOrWhiteSpace(listHtml))
+            if (StringChecker.IsDateTime(dateTime))
             {
-                var resList = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻列表", Page = listHtml }) as Dictionary<string, object>;
-
-                if (null != resList)
+                var formatDate = string.Format("{0:yyyyMMdd}", Convert.ToDateTime(dateTime));
+                var mongo = DataStorage.GetInstance(DBType.MongoDB);
+                var webSrc = DataSourceTHS.CreateInstance();
+                var newNewsList = new List<object>();
+                var listHtml = webSrc.GetNewsListCJYW(Convert.ToDateTime(dateTime));
+                if (!string.IsNullOrWhiteSpace(listHtml))
                 {
-                    resList.Remove("ContentType");
-
-                    foreach (var listItem in resList)
+                    var resDict = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻列表", Page = listHtml }) as Dictionary<string, object>;
+                    var resList = resDict["PageData"] as ArrayList;
+                    if (null != resList)
                     {
-                        var href = (listItem.Value as Dictionary<string, object>)["Href"].ToString().Trim();
-                        var parentUrl = string.Format("http://news.10jqka.com.cn/today_list/{0}/", formatDate).Trim();
-                        var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
-                        if (!string.IsNullOrWhiteSpace(newsHtml))
+                        foreach (Dictionary<string, object> listItem in resList)
                         {
-
-                            var resDetail = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }) as Dictionary<string, object>;
-                            if (null != resDetail)
+                            var href = listItem["Href"].ToString().Trim();
+                            var parentUrl = string.Format("http://news.10jqka.com.cn/today_list/{0}/", formatDate).Trim();
+                            var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
+                            if (!string.IsNullOrWhiteSpace(newsHtml))
                             {
-                                var svItem = new
-                                {
-                                    ContentType = "THS财经要闻",
-                                    Title = resDetail["Title"].ToString().Trim(),
-                                    Url = href,
-                                    ParentUrl = parentUrl,
-                                    SourceHref = resDetail["SourceHref"].ToString().Trim(),
-                                    SourceName = resDetail["SourceName"].ToString().Trim(),
-                                    NewsCreateTime = Convert.ToDateTime(resDetail["CreateTime"].ToString().Trim()),
-                                    Content = resDetail["Content"].ToString().Trim(),
-                                    Tag = Convert.ToInt32(formatDate.Replace("/", string.Empty)),
-                                    CreateTime = DateTime.Now,
-                                    PageMD5 = "无"
-                                };
-                                newNewsList.Add(svItem);
-                                LOGGER.Log(string.Format("获取一个新闻正文 {0}", svItem.Title));
-                                Thread.Sleep(new Random().Next(1000, 3000));
 
-                                ///分词
-                                var task = Task.Factory.StartNew(() =>
+                                var resItem = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }) as Dictionary<string, object>;
+                                var resDetail = resItem["PageData"] as Dictionary<string, object>;
+                                if (null != resDetail)
                                 {
-                                    var fcZStartTime = DateTime.Now;
-                                    this.SaveFenCi(svItem.Content, svItem.Url);
-                                    LOGGER.Log(string.Format("分词花费时间 开始时间：{0} 花费时间：{1}", fcZStartTime, DateTime.Now - fcZStartTime));
-                                });
+                                    var newsCreateTimeString = resDetail["CreateTime"].ToString().Trim();
+                                    var svItem = new
+                                    {
+                                        ContentType = "THS财经要闻",
+                                        Title = resDetail["Title"].ToString().Trim(),
+                                        Url = href,
+                                        ParentUrl = parentUrl,
+                                        SourceHref = resDetail["SourceHref"].ToString().Trim(),
+                                        SourceName = resDetail["SourceName"].ToString().Trim(),
+                                        NewsCreateTime = (StringChecker.IsDateTime(newsCreateTimeString))?Convert.ToDateTime(newsCreateTimeString):DateTime.MinValue,
+                                        Content = resDetail["Content"].ToString().Trim(),
+                                        Tag = Convert.ToInt32(formatDate),
+                                        CreateTime = DateTime.Now,
+                                        PageMD5 = "无"
+                                    };
+                                    newNewsList.Add(svItem);
+                                    LOGGER.Log(string.Format("获取一个新闻正文 {0}", svItem.Title));
+                                    ThreadManager.Pause(seconds: 5); ///5秒钟更新一次新闻         
+
+
+                                    ///分词
+                                    var task = Task.Factory.StartNew(() =>
+                                    {
+                                        var fcZStartTime = DateTime.Now;
+                                        this.SaveFenCi(svItem.Content, svItem.Url);
+                                        LOGGER.Log(string.Format("分词花费时间 开始时间：{0} 花费时间：{1}", fcZStartTime, DateTime.Now - fcZStartTime));
+                                    });
+                                }
                             }
                         }
+
+                        ///删除旧
+                        var deleteFilter = "{\"Tag\":" + Convert.ToInt32(formatDate.Replace("/", string.Empty)) + "}";
+                        mongo.Delete(deleteFilter, "News", "StockService");///删除旧数据
+                        //#region 同步到服务器上
+                        //var sql = "DELETE FROM News WHERE Tag=@Tag";
+                        //var paramList = new List<KeyValuePair<string, object>>();
+                        //paramList.Add(new KeyValuePair<string, object>("@Tag", Convert.ToInt32(formatDate.Replace("/", string.Empty))));
+                        //var mssql = DataStorage.GetInstance(DBType.SQLServer);
+                        //mssql.Delete(sql, "News", "StockService", exParam: paramList);
+                        //#endregion
+                        var index = 0;
+                        foreach (var svItem in newNewsList)
+                        {
+                            mongo.Save2("StockService", "News", null, svItem);
+                            //mssql.Save2("StockService", "News", null, svItem);//数据库太小不存
+                        }
                     }
-
-                    ///删除旧
-                    var deleteFilter = "{\"Tag\":" + Convert.ToInt32(formatDate.Replace("/", string.Empty)) + "}";
-                    mongo.Delete(deleteFilter, "News", "StockService");///删除旧数据
-
-
-                    #region 同步到服务器上
-                    var sql = "DELETE FROM News WHERE Tag=@Tag";
-                    var paramList = new List<KeyValuePair<string, object>>();
-                    paramList.Add(new KeyValuePair<string, object>("@Tag", Convert.ToInt32(formatDate.Replace("/", string.Empty))));
-                    var mssql = DataStorage.GetInstance(DBType.SQLServer);
-                    mssql.Delete(sql, "News", "StockService", exParam: paramList);
-                    #endregion
-                    var index = 0;
-                    foreach (var svItem in newNewsList)
-                    {
-                        mongo.Save2("StockService", "News", null, svItem);
-                        //mssql.Save2("StockService", "News", null, svItem);//数据库太小不存
-                    }
+                }
+                else
+                {
+                    LOGGER.Log(string.Format("获取的新闻列表为空白"));
+                    Thread.Sleep(new TimeSpan(0, 5, 0));
                 }
             }
             else
             {
-                LOGGER.Log(string.Format("获取的新闻列表为空白"));
+                LOGGER.Log(string.Format("传入的时间字符串不对:{0}", dateTime));
                 Thread.Sleep(new TimeSpan(0, 5, 0));
             }
         }

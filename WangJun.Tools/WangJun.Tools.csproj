@@ -73,6 +73,7 @@
     <Compile Include="FenCi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringChecker.cs" />
+    <Compile Include="ThreadManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
