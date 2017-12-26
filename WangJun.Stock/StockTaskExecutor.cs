@@ -139,8 +139,8 @@ namespace WangJun.Stock
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var webSource = DataSourceSINA.CreateInstance();
             var pageCount = webSource.GetDaDanPageCount();
-            var dbName = "StockService";
-            var collectionName = "SINADaDan";
+            var dbName =CONST.DB.DBName_StockService;
+            var collectionName = "SINADaDan2D";
             ///数据检查
             var lastTradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00");
             var checkFilter = "{\"ContentType\" :\"SINA大单\",\"TradingDate\":\"new Date('" + lastTradingDate + "')\"}";
@@ -166,7 +166,7 @@ namespace WangJun.Stock
                             PageCount = pageCount,
                         };
 
-                        mongo.Save(item, "SINADaDan", "StockService");
+                        //mongo.Save(item, "SINADaDan", "StockService");
                         LOGGER.Log(string.Format("SINA大单保存 {0} {1}", i, pageCount));
 
                         var arrayList = item.PageData as ArrayList;
@@ -190,6 +190,9 @@ namespace WangJun.Stock
                                 PageCount = pageCount,
                                 RowIndex = k
                             };
+
+
+                             
                             mongo.Save(item2D, "SINADaDan2D", "StockService");
                             LOGGER.Log(string.Format("SINA大单2D保存 {0} {1} {2}", i, k, pageCount));
 
@@ -500,8 +503,11 @@ namespace WangJun.Stock
                 var formatDate = string.Format("{0:yyyyMMdd}", Convert.ToDateTime(dateTime));
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
                 var webSrc = DataSourceTHS.CreateInstance();
-                var newNewsList = new List<object>();
+                var newNewsList = new Dictionary<string,object>();
                 var listHtml = webSrc.GetNewsListCJYW(Convert.ToDateTime(dateTime));
+                var dbName = CONST.DB.DBName_StockService;
+                var collectionNews = CONST.DB.CollectionName_News;
+
                 if (!string.IsNullOrWhiteSpace(listHtml))
                 {
                     var resDict = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻列表", Page = listHtml }) as Dictionary<string, object>;
@@ -515,7 +521,7 @@ namespace WangJun.Stock
                             var newsHtml = webSrc.GetNewsArticle(href, parentUrl);
                             if (!string.IsNullOrWhiteSpace(newsHtml))
                             {
-
+                                TaskStatusManager.Set("GetNewsListCJYW", new { ID = "GetNewsListCJYW", CreateTime = DateTime.Now, Status = "准备操作THS财经要闻新闻详细", Html= newsHtml });
                                 var resItem = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻详细", Page = newsHtml }) as Dictionary<string, object>;
                                 var resDetail = resItem["PageData"] as Dictionary<string, object>;
                                 if (null != resDetail)
@@ -535,7 +541,7 @@ namespace WangJun.Stock
                                         CreateTime = DateTime.Now,
                                         PageMD5 = "无"
                                     };
-                                    newNewsList.Add(svItem);
+                                    newNewsList.Add(href,svItem);
                                     LOGGER.Log(string.Format("获取一个新闻正文 {0}", svItem.Title));
                                     ThreadManager.Pause(seconds: 5); ///5秒钟更新一次新闻         
 
@@ -550,35 +556,23 @@ namespace WangJun.Stock
                                 }
                             }
                         }
-
-                        ///删除旧
-                        var deleteFilter = "{\"Tag\":" + Convert.ToInt32(formatDate.Replace("/", string.Empty)) + "}";
-                        mongo.Delete(deleteFilter, "News", "StockService");///删除旧数据
-                        //#region 同步到服务器上
-                        //var sql = "DELETE FROM News WHERE Tag=@Tag";
-                        //var paramList = new List<KeyValuePair<string, object>>();
-                        //paramList.Add(new KeyValuePair<string, object>("@Tag", Convert.ToInt32(formatDate.Replace("/", string.Empty))));
-                        //var mssql = DataStorage.GetInstance(DBType.SQLServer);
-                        //mssql.Delete(sql, "News", "StockService", exParam: paramList);
-                        //#endregion
-                        var index = 0;
+                         
                         foreach (var svItem in newNewsList)
                         {
-                            mongo.Save2("StockService", "News", null, svItem);
-                            //mssql.Save2("StockService", "News", null, svItem);//数据库太小不存
+                            var filter = "{\"Url\":\"" + svItem.Key + "\"}";
+                            mongo.Save3(dbName, collectionNews, svItem.Value, filter);
                         }
                     }
                 }
                 else
                 {
                     LOGGER.Log(string.Format("获取的新闻列表为空白"));
-                    Thread.Sleep(new TimeSpan(0, 5, 0));
                 }
             }
             else
             {
                 LOGGER.Log(string.Format("传入的时间字符串不对:{0}", dateTime));
-                Thread.Sleep(new TimeSpan(0, 5, 0));
+                ThreadManager.Pause(minutes: 5);
             }
         }
         #endregion
@@ -594,26 +588,24 @@ namespace WangJun.Stock
         {
             if(!string.IsNullOrWhiteSpace(content)&& !string.IsNullOrWhiteSpace(content))
             {
+                var dbName = CONST.DB.DBName_StockService;
+                var collectionName = CONST.DB.CollectionName_FenCi;
+
                 var res = FenCi.GetResult(content);
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
-                //var mssql = DataStorage.GetInstance(DBType.SQLServer);
-                var filter = "{\"Url\":\""+ url.Trim() + "\"}";
-                mongo.Delete(filter, "FenCi", "StockService");
-                var sql = "DELETE FROM FenCi WHERE Url=@Url";
-                var paramList = new List<KeyValuePair<string, object>>();
-                paramList.Add(new KeyValuePair<string, object> ("@Url", url));
-                //mssql.Delete(sql, "", "",exParam:paramList);
+ 
                 foreach (var item in res)
                 {
+
                     var svItem = new {
                         Url=url,
                         Word=item.Key,
                         Count=item.Value,
                         CreateTime=DateTime.Now
                     };
+                    var filter = "{\"Url\":\"" + url.Trim() + "\",\"Word\":\"" + svItem.Word + "\"}";
 
-                    mongo.Save2("StockService", "FenCi", null, svItem);
-                    //mssql.Save2("", "FenCi", null, svItem);
+                    mongo.Save3(dbName,collectionName,svItem, filter);
                 }
             }
         }

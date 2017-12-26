@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using WangJun.Data;
 using WangJun.Tools;
@@ -137,9 +136,10 @@ namespace WangJun.DB
         /// <summary>
         /// 保存一个数据实体
         /// </summary>
-        public void Save2(string dbName, string collectionName, string jsonfilter, object data)
+        public void Save2(string dbName, string collectionName, string jsonfilter, object data,bool replace=true)
         {
-             if (null != data) ///若数据有效
+ 
+            if (null != data) ///若数据有效
             {
                 var dict = Convertor.FromObjectToDictionary(data);
                 var dat = new BsonDocument(dict);
@@ -157,50 +157,6 @@ namespace WangJun.DB
                 {
                     collection.InsertOne(dat);
                 }
-
-            }
-        }
-        #endregion
-        protected IMongoCollection<BsonDocument> GetCollection(string dbName,string collectionName)
-        {
-            var db = this.client.GetDatabase(dbName);
-            var collection = db.GetCollection<BsonDocument>(collectionName);
-            return collection;
-        }
-
-        #region 保存一个数据实体
-        /// <summary>
-        /// 保存一个数据实体
-        /// </summary>
-        public void Save3(string dbName, string collectionName, object data, string query=null,bool replace=true)
-        {
-            if (null != data) ///若数据有效
-            {
-                var dict = Convertor.FromObjectToDictionary(data);
-                //string jsonData = Convertor.FromObjectToJson(data);
-                var dat = new BsonDocument(dict);
-                 
-                var collection = this.GetCollection(dbName, collectionName);
-                
-                if(string.IsNullOrWhiteSpace(query) || "{}"==query)
-                {
-                    query = "{F00000001:-999}"; ///不存在字段和值
-                }
-
-                if(replace)
-                {
-                    FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();
-                    option.IsUpsert = true;///找不到就添加
-                    var res = collection.FindOneAndReplace(query, dat, option);
-                }
-                else
-                {
-                    FindOneAndUpdateOptions<BsonDocument, BsonDocument> option = new FindOneAndUpdateOptions<BsonDocument, BsonDocument>();
-                    option.IsUpsert = true;
-                    var updateDefinition = "{ $set: "+dat.ToJson()+" }";
-                    collection.FindOneAndUpdate(query, updateDefinition, option);
-                }
-                 
 
             }
         }

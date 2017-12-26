@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Data;
 
 namespace WangJun.Stock
 {
@@ -18,6 +20,23 @@ namespace WangJun.Stock
                 return @"E:\WangJun2017\WangJun.Stock\bin\Debug1\WangJun.Stock.dll"; 
             }
         }
+
+        public static class DB {
+            public static string DBName_StockService { get { return "StockService"; } }
+            public static string CollectionName_News { get { return "News"; } }
+
+            public static string CollectionName_FenCi { get { return "FenCi"; } }
+
+            public static string CollectionName_DaDan { get { return "SINADaDan2D"; } }
+
+            public static string CollectionName_KLine { get { return "KLine"; } }
+
+            public static string CollectionName_Exception { get { return "Exception"; } }
+
+            public static string CollectionName_TaskStatus { get { return "TaskStatus"; } }
+        }
+
+
         /// <summary>
         /// Node服务Url
         /// </summary>
@@ -25,7 +44,10 @@ namespace WangJun.Stock
         {
             get
             {
-                return "http://localhost:8990";
+                var json = Convertor.FromJsonToDict2(File.ReadAllText("config.js"));
+                var nodeServiceUrl = json["NodeServiceUrl"].ToString();
+
+                return nodeServiceUrl;
             }
         }
 
@@ -36,7 +58,7 @@ namespace WangJun.Stock
          public static bool IsTradingDay()
         {
             var res = false;
-            if(DateTime.Now.DayOfWeek == DayOfWeek.Saturday|| DateTime.Now.DayOfWeek == DayOfWeek.Saturday) ///周六,周日非交易日
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Saturday|| DateTime.Now.DayOfWeek == DayOfWeek.Saturday) ///周六,周日非交易日
             {
                 return false;
             }
@@ -70,8 +92,16 @@ namespace WangJun.Stock
         /// <returns></returns>
         public static bool IsSafeUpdateTime(int updateCost)
         {//非交易日 或交易日前1小时 或交易时间结束
-            return true;
-
+            if(!CONST.IsTradingDay()) ///不是交易日
+            {
+                return true;
+            }
+            else if(CONST.IsTradingDay() && (DateTime.Now<= DateTime.Now.Date.AddHours(7)|| DateTime.Now.Date.AddHours(15.5)<= DateTime.Now.AddHours(updateCost)))
+            {
+                ///交易日内早7点前,或交易结束后
+                return true;
+            }
+            return false;
         }
 
         public static string UserAgent
@@ -81,5 +111,9 @@ namespace WangJun.Stock
                 return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36";
             }
         }
+
+        #region API Test
+
+        #endregion
     }
 }

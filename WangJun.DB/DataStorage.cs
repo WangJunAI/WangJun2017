@@ -128,7 +128,26 @@ namespace WangJun.DB
                 var dict = Convertor.FromObjectToDictionary(data);
                 this.sqlserver.Save(dbName, tableName, dict);
             }
-        } 
+        }
+        #endregion
+
+        #region 存储一个数据，若数据存在，则更新
+        /// <summary>
+        /// 存储一个数据，若数据存在，则更新
+        /// </summary>
+        /// <param name="data"></param>
+        public void Save3(string dbName, string tableName, object data, string query=null,bool replace=true )
+        {
+            if (null != this.mongo)
+            {
+                this.mongo.Save3(dbName, tableName, data, query, replace);
+            }
+            else if (null != this.sqlserver)
+            {
+                var dict = Convertor.FromObjectToDictionary(data);
+                this.sqlserver.Save(dbName, tableName, dict);
+            }
+        }
         #endregion
 
         #region 删除数据

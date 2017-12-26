@@ -49,6 +49,7 @@
     <Compile Include="StockSynchronizer.cs" />
     <Compile Include="StockTaskCreator.cs" />
     <Compile Include="StockTaskExecutor.cs" />
+    <Compile Include="TaskStatusManager.cs" />
     <Compile Include="WebDataSource.cs" />
   </ItemGroup>
   <ItemGroup>
