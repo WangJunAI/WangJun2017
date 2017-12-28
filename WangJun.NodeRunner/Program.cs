@@ -104,6 +104,10 @@ namespace WangJun.NodeRunner
             {
                 sync.SyncZJLX();
             }
+            else if("SyncStockCode" == serviceName)
+            {
+                sync.SyncStockCode();
+            }
 
             //sync.SyncCWZY();
             //sync.SyncSINADaDan();

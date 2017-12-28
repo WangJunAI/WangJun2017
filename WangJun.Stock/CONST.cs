@@ -21,7 +21,8 @@ namespace WangJun.Stock
             }
         }
 
-        public static class DB {
+        public static class DB
+        {
             public static string DBName_StockService { get { return "StockService"; } }
             public static string CollectionName_News { get { return "News"; } }
 
@@ -34,8 +35,32 @@ namespace WangJun.Stock
             public static string CollectionName_Exception { get { return "Exception"; } }
 
             public static string CollectionName_TaskStatus { get { return "TaskStatus"; } }
-        }
 
+            /// <summary>
+            /// 公司简介
+            /// </summary>
+            public static string CollectionName_GSJJ  {get { return "GSJJ"; } }
+
+            /// <summary>
+            /// 概念板块
+            /// </summary>
+            public static string CollectionName_BKGN { get { return "BKGN"; } }
+
+            /// <summary>
+            /// 资金流向
+            /// </summary>
+            public static string CollectionName_ZJLX { get { return "ZJLX"; } }
+
+            /// <summary>
+            /// 财务摘要
+            /// </summary>
+            public static string CollectionName_CWZY { get { return "CWZY"; } }
+
+            /// <summary>
+            /// 基本信息
+            /// </summary>
+            public static string CollectionName_BaseInfo { get { return "BaseInfo"; } }
+        }
 
         /// <summary>
         /// Node服务Url

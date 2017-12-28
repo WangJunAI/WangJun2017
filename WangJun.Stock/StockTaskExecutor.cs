@@ -32,29 +32,25 @@ namespace WangJun.Stock
         /// </summary>
         public void UpdateAllStockCode()
         {
-            var mongo = DataStorage.GetInstance("170");
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var dataSource = new Dictionary<string, string>();
 
             Console.WriteLine("准备从网络获取股票代码");
             dataSource = WebDataSource.GetInstance().GetAllStockCode();
-            
-            #region 删除旧数据
-            mongo.Delete("{\"ContentType\":\"股票代码\"}","BaseInfo", "StockService");
-            mongo.Delete("{\"ContentType\":\"股票代码\"}", "BaseInfo", "StockTask");
-            #endregion
 
+            var dbName = CONST.DB.DBName_StockService;
+            var collectionName = CONST.DB.CollectionName_BaseInfo;
             foreach (var srcItem in dataSource)
             {
-                var item = new { ContentType = "股票代码", StockCode = srcItem.Key, StockName = srcItem.Value, CreateTime = DateTime.Now };
-
-                mongo.Save(item, "BaseInfo", "StockTask");
-                mongo.Save(item, "BaseInfo", "StockService");
+                var svItem = new { ContentType = "股票代码", StockCode = srcItem.Key, StockName = srcItem.Value, CreateTime = DateTime.Now };
+                var filter = "{\"ContentType\":\"" + svItem.ContentType + "\",\"StockCode\":\"" + svItem.StockCode + "\"}";
+                mongo.Save3(dbName,collectionName,svItem,filter);
             }
             Console.WriteLine("已成功更新今日股票代码");
         }
         #endregion
 
-        #region 更新页面
+        #region 更新页面[已过时]
         /// <summary>
         /// 更新页面
         /// </summary>
@@ -135,76 +131,69 @@ namespace WangJun.Stock
             ///查找最近一个交易日的数据是否存在,若存在则不下载
             ///
 
+                var mongo = DataStorage.GetInstance(DBType.MongoDB);
+                var webSource = DataSourceSINA.CreateInstance();
+                var pageCount = webSource.GetDaDanPageCount();
+                var dbName = CONST.DB.DBName_StockService;
+                var collectionName = CONST.DB.CollectionName_DaDan;
+                ///数据检查
+                var lastTradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00");
 
-            var mongo = DataStorage.GetInstance(DBType.MongoDB);
-            var webSource = DataSourceSINA.CreateInstance();
-            var pageCount = webSource.GetDaDanPageCount();
-            var dbName =CONST.DB.DBName_StockService;
-            var collectionName = "SINADaDan2D";
-            ///数据检查
-            var lastTradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00");
-            var checkFilter = "{\"ContentType\" :\"SINA大单\",\"TradingDate\":\"new Date('" + lastTradingDate + "')\"}";
-            var checkRes = mongo.Find(dbName, collectionName, checkFilter);
-
-            if (0 == checkRes.Count) ///若没有查找到数据 
+            for (int i = 1; i < pageCount; i++)
             {
-                for (int i = 1; i < pageCount; i++)
+                var html = webSource.GetDaDan(i);
+
+                var res = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA大单", Page = html });
+
+                if (res is Dictionary<string, object>)
                 {
-                    var html = webSource.GetDaDan(i);
-
-                    var res = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA大单", Page = html });
-
-                    if (res is Dictionary<string, object>)
+                    var item = new
                     {
-                        var item = new
+                        PageData = (res as Dictionary<string, object>)["PageData"],
+                        ContentType = "SINA大单",
+                        CreateTime = DateTime.Now,
+                        TradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00"),
+                        PageIndex = i,
+                        PageCount = pageCount,
+                    };
+                    LOGGER.Log(string.Format("SINA大单保存 {0} {1}", i, pageCount));
+
+                    var arrayList = item.PageData as ArrayList;
+                    ///数据二维化，计算可以计算的，剩下的再想办法计算
+                    for (int k = 0; k < arrayList.Count; k++)
+                    {
+                        var arrItem = arrayList[k] as Dictionary<string, object>;
+                        var item2D = new
                         {
-                            PageData = (res as Dictionary<string, object>)["PageData"],
-                            ContentType = "SINA大单",
-                            CreateTime = DateTime.Now,
-                            TradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00"),
+                            StockCode = arrItem["StockCode"],
+                            StockName = arrItem["StockName"],
+                            TickTime = arrItem["交易时间"],
+                            Price = arrItem["成交价"],
+                            Turnover = arrItem["成交量"],
+                            PrevPrice = arrItem["之前价格"],
+                            Kind = arrItem["成交类型"],
+                            TradingTime = Convertor.CalTradingDate(item.TradingDate, arrItem["交易时间"].ToString()),
+                            TradingDate = item.TradingDate,
+                            CreateTime = item.CreateTime,
                             PageIndex = i,
                             PageCount = pageCount,
+                            RowIndex = k
                         };
 
-                        //mongo.Save(item, "SINADaDan", "StockService");
-                        LOGGER.Log(string.Format("SINA大单保存 {0} {1}", i, pageCount));
 
-                        var arrayList = item.PageData as ArrayList;
-                        ///数据二维化，计算可以计算的，剩下的再想办法计算
-                        for (int k = 0; k < arrayList.Count; k++)
-                        {
-                            var arrItem = arrayList[k] as Dictionary<string, object>;
-                            var item2D = new
-                            {
-                                StockCode = arrItem["StockCode"],
-                                StockName = arrItem["StockName"],
-                                TickTime = arrItem["交易时间"],
-                                Price = arrItem["成交价"],
-                                Turnover = arrItem["成交量"],
-                                PrevPrice = arrItem["之前价格"],
-                                Kind = arrItem["成交类型"],
-                                TradingTime = Convertor.CalTradingDate(item.TradingDate, arrItem["交易时间"].ToString()),
-                                TradingDate= item.TradingDate,
-                                CreateTime = item.CreateTime,
-                                PageIndex = i,
-                                PageCount = pageCount,
-                                RowIndex = k
-                            };
+                        var filter = "{\"PageCount\":" + item2D.PageCount + ",\"PageIndex\":" + item2D.PageIndex + ",\"RowIndex\":" + item2D.RowIndex + ",\"TradingDate\":new Date('" + item2D.TradingDate + "')}";
+                        mongo.Save3(dbName, collectionName, item2D, filter);
+                        LOGGER.Log(string.Format("SINA大单2D保存 {0} {1} {2}", i, k, pageCount));
 
-
-                             
-                            mongo.Save(item2D, "SINADaDan2D", "StockService");
-                            LOGGER.Log(string.Format("SINA大单2D保存 {0} {1} {2}", i, k, pageCount));
-
-                        }
                     }
-                    Thread.Sleep(new Random().Next(2000, 5000));
                 }
+                ThreadManager.Pause(seconds: 3);
             }
+
         }
         #endregion
 
-        #region 数据转换
+        #region 数据转换[已作废]
         /// <summary>
         /// 数据转换
         /// </summary>
@@ -234,7 +223,7 @@ namespace WangJun.Stock
         }
         #endregion
 
-        #region 数据转换 大单
+        #region 数据转换 大单[已作废]
         /// <summary>
         /// 数据转换 大单
         /// </summary>

@@ -35,26 +35,22 @@ namespace WangJun.Stock
             var startTime = DateTime.Now;///开始运行时间
             Console.Title = "股票代码更新进程 启动时间：" + startTime;
             var inst = StockTaskExecutor.CreateInstance();
-            var mssql = DataStorage.GetInstance("aifuwu", "sqlserver");
-            var mongo = DataStorage.GetInstance("170");
-            var count = 0;
             while(true)
             {               
                 if (CONST.IsSafeUpdateTime(1)) ///非交易时间,且交易前1小时
                 {
-                    Console.WriteLine("准备更新股票代码 {0} {1}",DateTime.Now,++count);
+                    LOGGER.Log(string.Format("准备更新股票代码 {0}",DateTime.Now));
                     inst.UpdateAllStockCode();
-                    mssql.Delete("DELETE FROM BaseInfo WHERE ContentType='股票代码'", "", "", null);
-                    DataStorage.MoveDataFromMongoToSQLServer("170", "StockService", "BaseInfo", "{\"ContentType\":\"股票代码\"}", "aifuwu", "qds165298153_db", "BaseInfo");///数据同步
-                    Console.WriteLine("股票代码更新完毕 {0} {1} 下一次更新在三小时后 已运行", DateTime.Now, count,DateTime.Now-startTime);
-                    Thread.Sleep(3 * 60 * 60 * 1000);
+                    LOGGER.Log(string.Format("股票代码更新完毕 {0} {1} 下一次更新在一天后后 已运行 ", DateTime.Now,DateTime.Now-startTime));
+                    ThreadManager.Pause(days: 1);
                 }
                 else
                 {
                     Console.WriteLine("交易时间或非安全可更新时间 {0}",DateTime.Now);
-                    Thread.Sleep(1 * 60 * 60 * 1000);
+                    ThreadManager.Pause(hours: 1);
+
                 }
-                
+
             }
         }
         #endregion
@@ -125,7 +121,8 @@ namespace WangJun.Stock
 
             var exe = StockTaskExecutor.CreateInstance();
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
-            var mssql = DataStorage.GetInstance(DBType.SQLServer);
+            var dbName = CONST.DB.DBName_StockService;
+            var collectionName = CONST.DB.CollectionName_CWZY;
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据,二维化
@@ -173,8 +170,19 @@ namespace WangJun.Stock
             var exe = StockTaskExecutor.CreateInstance();
             while (true)
             {
-                exe.GetDaDanData();
-                Thread.Sleep(new TimeSpan(24,0,0));
+                if (CONST.IsSafeUpdateTime(1))
+                {
+                    exe.GetDaDanData();
+                    LOGGER.Log(string.Format("大单数据已更新,下一次更新在一天后 {0}", DateTime.Now));
+                    ThreadManager.Pause(days: 1);
+                }
+                else
+                {
+                    LOGGER.Log(string.Format("未在安全更新时间内 {0}", DateTime.Now));
+                    ThreadManager.Pause(minutes: 5);
+                }
+
+                
             }
             
         }
@@ -288,7 +296,8 @@ namespace WangJun.Stock
 
             var exe = StockTaskExecutor.CreateInstance();
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
-            //var mssql = DataStorage.GetInstance(DBType.SQLServer);
+            var dbName = CONST.DB.DBName_StockService;
+            var collectionName = CONST.DB.CollectionName_GSJJ;
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据
@@ -309,17 +318,15 @@ namespace WangJun.Stock
                     };
 
                     ///删除旧数据
-                    var filter = "{\"ContentType\":\"SINA公司简介\",\"StockCode\":\"" + stockCode + "\"}";
-                    mongo.Delete(filter, "SINAGSJJ", "StockService");
                     ///添加新数据
                     LOGGER.Log(string.Format("更新{0} {1}的公司简介 ", stockCode, svItem.StockName));
-                    mongo.Save2("StockService", "SINAGSJJ", filter, svItem);
-                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
-                    //Console.ReadKey();
-                    ///二维化
-                    ///同步到SQL数据库中
+                    var filter = "{\"ContentType\":\"SINA公司简介\",\"StockCode\":\"" + stockCode + "\"}";
+                    mongo.Save3(dbName, collectionName, svItem,filter);
+                    ThreadManager.Pause(seconds: 5);
                 }
-                Thread.Sleep(24 * 60 * 60 * 1000);
+                LOGGER.Log(string.Format("本次板块概念更新完毕，下一次一天以后更新 {0}", DateTime.Now));
+
+                ThreadManager.Pause(days: 1);
                 q = this.PrepareData();
             }
 
@@ -337,7 +344,8 @@ namespace WangJun.Stock
 
             var exe = StockTaskExecutor.CreateInstance();
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
-            //var mssql = DataStorage.GetInstance(DBType.SQLServer);
+            var dbName = CONST.DB.DBName_StockService;
+            var collectionName = CONST.DB.CollectionName_BKGN;
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据
@@ -356,19 +364,17 @@ namespace WangJun.Stock
                         CreateTime = DateTime.Now,
                         PageData = resDict
                     };
-
-                    ///删除旧数据
+                    
                     var filter = "{\"ContentType\":\"SINA板块概念\",\"StockCode\":\"" + stockCode + "\"}";
-                    mongo.Delete(filter, "SINAGSJJ", "StockService");
-                    ///添加新数据
+                     ///添加新数据
                     LOGGER.Log(string.Format("更新{0} {1}的板块概念 ", stockCode, svItem.StockName));
-                    mongo.Save2("StockService", "SINABKGN", filter, svItem);
-                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
-                    //Console.ReadKey();
-                    ///二维化
-                    ///同步到SQL数据库中
+                    mongo.Save3(dbName, collectionName, svItem, filter);
+                    ThreadManager.Pause(seconds: 5);
+
                 }
-                Thread.Sleep(24 * 60 * 60 * 1000);
+                LOGGER.Log(string.Format("本次板块概念更新完毕，下一次两天以后更新 {0}",DateTime.Now));
+                ThreadManager.Pause(days: 2);
+
                 q = this.PrepareData();
             }
 
@@ -386,7 +392,8 @@ namespace WangJun.Stock
 
             var exe = StockTaskExecutor.CreateInstance();
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
-            //var mssql = DataStorage.GetInstance(DBType.SQLServer);
+            var dbName = CONST.DB.DBName_StockService; 
+            var collectionName = CONST.DB.CollectionName_ZJLX;
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据
@@ -397,24 +404,8 @@ namespace WangJun.Stock
                     var resObj = WebDataSource.GetInstance().GetZJLX(stockCode);
                     var resList = (resObj is Dictionary<string, object>) ? (resObj as Dictionary<string, object>)["PageData"] : new ArrayList();
                     var stockName = this.stockCodeDict[stockCode];
-                    ///保存到数据库中 二维化
-                    var svItem = new
-                    {
-                        StockCode = stockCode,
-                        StockName = stockName,
-                        Url = string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", stockCode),
-                        CreateTime = DateTime.Now,
-                        PageData = resList
-                    };
-
-                    ///删除旧数据
-                    var filter = "{\"ContentType\":\"THS资金流向\",\"StockCode\":\"" + stockCode + "\"}";
-                    mongo.Delete(filter, "SINAZJLX", "StockService");
-                    ///添加新数据
-                    LOGGER.Log(string.Format("更新{0} {1}THS资金流向 ", stockCode, svItem.StockName));
-                    mongo.Save2("StockService", "SINAZJLX", filter, svItem);
-                    //Console.ReadKey();
-                    ///二维化
+ 
+                     ///二维化
                      if(resList is ArrayList)
                     {
                         var rows = (resList as ArrayList);
@@ -438,17 +429,19 @@ namespace WangJun.Stock
                                 NetSmall = row["小单净额"],
                                 NetSmallProportion = row["小单净占比"],
                             };
-
-                            mongo.Save2("StockService", "SINAZJLX"+"2D", filter, svItem2D);
-
+ 
+                            var filter = "{\"ContentType\":\"THS资金流向\",\"StockCode\":\"" + stockCode + "\",\"TradingDate\":new Date('" + string.Format("{0:yyyy/MM/dd}", svItem2D.TradingDate) + "')}"; 
+                            mongo.Save3(dbName, collectionName, svItem2D, filter);
+                            LOGGER.Log(string.Format("THS资金流向 正在更新 {0} {1} {2}", svItem2D.StockCode, svItem2D.StockName, svItem2D.TradingDate));
                         }
                     }
 
-                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
+                    ThreadManager.Pause(seconds: 5);
 
                     ///同步到SQL数据库中
                 }
-                Thread.Sleep(24 * 60 * 60 * 1000);
+
+                ThreadManager.Pause(days: 1);
                 q = this.PrepareData();
             }
 
