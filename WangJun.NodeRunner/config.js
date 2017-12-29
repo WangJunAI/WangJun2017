@@ -1,4 +1,4 @@
 ﻿{
-    "ServiceName":"SyncStockNews",
-    "NodeServiceUrl":"http://localhost:9001"
+    "ServiceName":"SyncCWZY",
+    "NodeServiceUrl":"http://localhost:9007"
 }

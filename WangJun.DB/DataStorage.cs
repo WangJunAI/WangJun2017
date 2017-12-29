@@ -202,6 +202,28 @@ namespace WangJun.DB
             return null;
         }
         #endregion
+        #region 基于Json/SQLServer的查询
+        /// <summary>
+        /// 基于Linq的查询
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns></returns>
+        public List<Dictionary<string, object>> Find2(string dbName, string collectionName, string query, string protection = "{}", int pageIndex = 0, int pageSize = int.MaxValue, Dictionary<string, object> updateData = null)
+        {
+            if (null != this.mongo)
+            {
+                var res = mongo.Find2(dbName, collectionName, query,protection, pageIndex, pageSize,updateData);
+                return res;
+            }
+            else if (null != this.sqlserver)
+            {
+                //var res = this.sqlserver.Find(jsonString, exParam as List<KeyValuePair<string, object>>);
+                //return res;
+            }
+
+            return null;
+        }
+        #endregion
 
         #region 遍历处理
         /// <summary>
@@ -271,6 +293,25 @@ namespace WangJun.DB
         }
         #endregion
 
+        #region 转移集合
+        /// <summary>
+        /// 转移集合
+        /// </summary>
+        /// <param name="sourceKeyName"></param>
+        /// <param name="sourceDbName"></param>
+        /// <param name="sourceCollectionName"></param>
+        /// <param name="sourceFilter"></param>
+        /// <param name="targetKeyName"></param>
+        /// <param name="targetDbName"></param>
+        /// <param name="targetCollectionName"></param>
+        /// <param name="needDeleteSource"></param>
+        public static void MoveCollection(DataStorage sourceInst, string sourceDbName, string sourceCollectionName, string sourceFilter, DataStorage targetInst, string targetDbName, string targetCollectionName, bool needDeleteSource = false)
+        {
+            MongoDB.MoveCollection(sourceInst.mongo, sourceDbName, sourceCollectionName, sourceFilter,targetInst.mongo, targetDbName, targetCollectionName, needDeleteSource);
+        }
+        #endregion
+
+
         #region 移动一个数据库
         /// <summary>
         /// 
@@ -327,6 +368,13 @@ namespace WangJun.DB
         public List<Dictionary<string, object>> Find(string dbName, string tableName, string jsonString,string protection,Dictionary<string,object> updateData, int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var res = mongo.Find(dbName, tableName, jsonString, pageIndex, pageSize);
+            return res;
+        }
+        #endregion
+
+        #region Count
+        public long Count(string dbName , string collectionName,string filter) {
+            var res = this.mongo.Count(dbName, collectionName, filter);
             return res;
         }
         #endregion

@@ -144,16 +144,13 @@ namespace WangJun.Stock
 
                     ///删除旧数据
                     var filter = "{\"ContentType\":\"SINA财务概要\",\"StockCode\":\"" + stockCode + "\"}";
-                    mongo.Delete(filter, "SINACWZY", "StockService");
-                    ///添加新数据
+                     ///添加新数据
                     LOGGER.Log(string.Format("更新{0} {1}的财务摘要 ",stockCode, svItem.StockName));
-                    mongo.Save2("StockService", "SINACWZY", filter, svItem);
-                    Thread.Sleep(new Random().Next(1 * 1000, 5 * 1000));
-                    //Console.ReadKey();
-                    ///二维化
-                    ///同步到SQL数据库中
+                    mongo.Save3(dbName, collectionName, svItem, filter);
+                    ThreadManager.Pause(seconds: 5);
+ 
                 }
-                Thread.Sleep(24 * 60 * 60 * 1000);
+                ThreadManager.Pause(days: 2);
                 q = this.PrepareData();
             }
         }
@@ -446,6 +443,10 @@ namespace WangJun.Stock
             }
 
         }
+        #endregion
+
+        #region SINA 大单详细
+
         #endregion
 
         #region 准备数据

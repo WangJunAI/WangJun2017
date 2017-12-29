@@ -138,7 +138,16 @@ namespace WangJun.Stock
                 var collectionName = CONST.DB.CollectionName_DaDan;
                 ///数据检查
                 var lastTradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00");
+            ///删除根据日期创建的临时表格
+            ///将数据写入表格
+            ///将这个数据转移到大表中
+            #region 存储临时数据
+            var tempCollectionName = collectionName + string.Format("{0:yyyyMMdd}", DateTime.Now);
+            mongo.Remove(dbName, tempCollectionName, "{}");
+            #endregion
 
+
+            var totalCount = 0;
             for (int i = 1; i < pageCount; i++)
             {
                 var html = webSource.GetDaDan(i);
@@ -162,8 +171,9 @@ namespace WangJun.Stock
                     ///数据二维化，计算可以计算的，剩下的再想办法计算
                     for (int k = 0; k < arrayList.Count; k++)
                     {
+                        totalCount++;
                         var arrItem = arrayList[k] as Dictionary<string, object>;
-                        var item2D = new
+                        var svItem2D = new
                         {
                             StockCode = arrItem["StockCode"],
                             StockName = arrItem["StockName"],
@@ -179,10 +189,9 @@ namespace WangJun.Stock
                             PageCount = pageCount,
                             RowIndex = k
                         };
-
-
-                        var filter = "{\"PageCount\":" + item2D.PageCount + ",\"PageIndex\":" + item2D.PageIndex + ",\"RowIndex\":" + item2D.RowIndex + ",\"TradingDate\":new Date('" + item2D.TradingDate + "')}";
-                        mongo.Save3(dbName, collectionName, item2D, filter);
+                        mongo.Save3(dbName, tempCollectionName, svItem2D);
+                        var filter = "{\"PageCount\":" + svItem2D.PageCount + ",\"PageIndex\":" + svItem2D.PageIndex + ",\"RowIndex\":" + svItem2D.RowIndex + ",\"TradingDate\":new Date('" + svItem2D.TradingDate + "')}";
+                        //mongo.Save3(dbName, collectionName, svItem2D, filter);
                         LOGGER.Log(string.Format("SINA大单2D保存 {0} {1} {2}", i, k, pageCount));
 
                     }
@@ -190,6 +199,17 @@ namespace WangJun.Stock
                 ThreadManager.Pause(seconds: 3);
             }
 
+            var countInDB = mongo.Count(CONST.DB.DBName_StockService, tempCollectionName, "{}");
+            if (totalCount == countInDB)
+            {
+                LOGGER.Log(string.Format("准备转移数据"));
+                ///数据检查是否完毕,完备后插入
+                DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, tempCollectionName, "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
+            }
+            else
+            {
+                LOGGER.Log(string.Format("数据对不上 {0} {1}", totalCount, countInDB));
+            }
         }
         #endregion
 

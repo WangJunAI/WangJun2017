@@ -6,6 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using WangJun.Data;
+using WangJun.Debug;
 using WangJun.Tools;
 
 namespace WangJun.DB
@@ -302,7 +303,40 @@ namespace WangJun.DB
 
         }
         #endregion
+        #region 移动数据
+        /// <summary>
+        /// 移动数据
+        /// </summary>
+        /// <param name="sourceKeyName"></param>
+        /// <param name="sourceDbName"></param>
+        /// <param name="sourceCollectionName"></param>
+        /// <param name="sourceFilter"></param>
+        /// <param name="targetKeyName"></param>
+        /// <param name="targetDbName"></param>
+        /// <param name="targetCollectionName"></param>
+        /// <param name="needDeleteSource"></param>
+        public static void MoveCollection(MongoDB sourceInst, string sourceDbName, string sourceCollectionName, string sourceFilter, MongoDB targetInst, string targetDbName, string targetCollectionName, bool needDeleteSource = false)
+        {
+            if (null != sourceInst && null != targetInst)
+            {
+                sourceInst.EventTraverse += (object sender, EventArgs e) =>
+               {
+                   var ee = e as EventProcEventArgs;
+                   var dict = ee.Default as Dictionary<string, object>;
+                   var filter = string.Format("{{\"_id\":\"{0}\"}}", dict["_id"]);
+                   targetInst.Save2(targetDbName, targetCollectionName, filter, dict);
 
+                   LOGGER.Log(string.Format("正在转移数据 {0}", dict["_id"]));
+;                   if (true == needDeleteSource)
+                   {
+                       sourceInst.Delete(sourceDbName, sourceCollectionName, filter);
+                   }
+               };
+
+                sourceInst.Find(sourceDbName, sourceCollectionName, sourceFilter);
+            }
+        }
+        #endregion
 
         #region 获取集合的统计信息
         /// <summary>
@@ -473,6 +507,14 @@ namespace WangJun.DB
         }
         #endregion
 
+        #region Count
+        public long Count(string dbName, string collectionName, string filter)
+        {
+            var collection = this.GetCollection(dbName, collectionName);
+            var res = collection.Count(filter);
+            return res;
+        }
+        #endregion
 
     }
 }
