@@ -161,7 +161,7 @@ namespace WangJun.Stock
         }
         #endregion
 
-        #region SINA大单数据更新
+        #region SINA大单数据更新[暂时作废]
         /// <summary>
         /// SINA大单数据更新
         /// </summary>
@@ -200,9 +200,10 @@ namespace WangJun.Stock
             var exe = WebDataSource.GetInstance();//
             var dbName = CONST.DB.DBName_StockService;
             var collectionName = CONST.DB.CollectionName_KLine;
+            var methodName = "SyncKLineDay";
             while (true)
             {
-                var q = this.PrepareData();
+                var q = this.PrepareData(methodName);
                 var year = DateTime.Now.Year;
                 var jidu = Convertor.GetJidu(DateTime.Now); ///获取当前季度数据
                 
@@ -210,9 +211,6 @@ namespace WangJun.Stock
                 {
                     var stockCode = q.Dequeue();
                     var stockName = this.stockCodeDict[stockCode];
-
-                    TaskStatusManager.Set("SyncKLineDay", new { ID = "SyncKLineDay",CreateTime =DateTime.Now, Status= "准备操作SINA历史交易", StockCode = stockCode, StockName = stockName,Year=year,JiDu=jidu });
-
                     var resDict = exe.GetSINAKLineDay(stockCode, year, jidu);
                     if (null != resDict && resDict.ContainsKey("Rows") && (resDict["Rows"] is ArrayList))
                     {
@@ -251,10 +249,11 @@ namespace WangJun.Stock
                                     RowCount = rows.Count
                                 };
                                 ///状态保存
-                                TaskStatusManager.Set("SyncKLineDay", new { ID= "SyncKLineDay", CreateTime = DateTime.Now, Status = "准备写入SINA历史交易", StockCode = stockCode, StockName = stockName, Year = year, JiDu = jidu,RowIndex=svItem2D.RowIndex,RowCount=svItem2D.RowCount });
-
+ 
                                 var filter = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":new Date('" + string.Format("{0:yyyy/MM/dd}", svItem2D.TradingDate) + "')}";
                                 mongo.Save3(dbName, collectionName, svItem2D, filter);
+
+                                TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = svItem2D.StockName, Status = "已下载", CreateTime = DateTime.Now });
                                 LOGGER.Log(string.Format("保存 {0} {1} SINA历史交易2D", stockCode, stockName));
                             }
                         }
@@ -262,17 +261,19 @@ namespace WangJun.Stock
                     }
 
                     ThreadManager.Pause(seconds: 5);
+                    TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
 
+                    ///本季度下载完毕之后再下上一季度数据。
                     if (0 == q.Count && jidu == Convertor.GetJidu(DateTime.Now) && 1 < jidu)//当年2,3,4季度 当季度
                     {
                         jidu = jidu - 1;
-                        q = this.PrepareData();
+                        q = this.PrepareData(methodName);
                     }
                     else if (0 == q.Count && jidu == Convertor.GetJidu(DateTime.Now) && 1 == jidu)
                     {
                         jidu = 4;///上一年第四季度
                         year = year - 1;///上一年
-                        q = this.PrepareData();
+                        q = this.PrepareData(methodName);
                     }
 
 
@@ -300,10 +301,12 @@ namespace WangJun.Stock
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var dbName = CONST.DB.DBName_StockService;
             var collectionName = CONST.DB.CollectionName_GSJJ;
+            var methodName = "SyncGSJJ";
+
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据
-                var q = this.PrepareData();
+                var q = this.PrepareData(methodName);
                 while (0 < q.Count)
                 {
                     var stockCode = q.Dequeue();
@@ -324,12 +327,15 @@ namespace WangJun.Stock
                     LOGGER.Log(string.Format("更新{0} {1}的公司简介 ", stockCode, svItem.StockName));
                     var filter = "{\"ContentType\":\"SINA公司简介\",\"StockCode\":\"" + stockCode + "\"}";
                     mongo.Save3(dbName, collectionName, svItem,filter);
+                    TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = svItem.StockName, Status = "已下载", CreateTime = DateTime.Now });
                     ThreadManager.Pause(seconds: 5);
                 }
+                TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
+
                 LOGGER.Log(string.Format("本次板块概念更新完毕，下一次一天以后更新 {0}", DateTime.Now));
 
-                ThreadManager.Pause(days: 1);
-                q = this.PrepareData();
+                ThreadManager.Pause(days: 2);
+                q = this.PrepareData(methodName);
             }
 
         }
@@ -348,10 +354,12 @@ namespace WangJun.Stock
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var dbName = CONST.DB.DBName_StockService;
             var collectionName = CONST.DB.CollectionName_BKGN;
+            var methodName = "SyncBKGN";
+
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据
-                var q = this.PrepareData();
+                var q = this.PrepareData(methodName);
                 while (0 < q.Count)
                 {
                     var stockCode = q.Dequeue();
@@ -372,8 +380,10 @@ namespace WangJun.Stock
                     LOGGER.Log(string.Format("更新{0} {1}的板块概念 ", stockCode, svItem.StockName));
                     mongo.Save3(dbName, collectionName, svItem, filter);
                     ThreadManager.Pause(seconds: 5);
-
+                    TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = svItem.StockName, Status = "已下载", CreateTime = DateTime.Now });
                 }
+                TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
+
                 LOGGER.Log(string.Format("本次板块概念更新完毕，下一次两天以后更新 {0}",DateTime.Now));
                 ThreadManager.Pause(days: 2);
 
@@ -396,10 +406,12 @@ namespace WangJun.Stock
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var dbName = CONST.DB.DBName_StockService; 
             var collectionName = CONST.DB.CollectionName_ZJLX;
+            var methodName = "SyncZJLX";
+
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据
-                var q = this.PrepareData();
+                var q = this.PrepareData(methodName);
                 while (0 < q.Count)
                 {
                     var stockCode = q.Dequeue();
@@ -439,9 +451,11 @@ namespace WangJun.Stock
                     }
 
                     ThreadManager.Pause(seconds: 5);
+                    TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = stockName, Status = "已下载", CreateTime = DateTime.Now });
 
                     ///同步到SQL数据库中
                 }
+                TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
 
                 ThreadManager.Pause(days: 1);
                 q = this.PrepareData();
@@ -450,7 +464,7 @@ namespace WangJun.Stock
         }
         #endregion
 
-        #region SINA 大单详细
+        #region SINA 重点股票历史成交
 
         #endregion
 
