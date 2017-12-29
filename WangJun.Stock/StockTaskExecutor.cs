@@ -42,7 +42,7 @@ namespace WangJun.Stock
             var collectionName = CONST.DB.CollectionName_BaseInfo;
             foreach (var srcItem in dataSource)
             {
-                var svItem = new { ContentType = "股票代码", StockCode = srcItem.Key, StockName = srcItem.Value, CreateTime = DateTime.Now };
+                var svItem = new { ContentType = "股票代码", StockCode = srcItem.Key,SortCode = Convert.ToInt32(srcItem.Key), StockName = srcItem.Value, CreateTime = DateTime.Now };
                 var filter = "{\"ContentType\":\"" + svItem.ContentType + "\",\"StockCode\":\"" + svItem.StockCode + "\"}";
                 mongo.Save3(dbName,collectionName,svItem,filter);
             }

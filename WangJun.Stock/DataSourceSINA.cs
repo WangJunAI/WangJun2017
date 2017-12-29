@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WangJun.Data;
 using WangJun.Net;
+using WangJun.Tools;
 
 namespace WangJun.Stock
 {
@@ -53,7 +54,7 @@ namespace WangJun.Stock
         /// </summary>
         public int GetLSCJMXCount(string stockcode, string date)
         {
-            string url = string.Format("http://market.finance.sina.com.cn/transHis.php?date={0}&symbol={1}", date, stockcode);
+            string url = string.Format("http://market.finance.sina.com.cn/transHis.php?date={0}&symbol={1}", date, Convertor.AddStockCodePrefix( stockcode));
             var httpdownloader = new HTTP();
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -64,12 +65,15 @@ namespace WangJun.Stock
             headers.Add(HttpRequestHeader.Cookie, "U_TRS1=000000bc.81346475.5a10967a.97e5dd54; U_TRS2=000000bc.813e6475.5a10967a.ecb434e5; FINANCE2=56e2a29d3a8fe026d3c022d0667dda04");
 
             var strData = httpdownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
-
-            var startIndex = strData.IndexOf("var detailPages=") + "var detailPages=".Length;
-            var endIndex = strData.IndexOf("var detailDate =");
-            var subString = strData.Substring(startIndex, endIndex - startIndex);
-            var array = subString.Replace(";", string.Empty).Replace("[[", string.Empty).Replace("]]", string.Empty).Replace("\r\n", string.Empty).Split(new string[] { "],[" }, StringSplitOptions.RemoveEmptyEntries);
-            return array.Length;
+            if (!strData.Contains("输入的代码有误或没有交易数据"))
+            {
+                var startIndex = strData.IndexOf("var detailPages=") + "var detailPages=".Length;
+                var endIndex = strData.IndexOf("var detailDate =");
+                var subString = strData.Substring(startIndex, endIndex - startIndex);
+                var array = subString.Replace(";", string.Empty).Replace("[[", string.Empty).Replace("]]", string.Empty).Replace("\r\n", string.Empty).Split(new string[] { "],[" }, StringSplitOptions.RemoveEmptyEntries);
+                return array.Length;
+            }
+            return 0;
         }
         #endregion
 
@@ -84,7 +88,7 @@ namespace WangJun.Stock
         /// <returns></returns>
         public string GetLSCJMX(string stockcode, string date, int pageNumber)
         {
-            string url = string.Format("http://vip.stock.finance.sina.com.cn/quotes_service/view/vMS_tradehistory.php?symbol={0}&date={1}&page={2}", stockcode, date, pageNumber);
+            string url = string.Format("http://vip.stock.finance.sina.com.cn/quotes_service/view/vMS_tradehistory.php?symbol={0}&date={1}&page={2}",Convertor.AddStockCodePrefix( stockcode), date, pageNumber);
             var httpdownloader = new HTTP();
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -97,6 +101,27 @@ namespace WangJun.Stock
 
             var strData = httpdownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
             return strData;
+        }
+        #endregion
+
+        #region 获取指定股票的历史成交明细
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stockcode"></param>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public List<string> GetLSCJMX(string stockcode, string date)
+        {
+            List<string> list = new List<string>();
+            var pageCount = this.GetLSCJMXCount(stockcode,date);
+            for (int k = 1; k< pageCount; k++)
+            {
+                var html = this.GetLSCJMX(stockcode, date, k);
+                list.Add(html);
+                ThreadManager.Pause(seconds: 2);
+            }
+            return list;
         }
         #endregion
 

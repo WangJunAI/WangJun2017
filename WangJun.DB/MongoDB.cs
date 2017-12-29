@@ -269,6 +269,35 @@ namespace WangJun.DB
         }
         #endregion
 
+        #region 基于Json的查询
+        /// <summary>
+        /// 基于Linq的查询
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns></returns>
+        public List<Dictionary<string, object>> Find3(string dbName, string collectionName, string query,string sort="{}", string protection = "{}", int pageIndex = 0, int pageSize = int.MaxValue, Dictionary<string, object> updateData = null)
+        {
+            List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
+            FilterDefinition<BsonDocument> filter = query;
+            ProjectionDefinition<BsonDocument> protectionD = protection;
+            var db = this.client.GetDatabase(dbName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            var cursor = collection.Find(filter).Project(protectionD).Sort(sort).Skip(pageIndex * pageSize).Limit(pageSize).ToCursor();
+            foreach (var document in cursor.ToEnumerable())
+            {
+                if (null == this.EventTraverse)
+                {
+                    res.Add(document.ToDictionary());
+                }
+                else
+                {
+                    EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
+                }
+            }
+            return res;
+        }
+        #endregion
+
         #region 移动数据
         /// <summary>
         /// 移动数据

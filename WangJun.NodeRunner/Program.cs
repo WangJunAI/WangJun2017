@@ -79,13 +79,15 @@ namespace WangJun.NodeRunner
                 //var res = mongo.Find2("StockService", "SINADaDan2D","{\"TradingDate\":new Date(\"2017/12/18\")}", "{}");
                 //mongo.Distinct("StockService", "SINADaDan2D", "StockCode");
                 //analysor.AnalyseDaDan();
-                var db = DataStorage.GetInstance(DBType.MongoDB);
-                var list =  db.Find2(CONST.DB.DBName_StockService, CONST.DB.CollectionName_Exception, "{}");
-                foreach (var item in list)
-                {
-                    var resItem = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻详细", Page = (item["Args"] as Dictionary<string, object>)["Page"] }) as Dictionary<string, object>;
+                //var db = DataStorage.GetInstance(DBType.MongoDB);
+                //var list =  db.Find2(CONST.DB.DBName_StockService, CONST.DB.CollectionName_Exception, "{}");
+                //foreach (var item in list)
+                //{
+                //    var resItem = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS财经要闻新闻详细", Page = (item["Args"] as Dictionary<string, object>)["Page"] }) as Dictionary<string, object>;
 
-                }
+                //}
+
+                var list = DataSourceSINA.CreateInstance().GetLSCJMX("600360", "2017-12-27");
 
             }
             else if ("SyncStockNews" == serviceName)
@@ -119,10 +121,7 @@ namespace WangJun.NodeRunner
             else if ("SyncCWZY" == serviceName)
             {
                 sync.SyncCWZY();
-            }
-            //sync.SyncCWZY();
-            //sync.SyncSINADaDan();
-            //sync.SyncKLineDay();   
+            } 
             #endregion
 
             Console.WriteLine("全部结束");

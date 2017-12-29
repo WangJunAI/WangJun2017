@@ -42,7 +42,7 @@ namespace WangJun.Stock
                     LOGGER.Log(string.Format("准备更新股票代码 {0}",DateTime.Now));
                     inst.UpdateAllStockCode();
                     LOGGER.Log(string.Format("股票代码更新完毕 {0} {1} 下一次更新在一天后后 已运行 ", DateTime.Now,DateTime.Now-startTime));
-                    ThreadManager.Pause(days: 1);
+                    ThreadManager.Pause(days: 1); ///每日更新一次
                 }
                 else
                 {
@@ -50,7 +50,7 @@ namespace WangJun.Stock
                     ThreadManager.Pause(hours: 1);
 
                 }
-
+                
             }
         }
         #endregion
@@ -123,13 +123,16 @@ namespace WangJun.Stock
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var dbName = CONST.DB.DBName_StockService;
             var collectionName = CONST.DB.CollectionName_CWZY;
+            var methodName = "SyncCWZY";
             while (true)
             {
                 ///获取所有股票代码,遍历更新数据,二维化
-                var q = this.PrepareData();
+                var q = this.PrepareData(methodName);
                 while (0 < q.Count)
                 {
+
                     var stockCode = q.Dequeue();
+
                     var resObj = WebDataSource.GetInstance().GetCWZY(stockCode);
                     var resDict = (resObj is Dictionary<string, object>) ? (resObj as Dictionary<string, object>)["PageData"]   : new Dictionary<string, object>();
                     ///保存到数据库中 二维化
@@ -148,8 +151,10 @@ namespace WangJun.Stock
                     LOGGER.Log(string.Format("更新{0} {1}的财务摘要 ",stockCode, svItem.StockName));
                     mongo.Save3(dbName, collectionName, svItem, filter);
                     ThreadManager.Pause(seconds: 5);
- 
+                    TaskStatusManager.Set(methodName, new {ID= methodName, StockCode = stockCode, StockName = svItem.StockName, Status = "已下载", CreateTime = DateTime.Now });
                 }
+                TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
+
                 ThreadManager.Pause(days: 2);
                 q = this.PrepareData();
             }
@@ -454,17 +459,37 @@ namespace WangJun.Stock
         /// 准备数据
         /// </summary>
         /// <returns></returns>
-        protected Queue<string> PrepareData()
+        protected Queue<string> PrepareData(string methodName=null)
         {
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
-            var filter = "{\"ContentType\":\"股票代码\"}";
-            var resList = mongo.Find("StockService", "BaseInfo", filter);
+            var query = "{\"ContentType\":\"股票代码\",\"SortCode\":{$exists:true}}";
+            var sort = "{\"SortCode\":1}";
+            var resList = mongo.Find3("StockService", "BaseInfo", query,sort);
             if(null == this.stockCodeDict ||0==this.stockCodeDict.Count)
             {
                 this.stockCodeDict = resList.ToDictionary(k=>k["StockCode"].ToString(), v => v["StockName"].ToString());
             }
+            var codeList = from item in resList orderby (int)item["SortCode"] select item["StockCode"].ToString();
+            var queue = CollectionTools.ToQueue<string>(codeList);
 
-            var queue = CollectionTools.ToQueue<string>(this.stockCodeDict.Keys);
+            if(!string.IsNullOrWhiteSpace(methodName))
+            {
+                var status = TaskStatusManager.Get(methodName);
+                var from = string.Empty; ///上一次的起始位置
+                if (status.ContainsKey("StockCode"))
+                {
+                    from = status["StockCode"].ToString();
+                }
+                while (!string.IsNullOrWhiteSpace(from) && 0 < queue.Count)
+                {
+                    var stockCode = queue.Dequeue();
+                    if (stockCode == from) ///若有状态,则从上次的位置开始下载
+                    {
+                        break;
+                    }
+                }
+            }
+
             return queue;
         }
         #endregion

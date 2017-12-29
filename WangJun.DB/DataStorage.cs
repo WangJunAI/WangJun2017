@@ -224,6 +224,28 @@ namespace WangJun.DB
             return null;
         }
         #endregion
+        #region 基于Json/SQLServer的查询
+        /// <summary>
+        /// 基于Linq的查询
+        /// </summary>
+        /// <param name="filter">过滤器</param>
+        /// <returns></returns>
+        public List<Dictionary<string, object>> Find3(string dbName, string collectionName, string query, string sort="{}",string protection = "{}", int pageIndex = 0, int pageSize = int.MaxValue, Dictionary<string, object> updateData = null)
+        {
+            if (null != this.mongo)
+            {
+                var res = mongo.Find3(dbName, collectionName, query,sort, protection, pageIndex, pageSize, updateData);
+                return res;
+            }
+            else if (null != this.sqlserver)
+            {
+                //var res = this.sqlserver.Find(jsonString, exParam as List<KeyValuePair<string, object>>);
+                //return res;
+            }
+
+            return null;
+        }
+        #endregion
 
         #region 遍历处理
         /// <summary>

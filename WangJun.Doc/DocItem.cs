@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace WangJun.Doc
     /// </summary>
     public class DocItem
     {
+        public ObjectId _id { get; set; }
         public Guid ID{ get; set; }
 
         public string ShowMode { get; set; }
@@ -40,12 +42,24 @@ namespace WangJun.Doc
 
         public void Save()
         {
-            var mongo = DataStorage.GetInstance("170", "mongo");
-            mongo.Save2("DocService", "Doc", null, this);
+            var dbName = "DocService";
+            var collectionName = "DocItem";
+            var db = DataStorage.GetInstance(DBType.MongoDB);
+            var filter = "{\"_id\":ObjectId('"+this._id.ToString()+"')}";
+            db.Save3(dbName, collectionName, this, filter);
         }
 
         public void Remove()
-        { 
+        {
+            var dbName = "DocService";
+            var collectionName = "DocItem";
+            var db = DataStorage.GetInstance(DBType.MongoDB);
+            var filter = "{\"_id\":ObjectId('" + this._id.ToString() + "')}";
+            db.Remove(dbName, collectionName, filter);
+
+
         }
+
+ 
     }
 }
