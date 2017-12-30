@@ -1,4 +1,4 @@
 ﻿{
-    "ServiceName":"SyncCWZY",
-    "NodeServiceUrl":"http://localhost:9007"
+    "ServiceName":"SyncStockRardar",
+    "NodeServiceUrl":"http://localhost:9001"
 }

@@ -507,5 +507,48 @@ namespace WangJun.Stock
             return queue;
         }
         #endregion
+
+        #region SINA 股市雷达异动
+        public void SyncStockRardar()
+        {
+            var startTime = DateTime.Now;///开始运行时间
+            Console.Title = "SINA 股市雷达异动 更新进程 启动时间：" + startTime;
+
+            var exe = StockTaskExecutor.CreateInstance();
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var dbName = CONST.DB.DBName_StockService;
+            var collectionName = CONST.DB.CollectionName_Radar;
+            var methodName = "SyncStockRardar";
+
+            while (true)
+            {
+                var filterCheck = "{\"TradingDate\":new Date('"+string.Format("{0:yyyy/MM/dd}",DateTime.Now)+"')}";
+                var checkRes = mongo.Count(dbName, collectionName, filterCheck);
+                if (0 == checkRes && CONST.IsSafeUpdateTime(1))
+                {
+                    var listData = WebDataSource.GetInstance().GetStockRadar();
+                    foreach (var item in listData)
+                    {
+                        var tradingTime = item["异动时间"].ToString().Replace("-", "/");
+                        var filter = "{\"ContentType\":\"SINA 股市雷达\",\"TradingTime\":new Date('" + tradingTime + "')}";
+                        var svItem = new
+                        {
+                            StockCode = item["股票代码"],
+                            StockName = item["股票简称"],
+                            AnomalyInfo = item["异动信息"],
+                            TradingTime = item["异动时间"],
+                            TradingDate = Convert.ToDateTime(tradingTime).Date
+                        };
+                        mongo.Save3(dbName, collectionName, svItem, filter);
+                    }
+
+                    TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
+
+                    LOGGER.Log(string.Format("本次板块概念更新完毕，下一次一天以后更新 {0}", DateTime.Now));
+                }
+                ThreadManager.Pause(hours: 2);
+            }
+        }
+        #endregion
     }
 }

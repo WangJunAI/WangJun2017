@@ -47,6 +47,11 @@ namespace WangJun.Stock
             public static string CollectionName_BKGN { get { return "BKGN"; } }
 
             /// <summary>
+            /// 股票异动信息
+            /// </summary>
+            public static string CollectionName_Radar { get { return "Radar"; } }
+
+            /// <summary>
             /// 资金流向
             /// </summary>
             public static string CollectionName_ZJLX { get { return "ZJLX"; } }

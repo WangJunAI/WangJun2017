@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WangJun.Data;
+using WangJun.Debug;
 using WangJun.Net;
 using WangJun.Tools;
 
@@ -252,6 +253,38 @@ namespace WangJun.Stock
 
             var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
             return strData;
+        }
+        #endregion
+
+        #region 股市雷达
+        /// <summary>
+        /// 股市雷达 用于发现异常股票
+        /// http://finance.sina.com.cn/stockradar/stockradar16.html
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetStockRadar()
+        {
+            var list = new List<string>();
+            for (int k = 1; k <= 16; k++)
+            {
+                var url = string.Format("http://finance.sina.com.cn/stockradar/stockradar{0}.html", k);
+                var httpDownloader = new HTTP();
+                var headers = new Dictionary<HttpRequestHeader, string>();
+                headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+                headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+                headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+                headers.Add(HttpRequestHeader.Host, "finance.sina.com.cn");
+                headers.Add(HttpRequestHeader.Referer, string.Format("http://finance.sina.com.cn/stockradar/stockradar{0}.html", (k%14)+2));
+                headers.Add(HttpRequestHeader.UserAgent, CONST.UserAgent);
+
+                var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
+                list.Add(strData);
+                LOGGER.Log(string.Format("正在获取 股市雷达 {0}", k));
+                ThreadManager.Pause(seconds: 5);
+            }
+
+            return list;
+
         }
         #endregion
     }

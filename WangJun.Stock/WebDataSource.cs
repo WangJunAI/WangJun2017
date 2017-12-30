@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Data;
 using WangJun.Net;
 using WangJun.NetLoader;
 
@@ -162,9 +163,35 @@ namespace WangJun.Stock
             return res;
         }
         #endregion
-        
-        #region 获取THS新闻
 
+        #region 获取SINA股票雷达
+        /// <summary>
+        /// 获取SINA股票雷达
+        /// </summary>
+        /// <returns></returns>
+        public List<Dictionary<string,object>> GetStockRadar()
+        {
+            var tradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00");
+            var listHtml = DataSourceSINA.CreateInstance().GetStockRadar();
+            var listData = new List<Dictionary<string, object>>();
+            foreach (var html in listHtml)
+            {
+                var resDict = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA股市雷达", Page = html }) as Dictionary<string,object>;
+                var pageData = resDict["PageData"] as ArrayList;
+                if(pageData is ArrayList)
+                {
+                    var itemList = pageData as ArrayList;
+                    foreach (Dictionary<string,object> item in itemList)
+                    {
+                        var dict = item;
+                        dict["异动时间"] = Convertor.CalTradingDate(DateTime.Now, item["异动时间"].ToString());
+                        listData.Add(dict);
+                    }
+                }
+            }
+
+            return listData; 
+        }
         #endregion
     }
 }
