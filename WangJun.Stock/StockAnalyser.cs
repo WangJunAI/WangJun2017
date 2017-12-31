@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,7 @@ namespace WangJun.Stock
         }
 
 
-        #region 大单行为分析
+        #region 大单行为分析[暂时作废]
         /// <summary>
         /// 大单行为分析
         /// </summary>
@@ -100,6 +101,68 @@ namespace WangJun.Stock
         #region 每日最新热词
 
         #endregion
+
+        #region 板块概念
+        /// <summary>
+        /// 板块概念 每天晚上跑一次
+        /// </summary>
+        public void AnalyseBKGN()
+        {
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var dbName = CONST.DB.DBName_StockService;
+            var sourceCollectionName = CONST.DB.CollectionName_BKGN;
+            var targetCollectionName = CONST.DB.CollectionName_DataResult;
+            var bkDict = new Dictionary<string, List<string>> ();
+            var gnDict = new Dictionary<string, List<string>> ();
+            mongo.EventTraverse += (object sender ,EventArgs e) => {
+                var ee = e as EventProcEventArgs;
+                var data = (ee.Default as Dictionary<string, object>);
+                var pageData = data["PageData"] as Dictionary<string,object>;
+                var stockCode = data["StockCode"].ToString();
+                var stockName = data["StockName"].ToString();
+                var bkData = pageData["所属板块"] as object[];
+                var gnData = pageData["所属概念"] as object[];
+                if(bkData is object[])
+                {
+                    foreach (var item in (bkData as object[]))
+                    {
+                        var bk = item.ToString().Replace(".","_");
+                        if(!bkDict.ContainsKey(bk))
+                        {
+                            bkDict.Add(bk,new List<string>()) ;
+                        }
+
+                        bkDict[bk].Add(string.Format("{0}{1}", stockCode, stockName));
+                    }
+                }
+
+                if (gnData is object[])
+                {
+                    foreach (var item in (gnData as object[]))
+                    {
+                        var gn= item.ToString().Replace(".", "_");
+                        if (!gnDict.ContainsKey(gn))
+                        {
+                            gnDict.Add(gn, new List<string>());
+                        }
+
+                        gnDict[gn].Add(string.Format("{0}{1}", stockCode, stockName));
+
+                    }
+                }
+            };
+            var bkItem = new {ContentType="板块分析" ,Data=bkDict,CreateTime=DateTime.Now};
+            var gnItem = new { ContentType = "概念分析", Data = gnDict, CreateTime = DateTime.Now };
+
+            var filter = "{}";
+            mongo.Traverse(dbName, sourceCollectionName, filter);
+
+            mongo.Save3(dbName, targetCollectionName, bkItem);
+
+            mongo.Save3(dbName, targetCollectionName, gnItem);
+        }
+        #endregion
+
 
 
     }

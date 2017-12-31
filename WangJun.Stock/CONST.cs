@@ -65,6 +65,11 @@ namespace WangJun.Stock
             /// 基本信息
             /// </summary>
             public static string CollectionName_BaseInfo { get { return "BaseInfo"; } }
+
+            /// <summary>
+            /// 数据结果
+            /// </summary>
+            public static string CollectionName_DataResult { get { return "DataResult"; } }
         }
 
         /// <summary>

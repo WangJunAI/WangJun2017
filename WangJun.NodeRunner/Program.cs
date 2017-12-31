@@ -88,7 +88,9 @@ namespace WangJun.NodeRunner
                 //}
 
                 //var list = DataSourceSINA.CreateInstance().GetLSCJMX("600360", "2017-12-27");
-                var list = WebDataSource.GetInstance().GetStockRadar();
+                //var list = WebDataSource.GetInstance().GetStockRadar();
+
+                analysor.AnalyseBKGN();
             }
             else if ("SyncStockNews" == serviceName)
             {
