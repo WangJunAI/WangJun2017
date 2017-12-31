@@ -70,7 +70,8 @@ namespace WangJun.Stock
             /// 数据结果
             /// </summary>
             public static string CollectionName_DataResult { get { return "DataResult"; } }
-        }
+
+         }
 
         /// <summary>
         /// Node服务Url

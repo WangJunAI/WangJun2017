@@ -99,7 +99,31 @@ namespace WangJun.Stock
         #endregion
 
         #region 每日最新热词
+        /// <summary>
+        /// 每日最新热词
+        /// </summary>
+        public void AnalyseHotWords()
+        {
+            var date = DateTime.Now.AddDays(-3);
+            var filter = "{\"CreateTime\":{$gt:new Date('"+string.Format("{0:yyyy/MM/dd}", date) + "'),$lt:new Date('" + string.Format("{0:yyyy/MM/dd}", date) + " 23:59:59')}}";
+            var sort = "{\"Count\":-1}";
+            var count = 20;
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var dbName = CONST.DB.DBName_StockService;
+            var sourceCollectionName = CONST.DB.CollectionName_FenCi;
+            var targetCollectionName = CONST.DB.CollectionName_DataResult;
+            var list = mongo.Find3(dbName, sourceCollectionName, filter, sort);
 
+            var hotWords = new {
+                ContentType = "每日热词",
+                CreateTime = DateTime.Now,
+                Top20 =(from item in list select new { Word=item["Word"],Count=item["Count"]}).ToList(),
+                NewDate=int.Parse(string.Format("{0:yyyyMMdd}", date))
+            };
+
+            var svQuery = "{\"NewDate\":"+hotWords.NewDate+"}";
+            mongo.Save3(dbName, targetCollectionName, hotWords, svQuery);
+        }
         #endregion
 
         #region 板块概念

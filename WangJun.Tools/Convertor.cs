@@ -126,6 +126,16 @@ namespace WangJun.Data
                             }
                             dict.Add(name, list);
                         }
+                        else if (null != value && (value is IEnumerable))
+                        {
+                            var list = new List<object>();
+                            foreach (var arrayItem in (value as IEnumerable))
+                            {
+                                var arrayItemValue = Convertor.FromObjectToDictionary(arrayItem);
+                                list.Add(arrayItemValue);
+                            }
+                            dict.Add(name, list);
+                        }
                         else if(null != value)
                         {
                             dict.Add(name, value);
