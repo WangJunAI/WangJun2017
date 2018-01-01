@@ -131,8 +131,16 @@ namespace WangJun.Data
                             var list = new List<object>();
                             foreach (var arrayItem in (value as IEnumerable))
                             {
-                                var arrayItemValue = Convertor.FromObjectToDictionary(arrayItem);
-                                list.Add(arrayItemValue);
+                                if (!arrayItem.GetType().IsValueType && arrayItem.GetType() != typeof(string))
+                                {
+                                    var arrayItemValue = Convertor.FromObjectToDictionary(arrayItem);
+                                    list.Add(arrayItemValue);
+                                }
+                                else
+                                {
+                                    list.Add(arrayItem);
+                                }
+
                             }
                             dict.Add(name, list);
                         }

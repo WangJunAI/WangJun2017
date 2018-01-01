@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WangJun.DB;
+using WangJun.Debug;
 using WangJun.Tools;
 
 namespace WangJun.Stock
@@ -187,6 +188,92 @@ namespace WangJun.Stock
         }
         #endregion
 
+        #region 好业绩公司
+        /// <summary>
+        /// 好业绩公司
+        /// </summary>
+        public void AnalyseGoodPerformanceCompany()
+        {
+            var filter = "{\"PageData.0.每股净资产\":{$gt: 1},\"PageData.0.每股收益\":{$gt: 1},\"PageData.0.每股现金含量\":{$gt: 1},\"PageData.0.每股资本公积金\":{$gt: 1},\"PageData.0.净利润\":{$gt: 10000000}}";
+            var sort = "{}";
+            var count = 20;
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var dbName = CONST.DB.DBName_StockService;
+            var sourceCollectionName = CONST.DB.CollectionName_CWZY;
+            var targetCollectionName = CONST.DB.CollectionName_DataResult;
+            var list = mongo.Find3(dbName, sourceCollectionName, filter, sort);
+
+            var svItem = new
+            {
+                ContentType = "好业绩公司",
+                Discription="最近一个季度业绩大于指定指标",
+                CreateTime = DateTime.Now,
+                Company = (from item in list select new { StockCode=item["StockCode"], StockName = item["StockName"] }).ToList(),
+            };
+
+            var svQuery = "{\"ContentType\":\"好业绩公司\"}";
+            mongo.Save3(dbName, targetCollectionName, svItem, svQuery);
+        }
+        #endregion
+
+        #region 业绩变好公司
+        /// <summary>
+        /// 好业绩公司
+        /// </summary>
+        public void AnalyseBeBetterCompany()
+        {
+            var date = DateTime.Now.AddDays(-3);
+ 
+            var filter = "{}";
+            var sort = "{}";
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var dbName = CONST.DB.DBName_StockService;
+            var sourceCollectionName = CONST.DB.CollectionName_CWZY;
+            var targetCollectionName = CONST.DB.CollectionName_DataResult;
+            var svItem = new {ContentType="业绩连续两季度增长的股票",CreateTime=DateTime.Now,List=new List<string>() };
+            mongo.EventTraverse += (object sender,EventArgs e) => {
+                try
+                {
+                    var ee = e as EventProcEventArgs;
+                    var data = ee.Default as Dictionary<string, object>;
+                    var stockCode = data["StockCode"].ToString();
+                    var stockName = data["StockName"].ToString();
+                    var arrayList = data["PageData"] as object[];
+                    var item1 = arrayList[0] as Dictionary<string, object>;
+                    var item2 = arrayList[1] as Dictionary<string, object>;
+                    var mgjzc1 = (string.IsNullOrWhiteSpace(item1["每股净资产"].ToString())) ? 0 : float.Parse(item1["每股净资产"].ToString());///最新季度的每股净资产
+                    var mgjzc2 = (string.IsNullOrWhiteSpace(item2["每股净资产"].ToString())) ? 0 : float.Parse(item2["每股净资产"].ToString());///前第2季度的每股净资产
+                    var mgsy1 = (string.IsNullOrWhiteSpace(item1["每股收益"].ToString())) ? 0 : float.Parse(item1["每股收益"].ToString());///最新季度的每股收益
+                    var mgsy2 = (string.IsNullOrWhiteSpace(item2["每股收益"].ToString())) ? 0 : float.Parse(item2["每股收益"].ToString());///前第2季度的每股收益       
+                    var mgxjhl1 = (string.IsNullOrWhiteSpace(item1["每股现金含量"].ToString())) ? 0 : float.Parse(item1["每股现金含量"].ToString());///最新季度的每股现金含量
+                    var mgxjhl2 = (string.IsNullOrWhiteSpace(item2["每股现金含量"].ToString())) ? 0 : float.Parse(item2["每股现金含量"].ToString());///前第2季度的每股现金含量
+                    var mgzbgjj1 = (string.IsNullOrWhiteSpace(item1["每股资本公积金"].ToString())) ? 0 : float.Parse(item1["每股资本公积金"].ToString());///最新季度的每股资本公积金
+                    var mgzbgjj2 = (string.IsNullOrWhiteSpace(item2["每股资本公积金"].ToString())) ? 0 : float.Parse(item2["每股资本公积金"].ToString());///前第2季度的每股资本公积金
+                    var jlr1 = (string.IsNullOrWhiteSpace(item1["净利润"].ToString())) ? 0 : float.Parse(item1["净利润"].ToString());///最新季度的净利润
+                    var jlr2 = (string.IsNullOrWhiteSpace(item2["净利润"].ToString())) ? 0 : float.Parse(item2["净利润"].ToString());///前第2季度的净利润
+
+                    if (1 <= mgjzc1 && 1 <= mgjzc2 && mgjzc2 * 1 <= mgjzc1 ///每股净资产 持续增加且增长10%以上
+                && 1 <= mgsy1 && 1 <= mgsy2 && mgsy2 * 1<= mgsy1///每股收益 持续增加且增长10%以上
+                && 1 <= mgxjhl1 && 1 <= mgxjhl2 && mgxjhl2 * 1 <= mgxjhl1///每股现金含量 持续增加且增长10%以上
+                && 1 <= mgzbgjj1 && 1 <= mgzbgjj2 && mgzbgjj2 * 1 <= mgzbgjj1///每股资本公积金 持续增加且增长10%以上
+                && 1 <= jlr1 && 1 <= jlr2 && jlr2 * 1 <= jlr1///净利润 持续增加且增长10%以上
+                )
+                    {
+                        svItem.List.Add(string.Format("{0}{1}", stockCode, stockName));
+                    }
+                }
+                catch(Exception ex)
+                {
+                    LOGGER.Log(string.Format("{0}",ex.Message));
+                }
+            };
+
+            mongo.Traverse(dbName, sourceCollectionName, "{}");
+
+            var svQuery = "{\"ContentType\":\"业绩连续两季度增长的股票\"}";
+            mongo.Save3(dbName, targetCollectionName, svItem, svQuery);
+        }
+        #endregion
 
 
     }
