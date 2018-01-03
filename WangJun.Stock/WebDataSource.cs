@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WangJun.Data;
 using WangJun.Net;
 using WangJun.NetLoader;
+using WangJun.Tools;
 
 namespace WangJun.Stock
 {
@@ -48,7 +49,7 @@ namespace WangJun.Stock
             var res = new object();
             if ("SINA" == source.ToUpper()&& !string.IsNullOrWhiteSpace(stockCode))//  //WebDataSource.GetDataFromHttpAgent("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceSINA&m=GetCWZY&p=6018888");//
             {
-                var html = DataSourceSINA.CreateInstance().GetCWZY(stockCode);
+                var html = DataSourceSINA.GetInstance().GetCWZY(stockCode);
                 var resDict = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA财务摘要", Page=html });
                 return resDict;
             }
@@ -71,7 +72,7 @@ namespace WangJun.Stock
 
             if ("SINA" == source.ToUpper() && !string.IsNullOrWhiteSpace(stockCode)) //
             {
-                var html = DataSourceSINA.CreateInstance().GetGSJJ(stockCode);
+                var html = DataSourceSINA.GetInstance().GetGSJJ(stockCode);
                 if(string.IsNullOrWhiteSpace(html))
                 {
                     html = WebDataSource.GetDataFromHttpAgent(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceSINA&m=GetGSJJ&p={0}", stockCode));
@@ -103,7 +104,7 @@ namespace WangJun.Stock
         /// <returns></returns>
         public Dictionary<string,object> GetSINAKLineDay(string stockCode, int year ,int jidu,string source = "SINA")
         {
-            var html = DataSourceSINA.CreateInstance().GetLSJY(stockCode, year, jidu);
+            var html = DataSourceSINA.GetInstance().GetLSJY(stockCode, year, jidu);
             var res = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA历史交易", Page = html });// 
             var resDict= res as Dictionary<string, object>;
             return resDict["PageData"] as Dictionary<string, object>;
@@ -123,7 +124,7 @@ namespace WangJun.Stock
 
             if ("SINA" == source.ToUpper() && !string.IsNullOrWhiteSpace(stockCode)) //
             {
-                var html = DataSourceSINA.CreateInstance().GetBKGN(stockCode);
+                var html = DataSourceSINA.GetInstance().GetBKGN(stockCode);
                 if (string.IsNullOrWhiteSpace(html))
                 {
                     html = WebDataSource.GetDataFromHttpAgent(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceSINA&m=GetBKGN&p={0}", stockCode));
@@ -172,7 +173,7 @@ namespace WangJun.Stock
         public List<Dictionary<string,object>> GetStockRadar()
         {
             var tradingDate = Convertor.CalTradingDate(DateTime.Now, "00:00:00");
-            var listHtml = DataSourceSINA.CreateInstance().GetStockRadar();
+            var listHtml = DataSourceSINA.GetInstance().GetStockRadar();
             var listData = new List<Dictionary<string, object>>();
             foreach (var html in listHtml)
             {
@@ -191,6 +192,68 @@ namespace WangJun.Stock
             }
 
             return listData; 
+        }
+        #endregion
+
+        #region 获取THS龙虎榜数据
+        /// <summary>
+        /// 获取THS龙虎榜数据
+        /// </summary>
+        /// <param name="stockCode"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public List<object> GetLHB(string stockCode, string source = "THS")
+        {
+            var resList = new List<object>();
+
+            if ("THS" == source.ToUpper() && !string.IsNullOrWhiteSpace(stockCode)) //
+            {
+                var lhbHtml = DataSourceTHS.CreateInstance().GetGGLHB(stockCode);
+                if (string.IsNullOrWhiteSpace(lhbHtml))
+                {
+                    lhbHtml = WebDataSource.GetDataFromHttpAgent(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceTHS&m=GetGGLHB&p={0}", stockCode));
+                }
+
+                var lhbDict = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS个股龙虎榜", Page = lhbHtml });
+                resList.Add((lhbDict as Dictionary<string,object>)["PageData"]);
+                ThreadManager.Pause(seconds:2);
+                var lhbmxUrlList = DataSourceTHS.CreateInstance().GetUrlGGLHBMX(lhbHtml);
+                foreach (var lhbMXUrl in lhbmxUrlList)
+                {
+                    var lhbMXHtml = DataSourceTHS.CreateInstance().GetGGLHBMX(stockCode, lhbMXUrl);
+                    if (string.IsNullOrWhiteSpace(lhbMXHtml))
+                    {
+                        //lhbHtml = WebDataSource.GetDataFromHttpAgent(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceTHS&m=GetGGLHBMX&p={0}", stockCode));
+                    }
+                    var lhbMXDict = NodeService.Get(CONST.NodeServiceUrl, "同花顺", "GetDataFromHtml", new { ContentType = "THS个股龙虎榜明细", Page = lhbMXHtml });
+                    resList.Add((lhbMXDict as Dictionary<string, object>)["PageData"]);
+                    ThreadManager.Pause(seconds: 1);
+                }
+            }
+
+            return resList;
+        }
+        #endregion
+
+        #region 获取SINA融资融券
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stockCode"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public ArrayList GetRZRQ(string stockCode, string source = "SINA")
+        {
+            var res = new ArrayList();
+
+            if ("SINA" == source.ToUpper() && !string.IsNullOrWhiteSpace(stockCode)) //
+            {
+                var rzrqHtml = DataSourceSINA.GetInstance().GetRZRQ(stockCode);
+                var rzrqDict = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA融资融券", Page = rzrqHtml });
+                var pageData = (rzrqDict  as Dictionary<string, object>)["PageData"] as Dictionary<string, object>;
+                return pageData["Rows"] as ArrayList;
+            }
+            return res;
         }
         #endregion
     }

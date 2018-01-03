@@ -311,14 +311,14 @@ namespace WangJun.Stock
             }
             else if("SINA个股历史交易" == contentType)
             {
-                var sina = DataSourceSINA.CreateInstance();
+                var sina = DataSourceSINA.GetInstance();
                 var year = (int)exData["Year"];
                 var jidu = (int)exData["JiDu"];
                 html = sina.GetLSJY(stockcode, year, jidu);
             }
             else if ("SINA个股历史交易明细" == contentType)
             {
-                var sina = DataSourceSINA.CreateInstance();
+                var sina = DataSourceSINA.GetInstance();
                 var year = (int)exData["Year"];
                 var jidu = (int)exData["JiDu"];
                 html = sina.GetLSJY(stockcode, year, jidu);

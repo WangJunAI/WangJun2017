@@ -216,7 +216,7 @@ namespace WangJun.Stock
         }
         #endregion
 
-        #region 业绩变好公司
+        #region 两个季度业绩变好公司
         /// <summary>
         /// 好业绩公司
         /// </summary>
@@ -272,6 +272,65 @@ namespace WangJun.Stock
 
             var svQuery = "{\"ContentType\":\"业绩连续两季度增长的股票\"}";
             mongo.Save3(dbName, targetCollectionName, svItem, svQuery);
+        }
+        #endregion
+
+        #region 上涨4%-8%股票特点分析
+        /// <summary>
+        /// 上涨4%-8%股票特点分析
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public void AnalyseRisingStock(DateTime startTime ,DateTime endTime,int min=4,int max=8)
+        {
+            var minVal = float.Parse(min.ToString()) / 100.0;
+            var maxVal = float.Parse(max.ToString()) / 100.0;
+
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var dbName = CONST.DB.DBName_StockService;
+            var collectionKLine = CONST.DB.CollectionName_KLine;
+            var collecrionSINADaDan2D = CONST.DB.CollectionName_DaDan;
+            var collectionCWZY = CONST.DB.CollectionName_CWZY;
+            var collectionRadar = CONST.DB.CollectionName_Radar;
+            var collectionZJLX = CONST.DB.CollectionName_ZJLX;
+            #region 找所有的上涨指定涨幅的日线数据
+            var query1 = "{\"Increase\":{$gte:0.04,$lte:0.08},\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}",startTime)+ "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", endTime) + "')}}";
+            var targetKLineList = mongo.Find3(dbName, collectionKLine, query1);
+            #endregion
+
+            foreach (var kline in targetKLineList)
+            {
+                var stockCode = kline["StockCode"].ToString();
+                var stockName = kline["StockName"].ToString();
+                var itemTradingDate = DateTime.Parse(kline["TradingDate"].ToString());
+                ///获取这个股票所在的板块，概念
+                var queryBKGN = "{\"StockCode\":\""+stockCode+"\"}";
+                ///获取这个股票所在的前7交易日KLine
+                var days = -7;
+                var queryKLinePrev = "{\"Increase\":{$gte:0.04,$lte:0.08},\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
+                var prevKlineList = mongo.Find3(dbName, collectionKLine, queryKLinePrev);
+                ///获取这个股票的财务摘要
+                var queryCWZY = "{\"StockCode\":\"" + stockCode + "\"}";
+                var cwzyList = mongo.Find3(dbName, collectionCWZY,queryCWZY);
+                ///获取前7日的股票雷达
+                var queryRadar = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
+                var radarList = mongo.Find3(dbName, collectionRadar, queryRadar);
+                ///获取前7日的大单数据
+                var querySINADaDan2D = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
+                var dadanList = mongo.Find3(dbName, collecrionSINADaDan2D, querySINADaDan2D);
+                ///获取前7日资金流向
+
+                var queryZJLX = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
+                var zjlxList = mongo.Find3(dbName, collectionZJLX, queryZJLX);
+
+                ///获取前7日的龙虎榜信息
+                ///获取前7日该股的全网新闻
+                ///获取前7日该股的个股资讯
+
+
+
+
+            }
         }
         #endregion
 

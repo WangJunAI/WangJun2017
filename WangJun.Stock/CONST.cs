@@ -71,7 +71,22 @@ namespace WangJun.Stock
             /// </summary>
             public static string CollectionName_DataResult { get { return "DataResult"; } }
 
-         }
+            /// <summary>
+            /// 龙虎榜
+            /// </summary>
+            public static string CollectionName_LHB { get { return "LHB"; } }
+
+            /// <summary>
+            /// 龙虎榜明细
+            /// </summary>
+            public static string CollectionName_LHBMX { get { return "LHBMX"; } }
+
+            /// <summary>
+            /// 融资融券
+            /// </summary>
+            public static string CollectionName_RZRQ { get { return "RZRQ"; } }
+
+        }
 
         /// <summary>
         /// Node服务Url

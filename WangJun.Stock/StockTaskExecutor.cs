@@ -132,7 +132,7 @@ namespace WangJun.Stock
             ///
 
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
-                var webSource = DataSourceSINA.CreateInstance();
+                var webSource = DataSourceSINA.GetInstance();
                 var pageCount = webSource.GetDaDanPageCount();
                 var dbName = CONST.DB.DBName_StockService;
                 var collectionName = CONST.DB.CollectionName_DaDan;

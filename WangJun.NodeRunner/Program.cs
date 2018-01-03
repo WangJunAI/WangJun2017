@@ -91,7 +91,8 @@ namespace WangJun.NodeRunner
                 //var list = WebDataSource.GetInstance().GetStockRadar();
 
                 //analysor.AnalyseHotWords();
-                analysor.AnalyseBeBetterCompany();
+                //analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-10),endTime:DateTime.Now.AddDays(-5));
+                sync.SyncRZRQ();
             }
             else if ("SyncStockNews" == serviceName)
             {
