@@ -431,7 +431,7 @@ namespace WangJun.Stock
                                 StockName = stockName,
                                 Url = string.Format("http://stockpage.10jqka.com.cn/{0}/funds/", stockCode),
                                 CreateTime = DateTime.Now,
-                                TradingDate = row["日期"],
+                                TradingDate = DateTime.Parse(row["日期"].ToString()),
                                 Close = row["收盘价"],
                                 Increase = row["涨跌幅"],
                                 NetInflow = row["资金净流入"],
@@ -479,7 +479,7 @@ namespace WangJun.Stock
             var query = "{\"ContentType\":\"股票代码\",\"SortCode\":{$exists:true}}";
             var sort = "{\"SortCode\":1}";
             var resList = mongo.Find3("StockService", "BaseInfo", query, sort);
-            if (null == this.stockCodeDict || 0 == this.stockCodeDict.Count)
+            if (null != resList && (null == this.stockCodeDict || 0 == this.stockCodeDict.Count))
             {
                 this.stockCodeDict = resList.ToDictionary(k => k["StockCode"].ToString(), v => v["StockName"].ToString());
             }
@@ -544,7 +544,11 @@ namespace WangJun.Stock
 
                     TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
 
-                    LOGGER.Log(string.Format("本次板块概念更新完毕，下一次一天以后更新 {0}", DateTime.Now));
+                    LOGGER.Log(string.Format("本次股市雷达异动更新完毕，下一次一天以后更新 {0}", DateTime.Now));
+                }
+                else
+                {
+                    LOGGER.Log(string.Format("今日股市雷达异动已经更新，下一次一天以后更新"));
                 }
                 ThreadManager.Pause(hours: 2);
             }
@@ -652,7 +656,6 @@ namespace WangJun.Stock
                     var stockName = this.stockCodeDict[stockCode];
 
                     var array = WebDataSource.GetInstance().GetRZRQ(stockCode);
-
                     foreach (Dictionary<string,object> arrayItem in array)
                     {
                         var svItem = new {
@@ -669,15 +672,19 @@ namespace WangJun.Stock
                             RQYE = arrayItem["融券余额"],
                             CreateTime=DateTime.Now
                         };
-
+                        LOGGER.Log(string.Format("SINA融资融券 {0} {1} {2} 保存完毕", stockCode, stockName,svItem.TradingDate));
                         var query = "{\"StockCode\":\""+stockCode+"\",\"TradingDate\":new Date('"+string.Format("{0:yyyy/MM/dd}",svItem.TradingDate)+"')}";
                         mongo.Save3(dbName, collectionNameRZRQ, svItem, query);
                     }
-                    ThreadManager.Pause(seconds: 5);
+                    ThreadManager.Pause(seconds:2);
                     TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = stockName, Status = "已下载", CreateTime = DateTime.Now });
-
+                    LOGGER.Log(string.Format("SINA融资融券 {0} {1} 保存完毕",stockCode,stockName));
 
                 }
+
+                LOGGER.Log(string.Format("本次SINA融资融券更新完毕，下一次一天以后更新 {0}", DateTime.Now));
+                TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
+                ThreadManager.Pause(days: 1);
             }
         }
         #endregion

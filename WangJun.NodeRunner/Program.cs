@@ -91,8 +91,9 @@ namespace WangJun.NodeRunner
                 //var list = WebDataSource.GetInstance().GetStockRadar();
 
                 //analysor.AnalyseHotWords();
-                //analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-10),endTime:DateTime.Now.AddDays(-5));
-                sync.SyncRZRQ();
+                //var list = DataSourceTouTiao.GetInstance().GetSearchResult("紫光国芯");
+                analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-10),endTime:DateTime.Now.AddDays(-5));
+                 
             }
             else if ("SyncStockNews" == serviceName)
             {
@@ -129,6 +130,14 @@ namespace WangJun.NodeRunner
             else if ("SyncStockRardar" == serviceName)
             {
                 sync.SyncStockRardar();
+            }
+            else if ("SyncRZRQ" == serviceName)
+            {
+                sync.SyncRZRQ();
+            }
+            else if ("AnalyseRisingStock" == serviceName)
+            {
+                analysor.AnalyseRisingStock(startTime: DateTime.Now.AddDays(-10), endTime: DateTime.Now.AddDays(-5));
             }
 
             #endregion

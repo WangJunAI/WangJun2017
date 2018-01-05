@@ -89,7 +89,12 @@ namespace WangJun.Data
             }
             return list;
         }
-
+        public static Dictionary<string, object> FromObjectToDictionary2(object data)
+        {
+            string json = Convertor.FromObjectToJson(data);
+            var dict = Convertor.FromJsonToDict(json);
+            return dict;
+        }
         public static Dictionary<string,object> FromObjectToDictionary(object data)
         {
             var dict = new Dictionary<string, object>();
@@ -126,7 +131,7 @@ namespace WangJun.Data
                             }
                             dict.Add(name, list);
                         }
-                        else if (null != value && (value is IEnumerable))
+                        else if (null != value && (value is IEnumerable) && !(value is IDictionary))
                         {
                             var list = new List<object>();
                             foreach (var arrayItem in (value as IEnumerable))
@@ -285,6 +290,8 @@ namespace WangJun.Data
 
         public static Dictionary<string, object> FromJsonToDict(string jsonString)
         {
+            js.MaxJsonLength = 16 * 1024 * 1024;
+            
             Dictionary<string, object> data = js.Deserialize<Dictionary<string, object>>(jsonString);
             return data;
         }

@@ -293,6 +293,21 @@ namespace WangJun.Stock
             var collectionCWZY = CONST.DB.CollectionName_CWZY;
             var collectionRadar = CONST.DB.CollectionName_Radar;
             var collectionZJLX = CONST.DB.CollectionName_ZJLX;
+            var collectionLHB = CONST.DB.CollectionName_LHB;
+            var collectionBKGN = CONST.DB.CollectionName_BKGN;
+            var collectionDataResult = CONST.DB.CollectionName_DataResult;
+
+            var svItem = new
+            {
+                BKGN = new Dictionary<string, int>(),
+                PrevKLine = new Dictionary<string, int> { { "上涨", 0 }, { "下跌", 0 }, { "4%以下", 0 }, { "4%以上", 0 }, { "-4%及内", 0 }, { "小于-4%", 0 } },
+                CWZY = new Dictionary<string, int> { { "每股净资产小于1", 0 }, { "每股净资产大于1", 0 }, { "每股收益小于1", 0 }, { "每股收益大于1", 0 }, { "每股现金含量小于1", 0 }, { "每股现金含量大于1", 0 }, { "每股资本公积金小于1", 0 }, { "每股资本公积金大于1", 0 } },
+                Radar = new Dictionary<string, int> { },
+                DaDan = new Dictionary<string, int> { },
+                ZJLX = new Dictionary<string, int> { { "流入", 0 }, { "流出", 0 }, { "大单占比", 0 }, { "中单占比", 0 }, { "小单占比", 0 } },
+                LHB =new {SBLX=new Dictionary<string, int> { },JMR=new Dictionary<string, int> { { "正值", 0 },{"负值" ,0} } }
+            };
+
             #region 找所有的上涨指定涨幅的日线数据
             var query1 = "{\"Increase\":{$gte:0.04,$lte:0.08},\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}",startTime)+ "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", endTime) + "')}}";
             var targetKLineList = mongo.Find3(dbName, collectionKLine, query1);
@@ -300,37 +315,273 @@ namespace WangJun.Stock
 
             foreach (var kline in targetKLineList)
             {
+                LOGGER.Log(string.Format("正在分析 {0} {1}",kline["StockCode"], kline["StockName"]));
                 var stockCode = kline["StockCode"].ToString();
                 var stockName = kline["StockName"].ToString();
                 var itemTradingDate = DateTime.Parse(kline["TradingDate"].ToString());
-                ///获取这个股票所在的板块，概念
-                var queryBKGN = "{\"StockCode\":\""+stockCode+"\"}";
+                #region 数据查找 
+                                ///获取这个股票所在的板块，概念
+                var queryBKGN = "{\"StockCode\":\"" + stockCode + "\"}";
+                var bkgnList = mongo.Find3(dbName, collectionBKGN, queryBKGN);
                 ///获取这个股票所在的前7交易日KLine
                 var days = -7;
-                var queryKLinePrev = "{\"Increase\":{$gte:0.04,$lte:0.08},\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
-                var prevKlineList = mongo.Find3(dbName, collectionKLine, queryKLinePrev);
+                var queryKLinePrev = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
+                var prevKLineList = mongo.Find3(dbName, collectionKLine, queryKLinePrev);
                 ///获取这个股票的财务摘要
                 var queryCWZY = "{\"StockCode\":\"" + stockCode + "\"}";
-                var cwzyList = mongo.Find3(dbName, collectionCWZY,queryCWZY);
+                var cwzyList = mongo.Find3(dbName, collectionCWZY, queryCWZY);
                 ///获取前7日的股票雷达
                 var queryRadar = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
                 var radarList = mongo.Find3(dbName, collectionRadar, queryRadar);
                 ///获取前7日的大单数据
                 var querySINADaDan2D = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
-                var dadanList = mongo.Find3(dbName, collecrionSINADaDan2D, querySINADaDan2D);
+                var dadanList = new List<Dictionary<string,object>>();// mongo.Find3(dbName, collecrionSINADaDan2D, querySINADaDan2D);
+
                 ///获取前7日资金流向
 
                 var queryZJLX = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
                 var zjlxList = mongo.Find3(dbName, collectionZJLX, queryZJLX);
 
                 ///获取前7日的龙虎榜信息
+                var queryLHB = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}"; ;
+                var lhbList = mongo.Find3(dbName, collectionLHB, queryLHB);
+
+                ///获取前7日的龙虎榜明细信息
+                var queryLHBMX = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}"; ;
+                var lhbmxList = mongo.Find3(dbName, collectionLHB, queryLHBMX);
+
+                ///获取前7日的融资融券信息
+                var queryRZRQ = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}"; ;
+                var rzrqList = mongo.Find3(dbName, collectionLHB, queryRZRQ);
+
+
+
                 ///获取前7日该股的全网新闻
                 ///获取前7日该股的个股资讯
+                #endregion
+ 
+                #region 数据分析
 
 
+                #region 分析所在的板块
+                foreach (Dictionary<string, object> bkgn in bkgnList)
+                {
+                    var gnList = (bkgn["PageData"] as Dictionary<string, object>)["所属概念"] as object[];
+                    foreach (string gn in gnList)
+                    {
+                        if (!svItem.BKGN.ContainsKey(gn))
+                        {
+                            svItem.BKGN[gn] = 0;
+                        }
+                        svItem.BKGN[gn] += 1;
+                    }
+                }
+                #endregion
+
+                #region 分析上涨幅度/振幅/成交量/成交均价
+                for (var k = 0; k < prevKLineList.Count; k++)
+                {
+                    var prevKLine = prevKLineList[k];
+                    var increase = float.Parse(prevKLine["Increase"].ToString());///涨幅
+                    var amplitude = float.Parse(prevKLine["Amplitude"].ToString());///振幅
+
+                    if (increase <= 0)
+                    {
+                        svItem.PrevKLine["下跌"] += 1;
+
+                        if (increase <= -0.04)
+                        {
+                            svItem.PrevKLine["小于-4%"] += 1;
+                        }
+                        else if (-0.04 < increase && increase <= 0)
+                        {
+                            svItem.PrevKLine["-4%及内"] += 1;
+                        }
+                    }
+                    else if (0 < increase)
+                    {
+                        svItem.PrevKLine["上涨"] += 1;
+                        if (increase <= 0.04)
+                        {
+                            svItem.PrevKLine["4%以下"] += 1;
+                        }
+                        else if (0.04 < increase)
+                        {
+                            svItem.PrevKLine["4%以上"] += 1;
+                        }
+                    }
+
+
+                    if (k != 0)
+                    {
+                        ///判断成交量成交均价的增加比例
+                        var prev = prevKLineList[k - 1];
+
+                    }
+                }
+                #endregion
+
+                #region 财务分析 每股净资产/每股收益/每股现金含量/每股公积金/净利润比上一季度增加的比例/是否大于1
+                if (0 < cwzyList.Count)
+                {
+                    var cwzy = cwzyList.First()["PageData"] as object[];
+                    var cwzy0 = cwzy[0] as Dictionary<string, object>; ///最新季度
+                    var cwzy1 = cwzy[1] as Dictionary<string, object>;
+                    var mgjzc0 = (string.IsNullOrWhiteSpace(cwzy0["每股净资产"].ToString())) ? 0 : float.Parse(cwzy0["每股净资产"].ToString()); 
+                    var mgjzc1 = (string.IsNullOrWhiteSpace(cwzy1["每股净资产"].ToString())) ? 0 : float.Parse(cwzy1["每股净资产"].ToString()); 
+                    var mgsy0 = (string.IsNullOrWhiteSpace(cwzy0["每股收益"].ToString())) ? 0 : float.Parse(cwzy0["每股收益"].ToString()); 
+                    var mgsy1 = (string.IsNullOrWhiteSpace(cwzy1["每股收益"].ToString())) ? 0 : float.Parse(cwzy1["每股收益"].ToString()); 
+                    var mgxjhl0 = (string.IsNullOrWhiteSpace(cwzy0["每股现金含量"].ToString())) ? 0 : float.Parse(cwzy0["每股现金含量"].ToString()); 
+                    var mgxjhl1 = (string.IsNullOrWhiteSpace(cwzy1["每股现金含量"].ToString())) ? 0 : float.Parse(cwzy1["每股现金含量"].ToString()); 
+                    var mgzbgjj0 = (string.IsNullOrWhiteSpace(cwzy0["每股资本公积金"].ToString())) ? 0 : float.Parse(cwzy0["每股资本公积金"].ToString()); 
+                    var mgzbgjj1 = (string.IsNullOrWhiteSpace(cwzy1["每股资本公积金"].ToString())) ? 0 : float.Parse(cwzy1["每股资本公积金"].ToString());
+
+                    if (1 <= mgjzc0)
+                    {
+                        svItem.CWZY["每股净资产大于1"] += 1;
+                    }
+                    else if (mgjzc0 < 1)
+                    {
+                        svItem.CWZY["每股净资产小于1"] += 1;
+                    }
+
+                    if (1 <= mgsy0)
+                    {
+                        svItem.CWZY["每股收益大于1"] += 1;
+                    }
+                    else if (mgsy0 < 1)
+                    {
+                        svItem.CWZY["每股收益小于1"] += 1;
+                    }
+
+                    if (1 <= mgxjhl0)
+                    {
+                        svItem.CWZY["每股现金含量大于1"] += 1;
+                    }
+                    else if (mgxjhl0 < 1)
+                    {
+                        svItem.CWZY["每股现金含量小于1"] += 1;
+                    }
+
+                    if (1 <= mgxjhl0)
+                    {
+                        svItem.CWZY["每股资本公积金大于1"] += 1;
+                    }
+                    else if (mgxjhl0 < 1)
+                    {
+                        svItem.CWZY["每股资本公积金小于1"] += 1;
+                    }
+
+
+
+                }
+                #endregion
+
+                #region 股市雷达 哪种类型的多
+                if (null != radarList)
+                {
+                    foreach (var radar in radarList)
+                    {
+                        var radarType = radar["异动信息"].ToString();
+                        if (!svItem.Radar.ContainsKey(radarType))
+                        {
+                            svItem.Radar.Add(radarType, 0);
+                        }
+
+                        svItem.Radar[radarType] += 1;
+                    }
+                }
+                #endregion
+
+                #region 大单数据 哪种类型的多
+                if (null != dadanList)
+                {
+                    foreach (var dadan in dadanList)
+                    {
+
+                        var kind = dadan["Kind"].ToString();
+                        if (!svItem.DaDan.ContainsKey(kind))
+                        {
+                            svItem.DaDan.Add(kind, 0);
+                        }
+
+                        svItem.DaDan[kind] += 1;
+                    }
+                }
+                #endregion
+
+                #region 资金流向 大中小单占比 流入流出
+                if(null != zjlxList)
+                {
+                    for (int k = 0; k < zjlxList.Count; k++)
+                    {
+                        var zjlx = zjlxList[k];
+                        var netInflow =float.Parse( zjlx["NetInflow"].ToString());///资金净流入
+                        if (0 < netInflow)
+                        {
+                            svItem.ZJLX["流入"] += 1;
+                        }
+                        else if (netInflow < 0)
+                        {
+                            svItem.ZJLX["流出"] += 1;
+                        }
+                    }
+                }
+                #endregion
+
+
+                #region  龙虎榜数据
+                if (null != lhbList)
+                {
+                    for (int k = 0; k < lhbList.Count; k++)
+                    {
+                        var lhb = lhbList[k];
+                        var rq = lhb["C1"];///日期
+                        var sblx = lhb["C2"].ToString(); ///上榜类型
+                        var spj = float.Parse(lhb["C3"].ToString());///收盘价
+                        var crzd = float.Parse(lhb["C4"].ToString()); ///次日涨跌
+                        var mr1 = float.Parse(lhb["C5"].ToString()); ///买入
+                        var mr2 = float.Parse(lhb["C6"].ToString()); ///卖出
+                        var jmr = float.Parse(lhb["C7"].ToString());///净买入
+                        
+                        if(!svItem.LHB.SBLX.ContainsKey(sblx))
+                        {
+                            svItem.LHB.SBLX.Add(sblx, 0);
+                        }
+                        svItem.LHB.SBLX[sblx] += 1;
+
+                        if(0<jmr)
+                        {
+                            svItem.LHB.JMR["正值"] += 1;
+                        }
+                        else
+                        {
+                            svItem.LHB.JMR["负值"] += 1;
+                        }
+
+                    }
+                }
+                #endregion
+
+                #region 融资融券信息
+                if(null != rzrqList)
+                {
+                    for (int k = 1; k < rzrqList.Count; k++)
+                    {
+                        var rzrq0 = rzrqList[k];
+                        var rzrq1 = rzrqList[k-1];
+                        var rzye0 = float.Parse(rzrq0["RZYE"].ToString());///融资余额
+                        var rzmre0 = float.Parse(rzrq0["RZMRE"].ToString());///融资买入额
+                    }
+                }
+                #endregion
+
+                #endregion
 
 
             }
+
+            mongo.Save3(dbName, collectionDataResult, svItem);
         }
         #endregion
 

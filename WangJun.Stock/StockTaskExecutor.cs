@@ -146,9 +146,11 @@ namespace WangJun.Stock
             mongo.Remove(dbName, tempCollectionName, "{}");
             #endregion
 
-
+            var methodName = "GetDaDanData";
+            var status = TaskStatusManager.Get(methodName);
+            var startIndex = (status.ContainsKey("PageIndex")) ? int.Parse(status["PageIndex"].ToString()) : 0;
             var totalCount = 0;
-            for (int i = 1; i < pageCount; i++)
+            for (int i = startIndex; i < pageCount; i++)
             {
                 var html = webSource.GetDaDan(i);
 
@@ -190,21 +192,21 @@ namespace WangJun.Stock
                             RowIndex = k
                         };
                         mongo.Save3(dbName, tempCollectionName, svItem2D);
-                        var filter = "{\"PageCount\":" + svItem2D.PageCount + ",\"PageIndex\":" + svItem2D.PageIndex + ",\"RowIndex\":" + svItem2D.RowIndex + ",\"TradingDate\":new Date('" + svItem2D.TradingDate + "')}";
-                        //mongo.Save3(dbName, collectionName, svItem2D, filter);
+                        TaskStatusManager.Set(methodName, new { ID = methodName, PageIndex=i,PageCount=pageCount, Status = "已下载", CreateTime = DateTime.Now });
+
                         LOGGER.Log(string.Format("SINA大单2D保存 {0} {1} {2}", i, k, pageCount));
 
                     }
                 }
-                ThreadManager.Pause(seconds: 3);
+                ThreadManager.Pause(seconds: 2);
             }
-
+            TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
             var countInDB = mongo.Count(CONST.DB.DBName_StockService, tempCollectionName, "{}");
             if (totalCount == countInDB)
             {
                 LOGGER.Log(string.Format("准备转移数据"));
                 ///数据检查是否完毕,完备后插入
-                DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, tempCollectionName, "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
+                //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, tempCollectionName, "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, false);
             }
             else
             {

@@ -177,31 +177,33 @@ namespace WangJun.DB
         {
             if (null != data) ///若数据有效
             {
-                var dict = Convertor.FromObjectToDictionary(data);
+                //var dict = Convertor.FromObjectToDictionary(data);
                 //string jsonData = Convertor.FromObjectToJson(data);
+                var dict = Convertor.FromObjectToDictionary2(data);
                 var dat = new BsonDocument(dict);
                  
                 var collection = this.GetCollection(dbName, collectionName);
-                
-                if(string.IsNullOrWhiteSpace(query) || "{}"==query)
-                {
-                    query = "{F00000001:-999}"; ///不存在字段和值
-                }
 
-                if(replace)
+                if (string.IsNullOrWhiteSpace(query) || "{}" == query)
                 {
-                    FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();
-                    option.IsUpsert = true;///找不到就添加
-                    var res = collection.FindOneAndReplace(query, dat, option);
+                    collection.InsertOne(dat);
                 }
                 else
                 {
-                    FindOneAndUpdateOptions<BsonDocument, BsonDocument> option = new FindOneAndUpdateOptions<BsonDocument, BsonDocument>();
-                    option.IsUpsert = true;
-                    var updateDefinition = "{ $set: "+dat.ToJson()+" }";
-                    collection.FindOneAndUpdate(query, updateDefinition, option);
+                    if (replace)
+                    {
+                        FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();
+                        option.IsUpsert = true;///找不到就添加
+                        var res = collection.FindOneAndReplace(query, dat, option);
+                    }
+                    else
+                    {
+                        FindOneAndUpdateOptions<BsonDocument, BsonDocument> option = new FindOneAndUpdateOptions<BsonDocument, BsonDocument>();
+                        option.IsUpsert = true;
+                        var updateDefinition = "{ $set: " + dat.ToJson() + " }";
+                        collection.FindOneAndUpdate(query, updateDefinition, option);
+                    }
                 }
-                 
 
             }
         }
