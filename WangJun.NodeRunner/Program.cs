@@ -91,9 +91,9 @@ namespace WangJun.NodeRunner
                 //var list = WebDataSource.GetInstance().GetStockRadar();
 
                 //analysor.AnalyseHotWords();
-                //var list = DataSourceTouTiao.GetInstance().GetSearchResult("紫光国芯");
-                analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-10),endTime:DateTime.Now.AddDays(-5));
-                 
+                //var list = WebDataSource.GetInstance().GetTouTiaoSearch("紫光国芯");
+                //analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-10),endTime:DateTime.Now.AddDays(-5));
+                sync.SyncTouTiao();
             }
             else if ("SyncStockNews" == serviceName)
             {

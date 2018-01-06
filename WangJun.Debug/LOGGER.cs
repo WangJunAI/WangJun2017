@@ -35,9 +35,9 @@ namespace WangJun.Debug
 
         public static void Beep()
         {
-            for (int k = 0; k < 100; k++)
+            for (int k = 0; k < 1; k++)
             {
-                Console.Beep(new Random().Next(5000, 15000), 1 * 1000);
+                Console.Beep(new Random().Next(5000, 10000), 1 * 1000);
             }
         }
          

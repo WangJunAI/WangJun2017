@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using WangJun.Data;
 using WangJun.DB;
 using WangJun.Debug;
+using WangJun.Doc;
 using WangJun.Tools;
 
 namespace WangJun.Stock
@@ -479,10 +480,9 @@ namespace WangJun.Stock
             var query = "{\"ContentType\":\"股票代码\",\"SortCode\":{$exists:true}}";
             var sort = "{\"SortCode\":1}";
             var resList = mongo.Find3("StockService", "BaseInfo", query, sort);
-            if (null != resList && (null == this.stockCodeDict || 0 == this.stockCodeDict.Count))
-            {
-                this.stockCodeDict = resList.ToDictionary(k => k["StockCode"].ToString(), v => v["StockName"].ToString());
-            }
+
+            this.stockCodeDict = resList.ToDictionary(k => k["StockCode"].ToString(), v => v["StockName"].ToString());
+
             var codeList = from item in resList orderby (int)item["SortCode"] select item["StockCode"].ToString();
             var queue = CollectionTools.ToQueue<string>(codeList);
 
@@ -503,8 +503,8 @@ namespace WangJun.Stock
                     }
                 }
             }
-
             return queue;
+
         }
         #endregion
 
@@ -683,6 +683,50 @@ namespace WangJun.Stock
                 }
 
                 LOGGER.Log(string.Format("本次SINA融资融券更新完毕，下一次一天以后更新 {0}", DateTime.Now));
+                TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
+                ThreadManager.Pause(days: 1);
+            }
+        }
+        #endregion
+
+        #region 股票全网新闻
+        /// <summary>
+        /// SINA融资融券
+        /// </summary>
+        public void SyncTouTiao()
+        {
+            var startTime = DateTime.Now;///开始运行时间
+            Console.Title = "股票全网新闻 更新进程 启动时间：" + startTime;
+
+            var exe = StockTaskExecutor.CreateInstance();
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var dbName = CONST.DB.DBName_StockService;
+            var collectionNameRZRQ = CONST.DB.CollectionName_RZRQ;
+            var methodName = "SyncTouTiao";
+
+            while (true)
+            {
+                var q = this.PrepareData(methodName);
+
+                while (0 < q.Count)
+                {
+                    var stockCode = q.Dequeue();
+                    var stockName = this.stockCodeDict[stockCode];
+
+                    var array = WebDataSource.GetInstance().GetTouTiaoSearch(stockName);
+                    foreach (Dictionary<string, object> arrayItem in array)
+                    {
+                        var doc = DocItem.Create(arrayItem["Title"].ToString(), string.Format("{0},{1}", stockCode, stockName), arrayItem["Summary"].ToString(), arrayItem["Content"].ToString(), DateTime.Now);
+                        doc.Save();
+                        LOGGER.Log(string.Format("股票全网新闻 {0} {1} 保存完毕", stockCode, stockName));
+                     }
+                    ThreadManager.Pause(seconds: 1);
+                    TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = stockName, Status = "已下载", CreateTime = DateTime.Now });
+                    LOGGER.Log(string.Format("股票全网新闻 {0} {1} 保存完毕", stockCode, stockName));
+
+                }
+
+                LOGGER.Log(string.Format("股票全网新闻更新完毕，下一次一天以后更新 {0}", DateTime.Now));
                 TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
                 ThreadManager.Pause(days: 1);
             }

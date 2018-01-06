@@ -256,5 +256,45 @@ namespace WangJun.Stock
             return res;
         }
         #endregion
+
+        #region 头条新闻
+        public List<Dictionary<string,object>> GetTouTiaoSearch(string keyword)
+        {
+            var list = new List<Dictionary<string, object>>();
+            var htmlList = DataSourceTouTiao.GetInstance().GetSearchResult(keyword);
+            if(null != htmlList&& 0<htmlList.Count)
+            {
+                foreach (var html in htmlList)
+                {
+                    //var resDict = NodeService.Get(CONST.NodeServiceUrl, "今日头条", "GetDataFromHtml", new { ContentType = "今日头条搜索列表", Page = html });
+                    var resDict = Convertor.FromJsonToDict2(html);
+                    var dataList = resDict["data"] as ArrayList;
+
+                    foreach (Dictionary<string, object> dataItem in dataList)
+                    {
+                        if (dataItem.ContainsKey("article_url")&& dataItem.ContainsKey("title") && dataItem.ContainsKey("abstract") && dataItem.ContainsKey("create_time"))
+                        {
+                            var url = dataItem["article_url"].ToString();
+                            if (url.StartsWith("http://toutiao.com/group/"))
+                            {
+                                var articleString = DataSourceTouTiao.GetInstance().GetArticle(url);
+                                if (!string.IsNullOrWhiteSpace(articleString))
+                                {
+                                    var startIndex = articleString.IndexOf("content:") + "content:".Length;
+                                    var endIndex = articleString.IndexOf("groupId:");
+                                    articleString = articleString.Substring(startIndex, endIndex - startIndex);
+                                    var item = new Dictionary<string, object> { { "Title", dataItem["title"] }, { "Summary", dataItem["abstract"] }, { "Content", articleString }, { "CreateTime", dataItem["create_time"] } };
+                                    list.Add(item);
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            return list;
+        }
+        #endregion
     }
 }
