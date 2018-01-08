@@ -1,4 +1,4 @@
 ﻿{
     "ServiceName":"Test",
-    "NodeServiceUrl":"http://localhost:9011"
+    "NodeServiceUrl":"http://localhost:9003"
 }

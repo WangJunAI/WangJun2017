@@ -296,6 +296,8 @@ namespace WangJun.Stock
             var collectionLHB = CONST.DB.CollectionName_LHB;
             var collectionBKGN = CONST.DB.CollectionName_BKGN;
             var collectionDataResult = CONST.DB.CollectionName_DataResult;
+            var collectionLHBMX = CONST.DB.CollectionName_LHBMX;
+            var collectionRZRQ = CONST.DB.CollectionName_RZRQ;
 
             var svItem = new
             {
@@ -348,11 +350,11 @@ namespace WangJun.Stock
 
                 ///获取前7日的龙虎榜明细信息
                 var queryLHBMX = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}"; ;
-                var lhbmxList = mongo.Find3(dbName, collectionLHB, queryLHBMX);
+                var lhbmxList = mongo.Find3(dbName, collectionLHBMX, queryLHBMX);
 
                 ///获取前7日的融资融券信息
                 var queryRZRQ = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}"; ;
-                var rzrqList = mongo.Find3(dbName, collectionLHB, queryRZRQ);
+                var rzrqList = mongo.Find3(dbName, collectionRZRQ, queryRZRQ);
 
 
 
@@ -482,7 +484,7 @@ namespace WangJun.Stock
                 {
                     foreach (var radar in radarList)
                     {
-                        var radarType = radar["异动信息"].ToString();
+                        var radarType = radar["AnomalyInfo"].ToString();
                         if (!svItem.Radar.ContainsKey(radarType))
                         {
                             svItem.Radar.Add(radarType, 0);
@@ -535,31 +537,35 @@ namespace WangJun.Stock
                 {
                     for (int k = 0; k < lhbList.Count; k++)
                     {
-                        var lhb = lhbList[k];
-                        var rq = lhb["C1"];///日期
-                        var sblx = lhb["C2"].ToString(); ///上榜类型
-                        var spj = float.Parse(lhb["C3"].ToString());///收盘价
-                        var crzd = float.Parse(lhb["C4"].ToString()); ///次日涨跌
-                        var mr1 = float.Parse(lhb["C5"].ToString()); ///买入
-                        var mr2 = float.Parse(lhb["C6"].ToString()); ///卖出
-                        var jmr = float.Parse(lhb["C7"].ToString());///净买入
-                        
-                        if(!svItem.LHB.SBLX.ContainsKey(sblx))
+                        var lhb = lhbList[k]["Data"] as Dictionary<string,object>;
+                        if(8 == lhb.Keys.Count)
                         {
-                            svItem.LHB.SBLX.Add(sblx, 0);
-                        }
-                        svItem.LHB.SBLX[sblx] += 1;
+                            var rq = lhb["C1"];///日期
+                            var sblx = lhb["C2"].ToString(); ///上榜类型
+                            var spj =("-" == lhb["C3"].ToString()) ?0: float.Parse(lhb["C3"].ToString());///收盘价
+                            var crzd = ("-" == lhb["C4"].ToString()) ? 0 : float.Parse(lhb["C4"].ToString()); ///次日涨跌
+                            var mr1 = ("-" == lhb["C5"].ToString()) ? 0 : float.Parse(lhb["C5"].ToString()); ///买入
+                            var mr2 = ("-" == lhb["C6"].ToString()) ? 0 : float.Parse(lhb["C6"].ToString()); ///卖出
+                            var jmr = ("-" == lhb["C7"].ToString()) ? 0 : float.Parse(lhb["C7"].ToString());///净买入
 
-                        if(0<jmr)
-                        {
-                            svItem.LHB.JMR["正值"] += 1;
-                        }
-                        else
-                        {
-                            svItem.LHB.JMR["负值"] += 1;
-                        }
+                            if (!svItem.LHB.SBLX.ContainsKey(sblx))
+                            {
+                                svItem.LHB.SBLX.Add(sblx, 0);
+                            }
+                            svItem.LHB.SBLX[sblx] += 1;
 
+                            if (0 < jmr)
+                            {
+                                svItem.LHB.JMR["正值"] += 1;
+                            }
+                            else
+                            {
+                                svItem.LHB.JMR["负值"] += 1;
+                            }
+
+                        }
                     }
+
                 }
                 #endregion
 
@@ -581,7 +587,7 @@ namespace WangJun.Stock
 
             }
 
-            mongo.Save3(dbName, collectionDataResult, svItem);
+            //mongo.Save3(dbName, collectionDataResult, svItem);
         }
         #endregion
 

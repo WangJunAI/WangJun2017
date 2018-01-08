@@ -74,7 +74,7 @@ namespace WangJun.NodeRunner
             //sync.SyncStockCode();
             if("Test" == serviceName)
             {
-                var mongo = MongoDB.GetInst("mongodb");
+                var mongo = DataStorage.GetInstance(DBType.MongoDB);
                 var filter = "";
                 //var res = mongo.Find2("StockService", "SINADaDan2D","{\"TradingDate\":new Date(\"2017/12/18\")}", "{}");
                 //mongo.Distinct("StockService", "SINADaDan2D", "StockCode");
@@ -92,8 +92,34 @@ namespace WangJun.NodeRunner
 
                 //analysor.AnalyseHotWords();
                 //var list = WebDataSource.GetInstance().GetTouTiaoSearch("紫光国芯");
-                //analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-10),endTime:DateTime.Now.AddDays(-5));
-                sync.SyncTouTiao();
+                //analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-15),endTime:DateTime.Now.AddDays(-5));
+                //sync.SyncTouTiao();
+                //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, "SINADaDan2D20180101", "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
+                //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, "SINADaDan2D20180102", "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
+                //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, "SINADaDan2D20180103", "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
+                //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, "SINADaDan2D20180104", "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
+                //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, "SINADaDan2D20180106", "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
+                var svItem = new {
+                    字符串="字符串Test",
+                    整型=22,
+                    浮点=0.4f,
+                    时间=DateTime.Now,
+                    时间间隔=new TimeSpan(3,2,1,5),
+                    Guid=Guid.NewGuid()
+                };
+
+                var svItem2 = new {
+                    数组=new List<object> { svItem,svItem,svItem},
+                    字典=new Dictionary<string, object> { { "键1",svItem}, { "键2", svItem }, { "键3", svItem } }
+                };
+
+                var svItem3 = new {
+                    单体=svItem,
+                    集合=svItem2
+                };
+
+                var dict = Convertor.FromObjectToDictionary3(svItem3);
+                DataStorage.GetInstance(DBType.MongoDB).Save3("Test", "Test", svItem3);
             }
             else if ("SyncStockNews" == serviceName)
             {

@@ -177,9 +177,9 @@ namespace WangJun.DB
         {
             if (null != data) ///若数据有效
             {
-                //var dict = Convertor.FromObjectToDictionary(data);
-                //string jsonData = Convertor.FromObjectToJson(data);
-                var dict = Convertor.FromObjectToDictionary2(data);
+                var dict = Convertor.FromObjectToDictionary3(data);
+                ////string jsonData = Convertor.FromObjectToJson(data);
+                //var dict = Convertor.FromObjectToDictionary2(data);
                 var dat = new BsonDocument(dict);
                  
                 var collection = this.GetCollection(dbName, collectionName);
@@ -354,8 +354,8 @@ namespace WangJun.DB
                {
                    var ee = e as EventProcEventArgs;
                    var dict = ee.Default as Dictionary<string, object>;
-                   var filter = string.Format("{{\"_id\":\"{0}\"}}", dict["_id"]);
-                   targetInst.Save2(targetDbName, targetCollectionName, filter, dict);
+                   var filter = string.Format("{{\"_id\":ObjectId('{0}')}}", dict["_id"]);
+                   targetInst.Save3(targetDbName, targetCollectionName, dict,filter);
 
                    LOGGER.Log(string.Format("正在转移数据 {0}", dict["_id"]));
 ;                   if (true == needDeleteSource)
@@ -389,16 +389,11 @@ namespace WangJun.DB
 
 
         #region 删除一个实体
-        public void Delete(string dbName, string collectionName, string jsonString)
+        public void Delete(string dbName, string collectionName, string query)
         {
-             
-            var filterDict = Convertor.FromJsonToDict(jsonString);
-            var filterBuilder = Builders<BsonDocument>.Filter;
-            var filter = this.FilterConvertor(jsonString);
-
             var db = this.client.GetDatabase(dbName);
             var collection = db.GetCollection<BsonDocument>(collectionName);
-            collection.DeleteOne(filter); 
+            collection.DeleteOne(query); 
         }
         #endregion
 

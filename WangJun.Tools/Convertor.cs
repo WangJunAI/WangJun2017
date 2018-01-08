@@ -92,9 +92,81 @@ namespace WangJun.Data
         public static Dictionary<string, object> FromObjectToDictionary2(object data)
         {
             string json = Convertor.FromObjectToJson(data);
-            var dict = Convertor.FromJsonToDict(json);
+            var dict = Convertor.FromJsonToDict2(json);
             return dict;
         }
+
+        public static Dictionary<string,object> FromObjectToDictionary3(object data)
+        {
+            Dictionary<string, object> res = new Dictionary<string, object>();
+            if(null != data)
+            {
+  
+                    
+                    var propertyArray = data.GetType().GetProperties();
+                foreach (var property in propertyArray)
+                {
+                    var name = property.Name;
+                    var value = property.GetValue(data, null);
+                    if (property.CanRead)
+                    {
+                        #region 若是单个实体
+                        if (null != value && value.GetType().IsValueType || typeof(string) == value.GetType() || value.GetType().IsEnum) ///若是基本类型或字符串
+                        {
+                            if (typeof(TimeSpan) == value.GetType())  ///解决TimeSpan无法映射到Bson对象的问题
+                            {
+                                var itemValue = Convertor.FromObjectToDictionary3(value);
+                                res.Add(name, itemValue);
+                            }
+                            else
+                            {
+                                res.Add(name, value);
+                            }
+                        }
+                        else if (null == value)
+                        {
+                            res.Add(name, value);
+                        }
+                        else if (null != value && value.GetType().IsClass && typeof(string) != value.GetType() && !(value is IEnumerable)) ///非集合类
+                        {
+                            var valueDict = Convertor.FromObjectToDictionary3(value);
+                            res.Add(name, valueDict);
+                        }
+                        #endregion
+
+                        #region 若字典值是集合,列表,字典等
+                        else if(null != value && value.GetType().IsClass &&(value is IDictionary))
+                        {
+                            var dict = new Dictionary<string, object>();
+                            foreach (string key in (value as IDictionary).Keys)
+                            {
+                                var itemValue = (value as IDictionary)[key];
+                                var itemDict = Convertor.FromObjectToDictionary3(itemValue);
+                                dict.Add(key, itemDict);
+                            }
+                            res.Add(name, dict);
+                        }
+                        else if (null != value && value.GetType().IsClass && (value is IEnumerable))
+                        {
+                            var list = new List<Dictionary<string, object>>();
+                            foreach (var item in (value as IEnumerable))
+                            {
+                                var itemDict = Convertor.FromObjectToDictionary3(item);
+                                list.Add(itemDict);
+                            }
+                            res.Add(name, list);
+                        }
+                        #endregion
+                    }
+
+
+
+                }
+            }
+
+            return res;
+        }
+
         public static Dictionary<string,object> FromObjectToDictionary(object data)
         {
             var dict = new Dictionary<string, object>();

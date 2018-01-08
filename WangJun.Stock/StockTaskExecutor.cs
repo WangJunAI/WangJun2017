@@ -131,9 +131,13 @@ namespace WangJun.Stock
             ///查找最近一个交易日的数据是否存在,若存在则不下载
             ///
 
-                var mongo = DataStorage.GetInstance(DBType.MongoDB);
-                var webSource = DataSourceSINA.GetInstance();
-                var pageCount = webSource.GetDaDanPageCount();
+            var mongo = DataStorage.GetInstance(DBType.MongoDB);
+            var webSource = DataSourceSINA.GetInstance();
+            var pageCount = 0;// webSource.GetDaDanPageCount();
+            if (0 == pageCount)
+            {
+                pageCount = int.Parse(WebDataSource.GetDataFromHttpAgent(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceSINA&m=GetDaDanPageCount")));
+            }
                 var dbName = CONST.DB.DBName_StockService;
                 var collectionName = CONST.DB.CollectionName_DaDan;
                 ///数据检查
@@ -152,7 +156,12 @@ namespace WangJun.Stock
             var totalCount = 0;
             for (int i = startIndex; i < pageCount; i++)
             {
-                var html = webSource.GetDaDan(i);
+                var html = "";// webSource.GetDaDan(i);
+
+                if(string.IsNullOrWhiteSpace(html))
+                {
+                    html = WebDataSource.GetDataFromHttpAgent(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.Stock.DataSourceSINA&m=GetDaDan&p={0}", i));
+                }
 
                 var res = NodeService.Get(CONST.NodeServiceUrl, "新浪", "GetDataFromHtml", new { ContentType = "SINA大单", Page = html });
 
