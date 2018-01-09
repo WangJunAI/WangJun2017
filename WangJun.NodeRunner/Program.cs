@@ -92,7 +92,9 @@ namespace WangJun.NodeRunner
 
                 //analysor.AnalyseHotWords();
                 //var list = WebDataSource.GetInstance().GetTouTiaoSearch("紫光国芯");
-                //analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-15),endTime:DateTime.Now.AddDays(-5));
+                ///analysor.AnalyseRisingStock(startTime:DateTime.Now.AddDays(-15),endTime:DateTime.Now);
+                analysor.AnalyseStockSymbol(analysor.GetRisingStock(DateTime.Now.AddDays(-8),DateTime.Now.AddDays(-1)), "15日以内上涨15%的股票");
+
                 //sync.SyncTouTiao();
                 //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, "SINADaDan2D20180101", "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);
                 //DataStorage.MoveCollection(mongo, CONST.DB.DBName_StockService, "SINADaDan2D20180102", "{}", mongo, CONST.DB.DBName_StockService, CONST.DB.CollectionName_DaDan, true);

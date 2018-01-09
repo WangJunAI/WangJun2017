@@ -99,17 +99,17 @@ namespace WangJun.Data
         public static Dictionary<string,object> FromObjectToDictionary3(object data)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
-            if(null != data)
+            if (null != data)
             {
-  
-                    
-                    var propertyArray = data.GetType().GetProperties();
+
+                var propertyArray = data.GetType().GetProperties();
                 foreach (var property in propertyArray)
                 {
                     var name = property.Name;
                     var value = property.GetValue(data, null);
                     if (property.CanRead)
                     {
+
                         #region 若是单个实体
                         if (null != value && value.GetType().IsValueType || typeof(string) == value.GetType() || value.GetType().IsEnum) ///若是基本类型或字符串
                         {
@@ -135,14 +135,39 @@ namespace WangJun.Data
                         #endregion
 
                         #region 若字典值是集合,列表,字典等
-                        else if(null != value && value.GetType().IsClass &&(value is IDictionary))
+                        else if (null != value && value.GetType().IsClass && (value is IDictionary))
                         {
                             var dict = new Dictionary<string, object>();
                             foreach (string key in (value as IDictionary).Keys)
                             {
                                 var itemValue = (value as IDictionary)[key];
-                                var itemDict = Convertor.FromObjectToDictionary3(itemValue);
-                                dict.Add(key, itemDict);
+                                if (null != itemValue && itemValue.GetType().IsValueType || typeof(string) == itemValue.GetType() || itemValue.GetType().IsEnum)
+                                {
+                                    dict.Add(key, itemValue);
+                                }
+                                else if(null != itemValue && itemValue.GetType().IsClass && (itemValue is IEnumerable))
+                                {
+                                    var list = new List<object>();
+                                    foreach (var item in (value as IEnumerable))
+                                    {
+                                        if(null != item && item.GetType().IsValueType)
+                                        {
+                                            list.Add(item);
+                                        }
+                                        else
+                                        {
+                                            var itemDict = Convertor.FromObjectToDictionary3(item);
+                                            list.Add(itemDict);
+                                        }
+                                    }
+                                    dict.Add(key, list);
+                                }
+                                else
+                                {
+                                    var itemDict = Convertor.FromObjectToDictionary3(itemValue);
+                                    dict.Add(key, itemDict);
+                                }
+
                             }
                             res.Add(name, dict);
                         }
@@ -158,12 +183,8 @@ namespace WangJun.Data
                         }
                         #endregion
                     }
-
-
-
                 }
             }
-
             return res;
         }
 

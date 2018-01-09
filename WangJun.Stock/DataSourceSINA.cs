@@ -298,7 +298,7 @@ namespace WangJun.Stock
             var symbol = Convertor.AddStockCodePrefix(stockCode);
             var startDate = string.Format("{0}-01-01", DateTime.Now.Year);
             var endDate = string.Format("{0:yyyy-MM-dd}", DateTime.Now);
-            var url = string.Format("http://vip.stock.finance.sina.com.cn/q/go.php/vInvestConsult/kind/rzrq/index.phtml?symbol=sz002230&bdate=2017-01-01&edate=2017-11-24", symbol, startDate, endDate);
+            var url = string.Format("http://vip.stock.finance.sina.com.cn/q/go.php/vInvestConsult/kind/rzrq/index.phtml?symbol={0}&bdate={1}&edate={2}", symbol, startDate, endDate);
             var httpDownloader = new HTTP();
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
