@@ -59,8 +59,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommentItem.cs" />
     <Compile Include="CONST.cs" />
+    <Compile Include="DocAPI.cs" />
     <Compile Include="DocItem.cs" />
+    <Compile Include="CommentManager.cs" />
     <Compile Include="DocManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

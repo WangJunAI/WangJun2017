@@ -23,6 +23,7 @@ namespace WangJun.Stock
             return inst;
         }
 
+        #region 获取搜索结果
         /// <summary>
         /// 获取搜索结果
         /// </summary>
@@ -55,6 +56,7 @@ namespace WangJun.Stock
             return list;
 
         }
+        #endregion  
 
         public string GetArticle(string url)
         {

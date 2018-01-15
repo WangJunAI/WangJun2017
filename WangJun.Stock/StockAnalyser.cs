@@ -909,7 +909,7 @@ namespace WangJun.Stock
                 PrevKLine = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "上涨", new List<string>() }, { "下跌", new List<string>() }, { "4%以下", new List<string>() }, { "4%以上", new List<string>() }, { "-4%及内", new List<string>() }, { "小于-4%", new List<string>() }, { "前几日比当前价高", new List<string>() }, { "前几日比当前价低", new List<string>() } },
                 CWZY = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "每股净资产小于1", new List<string>() }, { "每股净资产大于1", new List<string>() }, { "每股净资产减少", new List<string>() }, { "每股净资产增加", new List<string>() }, { "每股收益小于1", new List<string>() }, { "每股收益大于1", new List<string>() }, { "每股收益减少", new List<string>() }, { "每股收益增加", new List<string>() }, { "每股现金含量小于1", new List<string>() }, { "每股现金含量大于1", new List<string>() }, { "每股现金含量减少", new List<string>() }, { "每股现金含量增加", new List<string>() }, { "每股资本公积金小于1", new List<string>() }, { "每股资本公积金大于1", new List<string>() }, { "每股资本公积金减少", new List<string>() }, { "每股资本公积金增加", new List<string>() } },
                 Radar = new Dictionary<string,  List<string>> { { "总数", new List<string>() } },
-                DaDan = new Dictionary<string,  List<string>> { { "总数", new List<string>() } },
+                DaDan = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "成交额大于500万", new List<string>() }, { "成交额小于500万", new List<string>() } },
                 ZJLX = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "流入", new List<string>() }, { "流出", new List<string>() }, { "大单占比正值", new List<string>() }, { "大单占比负值", new List<string>() }, { "中单占比正值", new List<string>() }, { "中单占比负值", new List<string>() }, { "小单占比正值", new List<string>() }, { "小单占比负值", new List<string>() } },
                 LHB = new { SBLX = new Dictionary<string,  List<string>> { { "总数", new List<string>() } }, JMR = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "正值", new List<string>() }, { "负值", new List<string>() } } },
                 RZRQ = new { RZYE = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "增加", new List<string>() }, { "减少", new List<string>() } }, RZMRE = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "增加", new List<string>() }, { "减少", new List<string>() } }, RQYLJE = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "增加", new List<string>() }, { "减少", new List<string>() } }, RQYL = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "增加", new List<string>() }, { "减少", new List<string>() } }, RQMCL = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "增加", new List<string>() }, { "减少", new List<string>() } }, RQYE = new Dictionary<string,  List<string>> { { "总数", new List<string>() }, { "增加", new List<string>() }, { "减少", new List<string>() } } },
@@ -932,6 +932,7 @@ namespace WangJun.Stock
                     svItem.涉及股票[stockCode + stockName] = new List<string> ();
                 }
                 svItem.涉及股票[stockCode + stockName] .Add(string.Format("{0}{1}",stockCode,stockName));
+                
                 #region 数据查找 
                 ///获取这个股票所在的板块，概念
                 var queryBKGN = "{\"StockCode\":\"" + stockCode + "\"}";
@@ -948,7 +949,7 @@ namespace WangJun.Stock
                 var radarList = mongo.Find3(dbName, collectionRadar, queryRadar);
                 ///获取前7日的大单数据
                 var querySINADaDan2D = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":{$gte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate.AddDays(days)) + "'),$lte:new Date('" + string.Format("{0:yyyy/MM/dd}", itemTradingDate) + "')}}";
-                var dadanList = new List<Dictionary<string, object>>();// mongo.Find3(dbName, collecrionSINADaDan2D, querySINADaDan2D);
+                var dadanList = mongo.Find3(dbName, collecrionSINADaDan2D, querySINADaDan2D);
 
                 ///获取前7日资金流向
 
@@ -1424,7 +1425,7 @@ namespace WangJun.Stock
             CalRecommendStock(svItem.涉及股票,0.1, null);
             CalRecommendStock(svItem.BKGN, 0.05,null);
             CalRecommendStock(svItem.PrevKLine,0.2, new List<string> { "前几日比当前价高" , "下跌" });
-            CalRecommendStock(svItem.CWZY,0.5, new List<string> { "每股净资产大于1", "每股收益小于1", "每股收益增加", "每股现金含量小于1", "每股净资产增加" });
+            CalRecommendStock(svItem.CWZY,0.7, new List<string> { "每股净资产大于1", "每股收益小于1", "每股收益增加", "每股现金含量小于1", "每股净资产增加" });
             CalRecommendStock(svItem.Radar, 0.1, new List<string> { "大买单", "大单成交" });
             CalRecommendStock(svItem.ZJLX, 0.1, new List<string> { "中单占比负值", "流出", "大单占比负值" });
             //CalRecommendStock(svItem.LHB.JMR,0, new List<string> { });
@@ -1461,6 +1462,7 @@ namespace WangJun.Stock
             var htmlBuilder = new StringBuilder();
             htmlBuilder.AppendFormat("<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>汪德禄专用&nbsp;&nbsp;&nbsp;&nbsp;{0}特征分析</title></head><body style=\"font-size: 20px;\">", title);
             htmlBuilder.AppendFormat("<h1>汪德禄专用&nbsp;&nbsp;&nbsp;&nbsp;{0}特征分析&nbsp;&nbsp;</h1>",title);
+            htmlBuilder.AppendFormat("{0}", OutPutHtml(svItem2.输出结果.ToDictionary(p=>p.Key,p=>p.Value.ToString()), "股票推荐"));
             htmlBuilder.AppendFormat("{0}", OutPutHtml(svItem2.之前日线占比, "之前日线占比"));
             htmlBuilder.AppendFormat("{0}", OutPutHtml(svItem2.财务摘要占比, "财务摘要占比"));
             htmlBuilder.AppendFormat("{0}", OutPutHtml(svItem2.异动雷达占比, "异动雷达占比"));
@@ -1474,6 +1476,7 @@ namespace WangJun.Stock
             htmlBuilder.AppendFormat("{0}", OutPutHtml(svItem2.融券余额占比, "融券余额占比"));
             htmlBuilder.AppendFormat("{0}", OutPutHtml(svItem2.股票占比, "股票占比"));
             htmlBuilder.AppendFormat("{0}", OutPutHtml(svItem2.板块概念占比, "板块概念占比"));
+
             htmlBuilder.AppendFormat("</body></html>");
             File.WriteAllText(string.Format("E://gupiao{0}.html",title), htmlBuilder.ToString(), Encoding.UTF8);
             mongo.Save3(dbName, collectionDataResult, svItem2);

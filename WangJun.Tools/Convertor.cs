@@ -111,7 +111,7 @@ namespace WangJun.Data
                     {
 
                         #region 若是单个实体
-                        if (null != value && value.GetType().IsValueType || typeof(string) == value.GetType() || value.GetType().IsEnum) ///若是基本类型或字符串
+                        if (null != value && ( value.GetType().IsValueType || typeof(string) == value.GetType() || value.GetType().IsEnum)) ///若是基本类型或字符串
                         {
                             if (typeof(TimeSpan) == value.GetType())  ///解决TimeSpan无法映射到Bson对象的问题
                             {
@@ -141,7 +141,7 @@ namespace WangJun.Data
                             foreach (string key in (value as IDictionary).Keys)
                             {
                                 var itemValue = (value as IDictionary)[key];
-                                if (null != itemValue && itemValue.GetType().IsValueType || typeof(string) == itemValue.GetType() || itemValue.GetType().IsEnum)
+                                if (null != itemValue && (itemValue.GetType().IsValueType || typeof(string) == itemValue.GetType() || itemValue.GetType().IsEnum))
                                 {
                                     dict.Add(key, itemValue);
                                 }

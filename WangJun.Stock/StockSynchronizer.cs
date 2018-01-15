@@ -716,7 +716,7 @@ namespace WangJun.Stock
                     var array = WebDataSource.GetInstance().GetTouTiaoSearch(stockName);
                     foreach (Dictionary<string, object> arrayItem in array)
                     {
-                        var doc = DocItem.Create(arrayItem["Title"].ToString(), string.Format("{0},{1}", stockCode, stockName), arrayItem["Summary"].ToString(), arrayItem["Content"].ToString(), DateTime.Now);
+                        var doc = DocItem.Create(arrayItem);
                         doc.Save();
                         LOGGER.Log(string.Format("股票全网新闻 {0} {1} 保存完毕", stockCode, stockName));
                      }
