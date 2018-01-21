@@ -8,18 +8,18 @@ using WangJun.DB;
 
 namespace WangJun.Doc
 {
-    public class DocManager
+    public class CategoryManager
     {
 
-        public static DocManager GetInstance()
+        public static CategoryManager GetInstance()
         {
-            var inst = new DocManager();
+            var inst = new CategoryManager();
             return inst;
         }
 
         public int Save(string title, string content, string creatorName, string creatorID)
         {
-            var inst = new DocItem();
+            var inst = new CategoryItem();
             //inst._id = ObjectId.GenerateNewId();
             inst.Title = title;
             inst.Keyword = "暂空";
@@ -33,9 +33,9 @@ namespace WangJun.Doc
             return 0;
         }
 
-        public DocItem Get(string id)
+        public CategoryItem Get(string id)
         {
-            var inst = DocItem.Load(id);
+            var inst = CategoryItem.Load(id);
             return inst;
         }
 
@@ -48,17 +48,17 @@ namespace WangJun.Doc
         /// <param name="pageSize"></param>
         /// <returns></returns>
 
-        public List<DocItem> Find(string query, string protection = "{}", int pageIndex = 0,int pageSize=50)
+        public List<CategoryItem> Find(string query, string protection = "{}", int pageIndex = 0,int pageSize=50)
         {
-            var list = new List<DocItem>();
+            var list = new List<CategoryItem>();
             var dbName = CONST.DB.DBName_DocService;
-            var collectionName = CONST.DB.CollectionName_DocItem;
+            var collectionName = CONST.DB.CollectionName_CategoryItem;
             if (!string.IsNullOrWhiteSpace(query))
             {
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
                 var resList = mongo.Find2(dbName, collectionName, query,protection,pageIndex,pageSize);
 
-                list = Convertor.FromDictionaryToObject<DocItem>(resList);
+                list = Convertor.FromDictionaryToObject<CategoryItem>(resList);
             }
 
             return list;
@@ -68,7 +68,7 @@ namespace WangJun.Doc
         {
             var res = new object();
             var dbName = CONST.DB.DBName_DocService;
-            var collectionName = CONST.DB.CollectionName_DocItem;
+            var collectionName = CONST.DB.CollectionName_CategoryItem;
             if (!string.IsNullOrWhiteSpace(query))
             {
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);

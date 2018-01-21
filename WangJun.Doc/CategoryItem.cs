@@ -12,18 +12,18 @@ namespace WangJun.Doc
     /// <summary>
     /// 文档实体 
     /// </summary>
-    public class DocItem
+    public class CategoryItem
     {
-        public static DocItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
+        public static CategoryItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
         {
-            var inst = new DocItem();
+            var inst = new CategoryItem();
             //inst._id = ObjectId.GenerateNewId();
             inst.Title = title;
             inst.Keyword = keyword;
             inst.Summary = summary;
             inst.Content = content;
             inst.CreateTime = dateTime;
-            inst.ContentType = "股票全网新闻";
+            inst.ContentType = "目录数据";
             inst.CreatorName = creatorName;
             inst.CreatorID = creatorID;
             return inst;
@@ -32,9 +32,9 @@ namespace WangJun.Doc
 
 
 
-        public static DocItem Create(Dictionary<string,object> data)
+        public static CategoryItem Create(Dictionary<string,object> data)
         {
-            var inst = Convertor.FromDictionaryToObject<DocItem>(data);
+            var inst = Convertor.FromDictionaryToObject<CategoryItem>(data);
             return inst;
         }
 
@@ -87,11 +87,11 @@ namespace WangJun.Doc
 
         public List<Dictionary<string, object>> ModifyLog { get; set; }
 
-        public static DocItem Load(string id)
+        public static CategoryItem Load(string id)
         {
             var _id = ObjectId.Parse(id);
             var query = "{\"_id\":new ObjectId('"+id+"')}";
-            var inst = DocManager.GetInstance().Find(query);
+            var inst = CategoryManager.GetInstance().Find(query);
 
             ///创建关联评论
             {
@@ -121,15 +121,15 @@ namespace WangJun.Doc
             return inst.First() ;
         }
 
-        public DocItem LoadInst(string id)
+        public CategoryItem LoadInst(string id)
         {
-            return DocItem.Load(id);
+            return CategoryItem.Load(id);
         }
 
         public void Save()
         {
             var dbName = "DocService";
-            var collectionName = "DocItem";
+            var collectionName = "CategoryItem";
             var db = DataStorage.GetInstance(DBType.MongoDB);
             //var filter = "{\"_id\":ObjectId('"+this._id.ToString()+"')}";
             db.Save3(dbName, collectionName, this);
@@ -138,7 +138,7 @@ namespace WangJun.Doc
         public void Remove()
         {
             //var dbName = "DocService";
-            //var collectionName = "DocItem";
+            //var collectionName = "CategoryItem";
             //var db = DataStorage.GetInstance(DBType.MongoDB);
             //var filter = "{\"_id\":ObjectId('" + this._id.ToString() + "')}";
             //db.Remove(dbName, collectionName, filter);

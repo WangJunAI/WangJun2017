@@ -14,6 +14,8 @@ namespace WangJun.Doc
 
             public static string CollectionName_DocItem { get { return "DocItem"; } }
 
+            public static string CollectionName_CategoryItem { get { return "CategoryItem"; } }
+
             public static string CollectionName_CommentItem { get { return "CommentItem"; } }
         }
     }
