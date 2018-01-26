@@ -580,11 +580,11 @@ namespace WangJun.Stock
                     var stockCode = q.Dequeue();
                     var stockName = this.stockCodeDict[stockCode];
                     var listData = WebDataSource.GetInstance().GetLHB(stockCode);
-                    var lhb = listData.First() as Dictionary<string,object>;
+                    var lhb = listData.First() as Dictionary<string, object>;
                     var lhbColumn = lhb["Column"] as Dictionary<string, object>;
                     var lhbData = lhb["Data"] as ArrayList;
-                    var tradingDate =DateTime.MinValue;
-                    foreach (Dictionary<string,object> itemLHB in lhbData)
+                    var tradingDate = DateTime.MinValue;
+                    foreach (Dictionary<string, object> itemLHB in lhbData)
                     {
                         tradingDate = DateTime.Parse(itemLHB["C1"].ToString());
                         var queryLHB = "{ \"StockCode\":\"" + stockCode + "\", \"TradingDate\":new Date('" + string.Format("{0:yyyy/MM/dd}", tradingDate) + "')}";
@@ -597,17 +597,18 @@ namespace WangJun.Stock
                         };
                         mongo.Save3(dbName, collectionNameLHB, svItem, queryLHB);
                     }
-                    
+
                     listData.RemoveAt(0);
-                    foreach (Dictionary<string,object> lhbmx in listData) ///第一个是龙虎榜,后面的是龙虎榜明细
+                    foreach (Dictionary<string, object> lhbmx in listData) ///第一个是龙虎榜,后面的是龙虎榜明细
                     {
 
                         var queryLHBMX = "{ \"StockCode\":\"" + stockCode + "\", \"TradingDate\":new Date('" + string.Format("{0:yyyy/MM/dd}", tradingDate) + "')}";
-                        var svItem = new {
-                            StockCode=stockCode,
+                        var svItem = new
+                        {
+                            StockCode = stockCode,
                             StockName = stockName,
-                            TradingDate=tradingDate,
-                            Data=lhbmx
+                            TradingDate = tradingDate,
+                            Data = lhbmx
                         };
                         mongo.Save3(dbName, collectionNameLHBMX, svItem, queryLHBMX);
                     }
@@ -619,14 +620,14 @@ namespace WangJun.Stock
 
                 }
 
-               TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
+                TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
 
 
 
             }
- 
 
-        
+
+
 
         }
         #endregion
@@ -643,7 +644,7 @@ namespace WangJun.Stock
             var exe = StockTaskExecutor.CreateInstance();
             var mongo = DataStorage.GetInstance(DBType.MongoDB);
             var dbName = CONST.DB.DBName_StockService;
-            var collectionNameRZRQ = CONST.DB.CollectionName_RZRQ; 
+            var collectionNameRZRQ = CONST.DB.CollectionName_RZRQ;
             var methodName = "SyncRZRQ";
 
             while (true)
@@ -656,13 +657,14 @@ namespace WangJun.Stock
                     var stockName = this.stockCodeDict[stockCode];
 
                     var array = WebDataSource.GetInstance().GetRZRQ(stockCode);
-                    foreach (Dictionary<string,object> arrayItem in array)
+                    foreach (Dictionary<string, object> arrayItem in array)
                     {
-                        var svItem = new {
+                        var svItem = new
+                        {
                             StockCode = stockCode,
                             StockName = stockName,
                             TradingDate = DateTime.Parse(arrayItem["日期"].ToString()),
-                            RZYE=arrayItem["融资余额"],
+                            RZYE = arrayItem["融资余额"],
                             RZMRE = arrayItem["融资买入额"],
                             RZCHE = arrayItem["融资偿还额"],
                             RQYLJE = arrayItem["融券余量金额"],
@@ -670,15 +672,15 @@ namespace WangJun.Stock
                             RQMCL = arrayItem["融券卖出量"],
                             RQCHL = arrayItem["融券偿还量"],
                             RQYE = arrayItem["融券余额"],
-                            CreateTime=DateTime.Now
+                            CreateTime = DateTime.Now
                         };
-                        LOGGER.Log(string.Format("SINA融资融券 {0} {1} {2} 保存完毕", stockCode, stockName,svItem.TradingDate));
-                        var query = "{\"StockCode\":\""+stockCode+"\",\"TradingDate\":new Date('"+string.Format("{0:yyyy/MM/dd}",svItem.TradingDate)+"')}";
+                        LOGGER.Log(string.Format("SINA融资融券 {0} {1} {2} 保存完毕", stockCode, stockName, svItem.TradingDate));
+                        var query = "{\"StockCode\":\"" + stockCode + "\",\"TradingDate\":new Date('" + string.Format("{0:yyyy/MM/dd}", svItem.TradingDate) + "')}";
                         mongo.Save3(dbName, collectionNameRZRQ, svItem, query);
                     }
-                    ThreadManager.Pause(seconds:2);
+                    ThreadManager.Pause(seconds: 2);
                     TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = stockName, Status = "已下载", CreateTime = DateTime.Now });
-                    LOGGER.Log(string.Format("SINA融资融券 {0} {1} 保存完毕",stockCode,stockName));
+                    LOGGER.Log(string.Format("SINA融资融券 {0} {1} 保存完毕", stockCode, stockName));
 
                 }
 
@@ -719,7 +721,7 @@ namespace WangJun.Stock
                         var doc = DocItem.Create(arrayItem);
                         doc.Save();
                         LOGGER.Log(string.Format("股票全网新闻 {0} {1} 保存完毕", stockCode, stockName));
-                     }
+                    }
                     ThreadManager.Pause(seconds: 1);
                     TaskStatusManager.Set(methodName, new { ID = methodName, StockCode = stockCode, StockName = stockName, Status = "已下载", CreateTime = DateTime.Now });
                     LOGGER.Log(string.Format("股票全网新闻 {0} {1} 保存完毕", stockCode, stockName));
@@ -729,6 +731,27 @@ namespace WangJun.Stock
                 LOGGER.Log(string.Format("股票全网新闻更新完毕，下一次一天以后更新 {0}", DateTime.Now));
                 TaskStatusManager.Set(methodName, new { ID = methodName, Status = "队列处理完毕", CreateTime = DateTime.Now });
                 ThreadManager.Pause(days: 1);
+            }
+        }
+        #endregion
+
+        #region 同步成交明细2018-1月
+        public void SyncExcel()
+        {
+            var q = this.PrepareData();
+            for (var date = DateTime.Now.AddDays(-1); new DateTime(2017, 1, 1) < date; date = date.AddDays(-1))
+            {
+                foreach (var stockCode in q)
+                {
+                     var stockName = this.stockCodeDict[stockCode];
+                    if (!(date.DayOfWeek == DayOfWeek.Sunday && date.DayOfWeek == DayOfWeek.Saturday))
+                    {
+                        DataSourceSINA.GetInstance().DownloadExcel(date, stockCode, stockName);
+                        
+                        LOGGER.Log(string.Format("{0}{1}{2}", stockCode, stockName, date));
+                    }
+                }
+
             }
         }
         #endregion

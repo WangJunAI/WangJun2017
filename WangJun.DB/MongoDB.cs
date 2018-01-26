@@ -183,13 +183,18 @@ namespace WangJun.DB
                 var dat = new BsonDocument(dict);
                  
                 var collection = this.GetCollection(dbName, collectionName);
-
-                if (string.IsNullOrWhiteSpace(query) || "{}" == query)
+                if ((string.IsNullOrWhiteSpace(query) || "{}" == query) && (!dict.ContainsKey("_id") || string.IsNullOrWhiteSpace(dict["_id"].ToString())))
                 {
                     collection.InsertOne(dat);
                 }
                 else
                 {
+                    if(string.IsNullOrWhiteSpace(query)&&dict.ContainsKey("_id")&&24 == dict["_id"].ToString().Length)
+                    {
+                        query = "{\"_id\":new ObjectId('"+dict["_id"]+"')}";
+                    }
+
+
                     if (replace)
                     {
                         FindOneAndReplaceOptions<BsonDocument, BsonDocument> option = new FindOneAndReplaceOptions<BsonDocument, BsonDocument>();

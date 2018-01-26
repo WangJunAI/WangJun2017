@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -55,7 +56,7 @@ namespace WangJun.Stock
         /// </summary>
         public int GetLSCJMXCount(string stockcode, string date)
         {
-            string url = string.Format("http://market.finance.sina.com.cn/transHis.php?date={0}&symbol={1}", date, Convertor.AddStockCodePrefix( stockcode));
+            string url = string.Format("http://market.finance.sina.com.cn/transHis.php?date={0}&symbol={1}", date, Convertor.AddStockCodePrefix(stockcode));
             var httpdownloader = new HTTP();
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -89,7 +90,7 @@ namespace WangJun.Stock
         /// <returns></returns>
         public string GetLSCJMX(string stockcode, string date, int pageNumber)
         {
-            string url = string.Format("http://vip.stock.finance.sina.com.cn/quotes_service/view/vMS_tradehistory.php?symbol={0}&date={1}&page={2}",Convertor.AddStockCodePrefix( stockcode), date, pageNumber);
+            string url = string.Format("http://vip.stock.finance.sina.com.cn/quotes_service/view/vMS_tradehistory.php?symbol={0}&date={1}&page={2}", Convertor.AddStockCodePrefix(stockcode), date, pageNumber);
             var httpdownloader = new HTTP();
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -115,8 +116,8 @@ namespace WangJun.Stock
         public List<string> GetLSCJMX(string stockcode, string date)
         {
             List<string> list = new List<string>();
-            var pageCount = this.GetLSCJMXCount(stockcode,date);
-            for (int k = 1; k< pageCount; k++)
+            var pageCount = this.GetLSCJMXCount(stockcode, date);
+            for (int k = 1; k < pageCount; k++)
             {
                 var html = this.GetLSCJMX(stockcode, date, k);
                 list.Add(html);
@@ -193,14 +194,14 @@ namespace WangJun.Stock
         /// <param name="stockCode"></param>
         public string GetCWZY(string stockCode)
         {
-            var url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/{0}.phtml",stockCode);
+            var url = string.Format("http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/{0}.phtml", stockCode);
             var httpDownloader = new HTTP();
             var headers = new Dictionary<HttpRequestHeader, string>();
             headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
             headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
             headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
             headers.Add(HttpRequestHeader.Host, "money.finance.sina.com.cn");
-            headers.Add(HttpRequestHeader.Referer, string.Format("http://money.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/{0}/displaytype/4.phtml",stockCode));
+            headers.Add(HttpRequestHeader.Referer, string.Format("http://money.finance.sina.com.cn/corp/go.php/vFD_FinanceSummary/stockid/{0}/displaytype/4.phtml", stockCode));
             headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0(Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36");
 
             var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
@@ -274,7 +275,7 @@ namespace WangJun.Stock
                 headers.Add(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
                 headers.Add(HttpRequestHeader.AcceptLanguage, "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
                 headers.Add(HttpRequestHeader.Host, "finance.sina.com.cn");
-                headers.Add(HttpRequestHeader.Referer, string.Format("http://finance.sina.com.cn/stockradar/stockradar{0}.html", (k%14)+2));
+                headers.Add(HttpRequestHeader.Referer, string.Format("http://finance.sina.com.cn/stockradar/stockradar{0}.html", (k % 14) + 2));
                 headers.Add(HttpRequestHeader.UserAgent, CONST.UserAgent);
 
                 var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
@@ -310,6 +311,25 @@ namespace WangJun.Stock
             var strData = httpDownloader.GetGzip2(url, Encoding.GetEncoding("GBK"), headers);
             return strData;
         }
+        #endregion
+
+        #region DownloadExcel
+        public void DownloadExcel(DateTime date, string stockCode, string stockName)
+        {
+            var httpDownloader = new HTTP();
+            var url = string.Format("http://market.finance.sina.com.cn/downxls.php?date={0}&symbol={1}", string.Format("{0:yyyy-MM-dd}", date), Convertor.AddStockCodePrefix(stockCode));
+            var filePath = string.Format(@"F:\Excel\{0}{1}{2:yyyyMMdd}.xls", stockCode, stockName, date);
+            filePath = filePath.Replace("*", "[星]");
+            if (!File.Exists(filePath))
+            {
+                var data = httpDownloader.GetFile(url);
+                File.WriteAllBytes(filePath, data);
+                ThreadManager.Pause(seconds: 3);
+
+            }
+
+        }
+
         #endregion
     }
 }

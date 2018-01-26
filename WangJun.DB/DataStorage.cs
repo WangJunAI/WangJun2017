@@ -260,7 +260,7 @@ namespace WangJun.DB
             var index = 0;
             var startTime = DateTime.Now;
             var prevTime = startTime;
-            var list = mongo.Find2(dbName, tableName, query,"{}", ++index, pageSize);
+            var list = mongo.Find3(dbName, tableName, query,"{}","{}", index++, pageSize);
             var hasData = (0 < list.Count) ? true : false;
             
             var queue = new Queue<List<Dictionary<string, object>>>();
@@ -268,9 +268,7 @@ namespace WangJun.DB
             while (0< queue.Count)
             {
                 var cost = DateTime.Now - prevTime;
-                mongo.Save("LOG", "Traverse", new {ContentType="遍历耗时",StartTime=startTime, Cost = cost,PrevTime=prevTime,CreateTime = DateTime.Now });
-
-                list = queue.Dequeue();
+                 list = queue.Dequeue();
                 foreach (var item in list)
                 {
                     EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(item));
@@ -279,7 +277,7 @@ namespace WangJun.DB
                 var task = Task.Factory.StartNew <object>(() => {
                     prevTime=DateTime.Now;
                     Console.WriteLine(" 准备查找第{0}页数据 页面大小:{1} 上次耗时:{2}",index,pageSize,cost);
-                    var resList = mongo.Find2(dbName, tableName, query,"{}", ++index, pageSize);
+                    var resList = mongo.Find3(dbName, tableName, query, "{}", "{}", index++, pageSize);
                     return resList;
                 });
 
@@ -409,6 +407,10 @@ namespace WangJun.DB
         {
 
         }
+        #endregion
+
+        #region Log
+        
         #endregion
     }
 }

@@ -174,12 +174,31 @@ namespace WangJun.Data
                         else if (null != value && value.GetType().IsClass && (value is IEnumerable))
                         {
                             var list = new List<Dictionary<string, object>>();
+                            var listValueType = new List<object>();
+                            bool isValueType = false;
                             foreach (var item in (value as IEnumerable))
                             {
-                                var itemDict = Convertor.FromObjectToDictionary3(item);
-                                list.Add(itemDict);
+                                if (!(item is string || item.GetType().IsValueType))
+                                {
+                                    var itemDict = Convertor.FromObjectToDictionary3(item);
+                                    list.Add(itemDict);
+                                }
+                                else
+                                {
+                                    isValueType = true;
+                                    listValueType.Add(item);
+                                }
                             }
-                            res.Add(name, list);
+
+                            if(!isValueType)
+                            {
+                                res.Add(name, list);
+                            }
+                            else
+                            {
+                                res.Add(name, listValueType);
+                            }
+                            
                         }
                         #endregion
                     }

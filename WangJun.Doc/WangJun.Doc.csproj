@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeItem.cs" />
     <Compile Include="CommentItem.cs" />
     <Compile Include="CONST.cs" />
     <Compile Include="DocAPI.cs" />
@@ -67,7 +68,9 @@
     <Compile Include="CommentManager.cs" />
     <Compile Include="CategoryManager.cs" />
     <Compile Include="DocManager.cs" />
+    <Compile Include="DocRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WriteLogItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">

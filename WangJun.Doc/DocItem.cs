@@ -51,9 +51,15 @@ namespace WangJun.Doc
 
         public string Content { get; set; }
 
+        public string PlainText { get; set; }
+
         public string Summary { get; set; }
 
         public string ContentType { get; set; }
+
+        public string CategoryName { get; set; }
+
+        public string CategoryID { get; set; }
 
         public int ReadCount { get; set; }
 
@@ -85,40 +91,58 @@ namespace WangJun.Doc
 
         public string CreatorID { get; set; }
 
+        public DateTime PublishTime { get; set; }
+
         public List<Dictionary<string, object>> ModifyLog { get; set; }
+
+        public bool HasProc { get; set; } //是否处理
+
+        public DateTime ProcTime { get; set; } ///处理时间
 
         public static DocItem Load(string id)
         {
-            var _id = ObjectId.Parse(id);
-            var query = "{\"_id\":new ObjectId('"+id+"')}";
-            var inst = DocManager.GetInstance().Find(query);
-
-            ///创建关联评论
+            if (!string.IsNullOrWhiteSpace(id) && 24 == id.Length)
             {
-                var dbName = "DocService";
-                var collectionName = "CommentItem";
-                var db = DataStorage.GetInstance(DBType.MongoDB);
-                var count = new Random().Next(10, 30);
-                for (int k = 0; k < count; k++)
+                var _id = ObjectId.Parse(id);
+                var query = "{\"_id\":new ObjectId('" + id + "')}";
+                var inst = DocManager.GetInstance().Find(query);
+
+                ///创建关联评论
                 {
-                    var length = inst.First().Content.Length;
-                    var commentLength = new Random().Next(10, 140);
-                    var comment = new CommentItem();
-                    comment.RootID = id;
-                    comment.ParentID = id;
-                    comment.LikeCount = new Random(k).Next(1, 1000);
-                    comment.Mode = "Text";
-                    comment.CreatorName = "创建人"+comment.LikeCount;
-                    comment.CreatorID = "ID"+comment.LikeCount;
-                    comment.CreateTime = DateTime.Now;
-                    comment.Content = inst.First().Content.Substring(length-commentLength,commentLength-1);
-                    db.Save3(dbName, collectionName, comment);
+                    var dbName = "DocService";
+                    var collectionName = "CommentItem";
+                    var db = DataStorage.GetInstance(DBType.MongoDB);
+                    var count = new Random().Next(10, 30);
+                    for (int k = 0; k < count; k++)
+                    {
+                        try
+                        {
+                            var length = inst.First().Content.Length;
+                            var commentLength = new Random().Next(10, 140);
+                            var comment = new CommentItem();
+                            comment.RootID = id;
+                            comment.ParentID = id;
+                            comment.LikeCount = new Random(k).Next(1, 1000);
+                            comment.Mode = "Text";
+                            comment.CreatorName = "创建人" + comment.LikeCount;
+                            comment.CreatorID = "ID" + comment.LikeCount;
+                            comment.CreateTime = DateTime.Now;
+                            comment.Content = inst.First().Content.Substring(length - commentLength, commentLength - 1);
+                            db.Save3(dbName, collectionName, comment);
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+
+                    }
+
                 }
 
+
+                return inst.First();
             }
-
-
-            return inst.First() ;
+            return new DocItem();
         }
 
         public DocItem LoadInst(string id)

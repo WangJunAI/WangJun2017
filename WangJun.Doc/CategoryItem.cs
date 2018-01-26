@@ -17,13 +17,8 @@ namespace WangJun.Doc
         public static CategoryItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
         {
             var inst = new CategoryItem();
-            //inst._id = ObjectId.GenerateNewId();
-            inst.Title = title;
-            inst.Keyword = keyword;
-            inst.Summary = summary;
-            inst.Content = content;
-            inst.CreateTime = dateTime;
-            inst.ContentType = "目录数据";
+            inst._id = ObjectId.GenerateNewId();
+            inst.Name = title;
             inst.CreatorName = creatorName;
             inst.CreatorID = creatorID;
             return inst;
@@ -42,38 +37,20 @@ namespace WangJun.Doc
 
         public string id { get { return _id.ToString(); } }
         public Guid ID{ get; set; }
+ 
+        public string Name { get; set; }
+        public string ParentID { get; set; }
 
-        public string ShowMode { get; set; }
+        public string ParentName { get; set; }
 
-        public string Title { get; set; }
+        public string GroupName { get; set; }
 
-        public string Keyword { get; set; }
+        public string GroupID { get; set; }
 
-        public string Content { get; set; }
+        public int ItemCount { get; set; }
 
-        public string Summary { get; set; }
-
-        public string ContentType { get; set; }
-
-        public int ReadCount { get; set; }
-
-        public int LikeCount { get; set; }
-
-        public int CommentCount { get; set; }
-
-        public string ImageUrl { get; set; }
-
-        public List<Dictionary<string,object>> Images { get; set; }
-
-        public List<Dictionary<string, object>> Videos { get; set; }
-
-        public List<Dictionary<string, object>> Votes { get; set; }
-
-        public List<Dictionary<string, object>> Attachments { get; set; }
-
-        public List<Dictionary<string, object>> AppendList { get; set; } ///
-
-        public List<CommentItem> CommentList { get; set; }
+        public int SubCategoryCount { get; set; }
+         
 
         public DateTime CreateTime { get; set; }
 
@@ -92,32 +69,7 @@ namespace WangJun.Doc
             var _id = ObjectId.Parse(id);
             var query = "{\"_id\":new ObjectId('"+id+"')}";
             var inst = CategoryManager.GetInstance().Find(query);
-
-            ///创建关联评论
-            {
-                var dbName = "DocService";
-                var collectionName = "CommentItem";
-                var db = DataStorage.GetInstance(DBType.MongoDB);
-                var count = new Random().Next(10, 30);
-                for (int k = 0; k < count; k++)
-                {
-                    var length = inst.First().Content.Length;
-                    var commentLength = new Random().Next(10, 140);
-                    var comment = new CommentItem();
-                    comment.RootID = id;
-                    comment.ParentID = id;
-                    comment.LikeCount = new Random(k).Next(1, 1000);
-                    comment.Mode = "Text";
-                    comment.CreatorName = "创建人"+comment.LikeCount;
-                    comment.CreatorID = "ID"+comment.LikeCount;
-                    comment.CreateTime = DateTime.Now;
-                    comment.Content = inst.First().Content.Substring(length-commentLength,commentLength-1);
-                    db.Save3(dbName, collectionName, comment);
-                }
-
-            }
-
-
+            
             return inst.First() ;
         }
 

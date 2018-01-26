@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,17 +18,17 @@ namespace WangJun.Doc
             return inst;
         }
 
-        public int Save(string title, string content, string creatorName, string creatorID)
+        public int Save(string name, string parentId, string creatorName, string creatorID)
         {
             var inst = new CategoryItem();
-            //inst._id = ObjectId.GenerateNewId();
-            inst.Title = title;
-            inst.Keyword = "暂空";
-            inst.Summary = "暂空";
-            inst.Content = content;
+            inst._id = ObjectId.GenerateNewId();
+            inst.Name = name;
+            inst.ParentID = parentId;
+            inst.GroupName = "文档库模板";
             inst.CreateTime = DateTime.Now;
-            inst.ContentType = "测试";
+            inst.UpdateTime = DateTime.Now;
             inst.CreatorName = creatorName;
+            inst.Status = CONST.Status.Normal;
             inst.CreatorID = creatorID;
             inst.Save();
             return 0;
@@ -36,6 +37,10 @@ namespace WangJun.Doc
         public CategoryItem Get(string id)
         {
             var inst = CategoryItem.Load(id);
+            if (24 == inst.ParentID.Length)
+            {
+                inst.ParentName = CategoryItem.Load(inst.ParentID).Name;
+            }
             return inst;
         }
 
@@ -78,5 +83,21 @@ namespace WangJun.Doc
 
             return res;
         }
+
+        public object Remove(string query)
+        {
+            var res = new object();
+            var dbName = CONST.DB.DBName_DocService;
+            var collectionName = CONST.DB.CollectionName_CategoryItem;
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                var mongo = DataStorage.GetInstance(DBType.MongoDB);
+                mongo.Remove(dbName, collectionName, query);
+            }
+
+            return 0;
+
+        }
+ 
     }
 }

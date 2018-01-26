@@ -7,7 +7,9 @@ using System.Text;
 using WangJun.BizCore;
 using WangJun.Data;
 using WangJun.DB;
+using WangJun.Doc;
 using WangJun.NetLoader;
+using WangJun.OA;
 using WangJun.Stock;
 using WangJun.Tools;
 
@@ -167,7 +169,18 @@ namespace WangJun.NodeRunner
             {
                 analysor.AnalyseRisingStock(startTime: DateTime.Now.AddDays(-10), endTime: DateTime.Now.AddDays(-5));
             }
-
+            else if("DocRunner" == serviceName)
+            {
+               // DataSourceSINA.GetInstance().DownloadExcel();
+                //new DocRunner().DataAnalyse();
+            }
+            else if ("SyncExcel" == serviceName)
+            {
+                //DataSourceSINA.GetInstance().DownloadExcel();
+                //new DocRunner().DataAnalyse();
+                //sync.SyncExcel();
+                ExcelService.GetInstance().ConvertToJson(@"F:\【工程】2015年年终奖数据.xlsx", "Test", @"F:\Test");
+            }
             #endregion
 
             Console.WriteLine("全部结束");

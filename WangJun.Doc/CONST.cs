@@ -17,6 +17,14 @@ namespace WangJun.Doc
             public static string CollectionName_CategoryItem { get { return "CategoryItem"; } }
 
             public static string CollectionName_CommentItem { get { return "CommentItem"; } }
+
+            public static string CollectionName_LogItem { get { return "LogItem"; } }
+
+            public static string CollectionName_InvokeItem { get { return "InvokeItem"; } }
+        }
+
+        public static class Status {
+            public static string Normal  { get { return "正常"; } }
         }
     }
 }
