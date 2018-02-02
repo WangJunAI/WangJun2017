@@ -98,6 +98,7 @@ namespace WangJun.Data
 
         public static Dictionary<string,object> FromObjectToDictionary3(object data)
         {
+  
             Dictionary<string, object> res = new Dictionary<string, object>();
             if (null != data)
             {

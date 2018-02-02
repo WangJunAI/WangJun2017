@@ -21,6 +21,12 @@ namespace WangJun.Doc
             public static string CollectionName_LogItem { get { return "LogItem"; } }
 
             public static string CollectionName_InvokeItem { get { return "InvokeItem"; } }
+
+            public static string CollectionName_ModifyLogItem { get { return "ModifyLogItem"; } }
+
+            public static string CollectionName_RecycleBin { get { return "RecycleBin"; } }
+
+            public static string CollectionName_FenCi { get { return "FenCi"; } }
         }
 
         public static class Status {

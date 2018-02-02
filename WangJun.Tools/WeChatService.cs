@@ -6,7 +6,7 @@ using System.Web;
 using System.Configuration;
 using System.Web.Script.Serialization;
 
-namespace ZlSoft.Service
+namespace WangJun.Tools
 {
     public static class WeChatService
     {

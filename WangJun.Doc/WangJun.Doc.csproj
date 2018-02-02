@@ -59,9 +59,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnalysisItem.cs" />
     <Compile Include="ChangeItem.cs" />
     <Compile Include="CommentItem.cs" />
     <Compile Include="CONST.cs" />
+    <Compile Include="DocAnalysor.cs" />
     <Compile Include="DocAPI.cs" />
     <Compile Include="CategoryItem.cs" />
     <Compile Include="DocItem.cs" />
@@ -69,7 +71,11 @@
     <Compile Include="CategoryManager.cs" />
     <Compile Include="DocManager.cs" />
     <Compile Include="DocRunner.cs" />
+    <Compile Include="ModifyLogItem.cs" />
+    <Compile Include="ObjectItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RecycleBinItem.cs" />
+    <Compile Include="RecycleBinManager.cs" />
     <Compile Include="WriteLogItem.cs" />
   </ItemGroup>
   <ItemGroup>

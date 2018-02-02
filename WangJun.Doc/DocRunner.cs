@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,13 @@ namespace WangJun.Doc
     /// </summary>
     public class DocRunner
     {
+
+        public static DocRunner GetInstance()
+        {
+            var inst = new DocRunner();
+            return inst;
+        }
+
         /// <summary>
         /// 变更记录
         /// </summary>
@@ -30,7 +38,7 @@ namespace WangJun.Doc
         }
 
         /// <summary>
-        /// 热词分析 分词 发文/修改统计
+        /// 根据新增,修改情况 热词分析 分词 发文/修改统计
         /// </summary>
         public void DataAnalyse()
         {
@@ -40,57 +48,54 @@ namespace WangJun.Doc
             {
                 ///遍历写入数据
                 var dbName = CONST.DB.DBName_DocService;
-                var collectionName = CONST.DB.CollectionName_DocItem;
+                var collectionName = CONST.DB.CollectionName_ModifyLogItem;
                 var db = DataStorage.GetInstance(DBType.MongoDB);
                 db.EventTraverse += (object sender, EventArgs e) =>
                 {
                     EventProcEventArgs ee = e as EventProcEventArgs;
-                ///正文分析
-                ///文章统计
-                var data = ee.Default as Dictionary<string, object>;
-                    if (data.ContainsKey("PlainText") && data["PlainText"] is string)
+                    var dict = ee.Default as Dictionary<string, object>;
+                    var targetDbName = dict["DatabaseName"].ToString();
+                    var targetCollectionName = dict["CollectionName"].ToString();
+                    var targetID = (ObjectId)dict["TargetID"];
+                    var id = dict["_id"].ToString();
+
+                    if(targetCollectionName == CONST.DB.CollectionName_DocItem)
                     {
-                        var content = data["PlainText"].ToString();
-                        var title = data["Title"].ToString();
-                        var res1 = FenCi.GetResult(content); 
-  
-                        foreach (var item in res1)
+                        ///重新分词,聚类
+                        var doc = DocItem.Load(targetID.ToString());
+                        var plainText = doc.PlainText;
+                        var res = FenCi.GetResult(plainText);
+                        var queryDel = "{'TargetID':ObjectId('" + targetID.ToString() + "')}";
+                        db.Remove(dbName, collectionName, queryDel);
+                        foreach (var item in res)
                         {
                             var svItem = new
                             {
-                                id = data["id"],
+                                DbName = targetDbName,
+                                CollectionName = targetCollectionName,
+                                TargetID = targetID,
                                 Word = item.Key,
                                 Count = item.Value,
                                 CreateTime = DateTime.Now,
-                                Source = "Content"
-                            };
-                            var filter = "{\"id\":\"" + svItem.id + "\",\"Word\":\"" + svItem.Word + "\",\"Source\":\"Content\"}";
+                                TargetCreateTime=dict["CreateTime"]
 
-                            db.Save3(dbName, "FenCi", svItem, filter);
+                            };
+
+                            db.Save3(CONST.DB.DBName_DocService, CONST.DB.CollectionName_FenCi, svItem);
                         }
-                         
+
+                    }
+                    else if(targetCollectionName == CONST.DB.CollectionName_CategoryItem)
+                    {
+                        ///重新统计,当前目录的子目录数量 , 每一级文档数量
+                        var subCategoryList = CategoryManager.GetInstance().GetSubCategory(targetID.ToString());
+                        var category=CategoryItem.Load(targetID.ToString());
+                        category.SubCategoryCount = subCategoryList.Count;
+                        category.Save();
+
                     }
 
-                    if (data.ContainsKey("Title") && data["Title"] is string)
-                    { 
-                        var title = data["Title"].ToString(); 
-                        var res2 = FenCi.GetResult(title);
- 
-                        foreach (var item in res2)
-                        {
-                            var svItem = new
-                            {
-                                id = data["_id"].ToString(),
-                                Word = item.Key,
-                                Count = item.Value,
-                                CreateTime = DateTime.Now,
-                                Source = "Title"
-                            };
-                            var filter = "{\"id\":\"" + svItem.id + "\",\"Word\":\"" + svItem.Word + "\",\"Source\":\"Title\"}";
-
-                            db.Save3(dbName, "FenCi", svItem, filter);
-                        }
-                    }
+                    //ModifyLogItem.Remove(id);
                 };
                 db.Traverse(dbName, collectionName, "{}");
                 ThreadManager.Pause(minutes: 2);

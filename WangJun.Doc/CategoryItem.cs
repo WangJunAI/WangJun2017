@@ -50,6 +50,8 @@ namespace WangJun.Doc
         public int ItemCount { get; set; }
 
         public int SubCategoryCount { get; set; }
+
+
          
 
         public DateTime CreateTime { get; set; }
@@ -63,6 +65,9 @@ namespace WangJun.Doc
         public string CreatorID { get; set; }
 
         public List<Dictionary<string, object>> ModifyLog { get; set; }
+
+        public string ClassFullName { get { return this.GetType().FullName; } }
+ 
 
         public static CategoryItem Load(string id)
         {
@@ -83,8 +88,16 @@ namespace WangJun.Doc
             var dbName = "DocService";
             var collectionName = "CategoryItem";
             var db = DataStorage.GetInstance(DBType.MongoDB);
-            //var filter = "{\"_id\":ObjectId('"+this._id.ToString()+"')}";
-            db.Save3(dbName, collectionName, this);
+
+            if (this._id == ObjectId.Empty)
+            {
+                db.Save3(dbName, collectionName, this);
+            }
+            else
+            {
+                var query = "{\"_id\":ObjectId('"+this._id.ToString()+"')}";
+                db.Save3(dbName, collectionName, this, query);
+            }
         }
 
         public void Remove()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using WangJun.DB;
 namespace WangJun.Doc
 {
     /// <summary>
-    /// 目录变更,文档变更
+    /// 修改变更记录
     /// </summary>
     public class ChangeItem
     {
@@ -23,7 +24,7 @@ namespace WangJun.Doc
         public string Source { get; set; }
 
         public string HttpMethod { get; set; }
-
+ 
         public void Save()
         {
             var task = new TaskFactory().StartNew(() => {

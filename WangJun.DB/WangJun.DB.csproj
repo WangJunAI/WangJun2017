@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DBItem.cs" />
     <Compile Include="DBType.cs" />
     <Compile Include="YunConfig.cs" />
     <Compile Include="DataStorage.cs" />

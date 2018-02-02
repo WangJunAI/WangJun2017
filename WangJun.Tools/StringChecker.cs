@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Web.Script.Serialization;
+using MongoDB.Bson;
 
 namespace WangJun.Data
 {
@@ -174,5 +175,15 @@ namespace WangJun.Data
             return res;
         }
         #endregion
+
+        #region 判断是否是ObjectId
+        public static bool IsObjectId(string id)
+        {
+            var oid = ObjectId.Empty;
+            return   ObjectId.TryParse(id, out oid);
+        }
+        #endregion
+
+
     }
 }

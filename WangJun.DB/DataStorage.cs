@@ -410,7 +410,20 @@ namespace WangJun.DB
         #endregion
 
         #region Log
-        
+
+        #endregion
+
+        #region Get
+        public Dictionary<string,object> Get(string dbName, string collectionName, string query, string sort= "{}", string protection = "{}", int pageIndex = 0, int pageSize = int.MaxValue, Dictionary<string, object> updateData = null)
+        {
+
+            var list = this.Find3(dbName, collectionName, query, sort, protection, 0, 1);
+            if(1 == list.Count)
+            {
+                return list.First();
+            }
+            return null;
+        }
         #endregion
     }
 }

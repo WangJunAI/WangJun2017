@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -739,12 +740,13 @@ namespace WangJun.Stock
         public void SyncExcel()
         {
             var q = this.PrepareData();
-            for (var date = DateTime.Now.AddDays(-1); new DateTime(2017, 1, 1) < date; date = date.AddDays(-1))
+            //var date = DateTime.Now;
+            for (var date = new DateTime(2018, 1, 26); new DateTime(2017, 1, 1) < date; date = date.AddDays(-1))
             {
                 foreach (var stockCode in q)
                 {
                      var stockName = this.stockCodeDict[stockCode];
-                    if (!(date.DayOfWeek == DayOfWeek.Sunday && date.DayOfWeek == DayOfWeek.Saturday))
+                    if (!(date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday))
                     {
                         DataSourceSINA.GetInstance().DownloadExcel(date, stockCode, stockName);
                         
@@ -755,5 +757,38 @@ namespace WangJun.Stock
             }
         }
         #endregion
+
+        public void ProcHistory()
+        {
+            var folderPath = @"F:\Excel\";
+            var files = Directory.EnumerateFiles(folderPath);
+            foreach (var filePath in files)
+            {
+                var fileName = filePath.Replace(folderPath, string.Empty).Replace(".xls", string.Empty);
+                var lines = File.ReadAllLines(filePath,Encoding.Default);
+                for (var k=1;k<lines.Length;k++)
+                {
+                    var line = lines[k];
+                    var fileNameLength = fileName.Length;
+                    var stockCode = fileName.Substring(0, 6);
+                    var dateString = fileName.Substring(fileName.Length - 8, 8).Insert(4, "-").Insert(7, "-");
+                    var arr = line.Split(new char[] { '\t' },StringSplitOptions.RemoveEmptyEntries);
+                    if(6 == arr.Length && lines[0].Contains("成交时间"))
+                    {
+                        var tradingTime = DateTime.Parse(dateString + " " + arr[0]);
+                        var price = float.Parse(arr[1]);
+                        var priceChange = arr[2];
+                        var volume = int.Parse(arr[3])*100;
+                        var turnover = float.Parse(arr[4]);
+                        var kind = arr[5];
+                        LOGGER.Log(string.Format("{0}{1}{2}{3}{4}{5}", tradingTime, price, priceChange, volume, turnover, kind));
+                    }
+                     
+
+                    LOGGER.Log(line);
+                }
+
+            }
+        }
     }
 }
