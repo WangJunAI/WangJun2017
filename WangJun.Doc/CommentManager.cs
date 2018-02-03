@@ -5,16 +5,36 @@ using System.Text;
 using System.Threading.Tasks;
 using WangJun.Data;
 using WangJun.DB;
+using WangJun.HumanResource;
 
 namespace WangJun.Doc
 {
     public class CommentManager
     {
+        public SESSION CurrentUser
+        {
+            get
+            {
+                return SESSION.Current;
+            }
+        }
 
         public static CommentManager GetInstance()
         {
             var inst = new CommentManager();
             return inst;
+        }
+
+        public int Add(string content,string targetId,string mode)
+        {
+            var inst = new CommentItem();
+            inst.RootID = targetId;
+            inst.Content = content;
+            inst.CreatorID = this.CurrentUser.UserID;
+            inst.CreatorName = this.CurrentUser.UserName;
+            inst.Mode = mode;
+            inst.Save();
+            return 0;
         }
 
         /// <summary>

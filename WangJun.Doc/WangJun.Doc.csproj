@@ -61,6 +61,8 @@
   <ItemGroup>
     <Compile Include="AnalysisItem.cs" />
     <Compile Include="ChangeItem.cs" />
+    <Compile Include="ClientBehaviorItem.cs" />
+    <Compile Include="ClientBehaviorManager.cs" />
     <Compile Include="CommentItem.cs" />
     <Compile Include="CONST.cs" />
     <Compile Include="DocAnalysor.cs" />
@@ -82,6 +84,10 @@
     <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
       <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
       <Name>WangJun.DB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WangJun.HumanResource\WangJun.HumanResource.csproj">
+      <Project>{06F3A647-D026-4847-94A5-20643223CC96}</Project>
+      <Name>WangJun.HumanResource</Name>
     </ProjectReference>
     <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
       <Project>{79474114-39E0-4FEC-A040-F2E867CA82A7}</Project>

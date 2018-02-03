@@ -27,6 +27,8 @@ namespace WangJun.Doc
             public static string CollectionName_RecycleBin { get { return "RecycleBin"; } }
 
             public static string CollectionName_FenCi { get { return "FenCi"; } }
+
+            public static string CollectionName_ClientBehaviorItem { get { return "ClientBehaviorItem"; } }
         }
 
         public static class Status {
