@@ -78,7 +78,7 @@ namespace WangJun.NodeRunner
             {
                 //WeChatService.GetAllOrg();
                 //new DocRunner().DataAnalyse();
-                new StaffManager().In();
+                var res = new DataSourceBaidu().GetPic("骆驼管家告诉你投资P2P，分散也要懂策略！");
             }
             else if ("SyncExcel" == serviceName)
             {

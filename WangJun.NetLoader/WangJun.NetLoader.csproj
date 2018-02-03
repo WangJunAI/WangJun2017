@@ -51,6 +51,7 @@
     <Compile Include="FanyYiJunAPI.cs" />
     <Compile Include="JRJ.cs" />
     <Compile Include="NodeService.cs" />
+    <Compile Include="DataSourceBaidu.cs" />
     <Compile Include="SinaFin.cs" />
     <Compile Include="So360.cs" />
     <Compile Include="THS.cs" />
