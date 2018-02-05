@@ -174,5 +174,11 @@ namespace WangJun.Doc
             return 0;
 
         }
+
+        public object Aggregate( string match, string group)
+        {
+            var db = DataStorage.GetInstance(DBType.MongoDB);
+            return db.Aggregate(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem,   match,   group);
+        }
     }
 }

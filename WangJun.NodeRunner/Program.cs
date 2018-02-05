@@ -81,7 +81,7 @@ namespace WangJun.NodeRunner
                 //new DocRunner().DataAnalyse();
                 //var res = new DataSourceBaidu().GetPic("骆驼管家告诉你投资P2P，分散也要懂策略！");
 
-                MongoDB.GetInst("mongodb").Aggregate("DocService", "DocItem", "{}");
+                //MongoDB.GetInst("mongodb").Aggregate("DocService", "DocItem", "{}");
                 //for (int k = 0; k < 1000; k++)
                 //{
                 //    DocManager.GetInstance().Save("测试" + k, "<p>Test"+k+"</p>", "5a78263026b0185ef8d286c2", "2018-02-10 0:0:0", "已发布", null, "Test");

@@ -503,12 +503,17 @@ namespace WangJun.DB
         #endregion
 
         #region 聚合计算
-        public void Aggregate(string dbName, string collectionName, string query, string sort = "{}", string protection = "{}", int pageIndex = 0, int pageSize = int.MaxValue, Dictionary<string, object> updateData = null)
+        /// <summary>
+        /// 添加聚合计算
+        /// </summary>
+        /// <param name="dbName"></param>
+        /// <param name="collectionName"></param>
+        /// <param name="pipeline"></param>
+        /// <returns></returns>
+        public List<Dictionary<string, object>> Aggregate(string dbName, string collectionName,string[] pipeline)
         {
             List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
-            FilterDefinition<BsonDocument> filter = query;
-            ProjectionDefinition<BsonDocument> protectionD = protection;
-            var pipelineDefinition = PipelineDefinition< BsonDocument, BsonDocument>.Create(new string[] { "{$match:{}}", "{$group:{_id:'$CategoryName',total:{$sum:1}}}" });
+            var pipelineDefinition = PipelineDefinition< BsonDocument, BsonDocument>.Create(pipeline);//"{$match:{}}", "{$group:{_id:'$CategoryName',total:{$sum:1}}}"
             var db = this.client.GetDatabase(dbName);
             var collection = db.GetCollection<BsonDocument>(collectionName);
             var cursor = collection.Aggregate(pipelineDefinition);
@@ -523,10 +528,10 @@ namespace WangJun.DB
                     EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
                 }
             }
-            var test = res;
-            //return res;
+            return res;
         }
         #endregion
+
         #region Distinct
         /// <summary>
         /// Distinct

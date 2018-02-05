@@ -425,5 +425,23 @@ namespace WangJun.DB
             return null;
         }
         #endregion
+
+        #region 聚合查询
+         public List<Dictionary<string, object>> Aggregate(string dbName, string collectionName, string match,string group)
+        {
+            if (null != this.mongo)
+            {
+                var res = mongo.Aggregate(dbName, collectionName, new string[] { match, group });
+                return res;
+            }
+            else if (null != this.sqlserver)
+            {
+                //var res = this.sqlserver.Find(jsonString, exParam as List<KeyValuePair<string, object>>);
+                //return res;
+            }
+
+            return null;
+        }
+        #endregion
     }
 }
