@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace WangJun.Doc
 {
-    public class ClientBehaviorManager
+    public static class ClientBehaviorManager
     {
-        public void Add(string dbName,string collectionName,string targetId,string behaviorType,string userID,string userName)
+        public static void Add(string dbName,string collectionName,string targetId,string behaviorType,string userID,string userName)
         {
             var inst = new ClientBehaviorItem();
             inst.DbName = dbName;

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WangJun.Data;
 using WangJun.DB;
+using WangJun.HumanResource;
 
 namespace WangJun.Doc
 {
@@ -22,7 +23,7 @@ namespace WangJun.Doc
         {
             var inst = new DocItem();
             var isNew = false;
-            if (24 == id.Length && "000000000000000000000000" != id)
+            if (!string.IsNullOrWhiteSpace(id)&& 24 == id.Length && "000000000000000000000000" != id)
             {
                 inst._id = ObjectId.Parse(id);
             }
@@ -37,7 +38,7 @@ namespace WangJun.Doc
             inst.Content = content;
             inst.CategoryID = categoryID;
             inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
-            inst.CreateTime = DateTime.Now;
+            inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100,100));
             inst.ContentType = "测试";
             inst.CreatorName = "测试员";
             inst.PublishTime = DateTime.Parse(publishTime);
@@ -61,6 +62,17 @@ namespace WangJun.Doc
         public DocItem Get(string id)
         {
             var inst = DocItem.Load(id);
+            try
+            {
+                var currentUser = SESSION.Current;
+
+                this.UpdateValue(id, "{$inc:{'ReadCount':1}}");
+                ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, id, "阅读", currentUser.UserID, currentUser.UserName);
+            }
+            catch
+            {
+
+            }
             return inst;
         }
 
@@ -78,16 +90,29 @@ namespace WangJun.Doc
             return 0;
         }
 
-            /// <summary>
-            /// 根据
-            /// </summary>
-            /// <param name="query"></param>
-            /// <param name="protection"></param>
-            /// <param name="pageIndex"></param>
-            /// <param name="pageSize"></param>
-            /// <returns></returns>
+        public int UpdateValue(string id, object updateData)
+        { 
+            var dbName = CONST.DB.DBName_DocService;
+            var collectionName = CONST.DB.CollectionName_DocItem;
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                var query = "{'_id':ObjectId('" + id + "')}";
+                var db = DataStorage.GetInstance(DBType.MongoDB);
+                db.Save3(dbName, collectionName, updateData, query, false);
+            }
+            return 0;
+        }
 
-            public List<DocItem> Find(string query, string protection = "{}",string sort="{}", int pageIndex = 0,int pageSize=50)
+        /// <summary>
+        /// 根据
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="protection"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+
+        public List<DocItem> Find(string query, string protection = "{}",string sort="{}", int pageIndex = 0,int pageSize=50)
         {
             var list = new List<DocItem>();
             var dbName = CONST.DB.DBName_DocService;
@@ -101,6 +126,20 @@ namespace WangJun.Doc
             }
 
             return list;
+        }
+
+        public List<DocItem> LoadAllDocInSubFolder(string categoryId, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50) {
+            var list = RecycleBinManager.GetInstance().FindTarget(CONST.DB.DBName_DocService,CONST.DB.CollectionName_CategoryItem,categoryId);
+            var source = list.Where((p) => { return p.TableName == CONST.DB.CollectionName_DocItem; }).Skip(pageIndex * pageSize).Take(pageSize);
+            var query = "{'_id':{$in:[idArray]}}";
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (var item in source)
+            {
+                stringBuilder.AppendFormat("ObjectId('{0}'),",item.ID);
+            }
+            query = query.Replace("idArray", stringBuilder.ToString());
+            var res = this.Find(query, protection, sort, pageIndex, pageSize);
+            return res;
         }
 
         public object Count(string query)

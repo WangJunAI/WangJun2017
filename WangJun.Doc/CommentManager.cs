@@ -27,13 +27,31 @@ namespace WangJun.Doc
 
         public int Add(string content,string targetId,string mode)
         {
+            var currentUser = SESSION.Current;
             var inst = new CommentItem();
             inst.RootID = targetId;
             inst.Content = content;
-            inst.CreatorID = this.CurrentUser.UserID;
-            inst.CreatorName = this.CurrentUser.UserName;
+            inst.CreatorID = currentUser.UserID;
+            inst.CreatorName = currentUser.UserName;
             inst.Mode = mode;
             inst.Save();
+
+
+            if(mode == "LikeCount")
+            {
+                DocManager.GetInstance().UpdateValue(targetId, "{$inc:{'LikeCount':1}}");
+                ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_CommentItem, targetId, "点赞", currentUser.UserID, currentUser.UserName);
+            }
+            else if(mode == "text")
+            {
+                DocManager.GetInstance().UpdateValue(targetId, "{$inc:{'CommentCount':1}}");
+                ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_CommentItem, targetId, "评论", currentUser.UserID, currentUser.UserName);
+
+            }
+
+
+
+
             return 0;
         }
 

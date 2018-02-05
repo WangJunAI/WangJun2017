@@ -125,6 +125,9 @@ namespace WangJun.Doc
             var collectionName = "DocItem";
             var db = DataStorage.GetInstance(DBType.MongoDB);
             //var filter = "{\"_id\":ObjectId('"+this._id.ToString()+"')}";
+            
+
+
             db.Save3(dbName, collectionName, this);
         }
 

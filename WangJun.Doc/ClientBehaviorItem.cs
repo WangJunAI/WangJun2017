@@ -16,6 +16,9 @@ namespace WangJun.Doc
 
         public string TargetID { get; set; }
 
+        /// <summary>
+        /// 阅读,点赞,评论,界面操作
+        /// </summary>
         public string BehaviorType { get; set; }
 
         public string UserID { get; set; }

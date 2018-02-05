@@ -67,7 +67,15 @@ namespace WangJun.Data
                         }
                         else if(property.PropertyType.IsValueType)
                         {
-                            property.SetValue(item, data[key], null);
+
+                            if(property.PropertyType == typeof(int))
+                            {
+                                property.SetValue(item, int.Parse(data[key].ToString()), null);
+                            }
+                            else
+                            {
+                                property.SetValue(item, data[key], null);
+                            }
                         }
                         else
                         {

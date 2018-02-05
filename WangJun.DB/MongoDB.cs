@@ -177,10 +177,21 @@ namespace WangJun.DB
         {
             if (null != data) ///若数据有效
             {
-                var dict = Convertor.FromObjectToDictionary3(data);
-                ////string jsonData = Convertor.FromObjectToJson(data);
-                //var dict = Convertor.FromObjectToDictionary2(data);
-                var dat = new BsonDocument(dict);
+
+                var dict = new Dictionary<string, object>();
+                var dat = new BsonDocument();
+                if(data is string && data.ToString().Contains("$")&& false ==replace)
+                {
+
+                }
+                else
+                {
+                    dict = Convertor.FromObjectToDictionary3(data);
+                    ////string jsonData = Convertor.FromObjectToJson(data);
+                    //var dict = Convertor.FromObjectToDictionary2(data);
+                    dat = new BsonDocument(dict);
+
+                }
                  
                 var collection = this.GetCollection(dbName, collectionName);
                 if ((string.IsNullOrWhiteSpace(query) || "{}" == query) && (!dict.ContainsKey("_id") || string.IsNullOrWhiteSpace(dict["_id"].ToString())))
@@ -205,7 +216,11 @@ namespace WangJun.DB
                     {
                         FindOneAndUpdateOptions<BsonDocument, BsonDocument> option = new FindOneAndUpdateOptions<BsonDocument, BsonDocument>();
                         option.IsUpsert = true;
-                        var updateDefinition = "{ $set: " + dat.ToJson() + " }";
+                        var updateDefinition = "{ '$set': " + dat.ToJson() + " }";
+                        if(data is string)
+                        {
+                            updateDefinition = data.ToString();
+                        }
                         collection.FindOneAndUpdate(query, updateDefinition, option);
                     }
                 }
@@ -488,28 +503,27 @@ namespace WangJun.DB
         #endregion
 
         #region 聚合计算
-        public void Aggregate(string dbName, string collectionName, string jsonString, int pageIndex = 0, int pageSize = int.MaxValue)
+        public void Aggregate(string dbName, string collectionName, string query, string sort = "{}", string protection = "{}", int pageIndex = 0, int pageSize = int.MaxValue, Dictionary<string, object> updateData = null)
         {
-            //List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
-            //var filterDict = Convertor.FromJsonToDict2(jsonString);
-            //var filterBuilder = Builders<BsonDocument>.Filter;
-            //var filter = this.FilterConvertor(jsonString);
-
-            //var define =PipelineDefinitionBuilder.
-            //var db = this.client.GetDatabase(dbName);
-            //var collection = db.GetCollection<BsonDocument>(collectionName);
-            //var cursor = collection.Aggregate()
-            //foreach (var document in cursor.ToEnumerable())
-            //{
-            //    if (null == this.EventTraverse)
-            //    {
-            //        res.Add(document.ToDictionary());
-            //    }
-            //    else
-            //    {
-            //        EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
-            //    }
-            //}
+            List<Dictionary<string, object>> res = new List<Dictionary<string, object>>();
+            FilterDefinition<BsonDocument> filter = query;
+            ProjectionDefinition<BsonDocument> protectionD = protection;
+            var pipelineDefinition = PipelineDefinition< BsonDocument, BsonDocument>.Create(new string[] { "{$match:{}}", "{$group:{_id:'$CategoryName',total:{$sum:1}}}" });
+            var db = this.client.GetDatabase(dbName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            var cursor = collection.Aggregate(pipelineDefinition);
+            foreach (var document in cursor.ToEnumerable())
+            {
+                if (null == this.EventTraverse)
+                {
+                    res.Add(document.ToDictionary());
+                }
+                else
+                {
+                    EventProc.TriggerEvent(this.EventTraverse, this, EventProcEventArgs.Create(document.ToDictionary()));
+                }
+            }
+            var test = res;
             //return res;
         }
         #endregion

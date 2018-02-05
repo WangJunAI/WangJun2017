@@ -50,7 +50,7 @@ namespace WangJun.Doc
         /// 若是删除文档,则直接删除
         /// </summary>
         /// <returns></returns>
-        protected List<DBItem> FindTarget(string dbName, string collectionName, string id)
+        public List<DBItem> FindTarget(string dbName, string collectionName, string id)
         {
             List<DBItem> list = new List<DBItem>();
             var db = DataStorage.GetInstance(DBType.MongoDB);
@@ -63,7 +63,7 @@ namespace WangJun.Doc
                 {
                     var dbItem1 = DBItem.Create(CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem, category.id);
                     list.Add(dbItem1);
-                    var docList = DocManager.GetInstance().Find("{'CategoryID':'" + dbItem1.ID + "'}");
+                    var docList = DocManager.GetInstance().Find("{'CategoryID':'" + dbItem1.ID + "'}","{}","{}",0,int.MaxValue);
                     foreach (var doc in docList)
                     {
                         var dbItem2 = DBItem.Create(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, doc.id);

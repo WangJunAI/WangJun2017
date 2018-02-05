@@ -8,5 +8,25 @@ namespace WangJun.Workflow
 {
     public class WorkflowEngine
     {
+        public void StartInstance()
+        {
+
+        }
+
+        public void FindNextStep()
+        {
+
+        }
+
+        public void ExecuteTask()
+        {
+
+        }
+
+
+        public void EndInstance()
+        {
+
+        }
     }
 }

@@ -21,10 +21,14 @@ namespace WangJun.HumanResource
 
             get
             {
-                var inst = new SESSION();
-                inst.UserID = "E10000";
-                inst.UserName = "测试人员";
-                return inst;
+                var list = new List<SESSION>();
+ 
+                for (int  k= 0;   k< 100;  k++)
+                {
+                    list.Add(new SESSION { UserID = string.Format("E{0:000}",k),UserName=string.Format("测试{0:000}",k) });
+                }
+
+                return list[new Random().Next(0, 100)];
             }
         }
     }
