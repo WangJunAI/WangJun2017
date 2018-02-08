@@ -1,11 +1,8 @@
 ﻿using MongoDB.Bson;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WangJun.Data;
 using WangJun.DB;
+using WangJun.Utility;
 
 namespace WangJun.Doc
 {

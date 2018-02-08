@@ -11,7 +11,8 @@
     <AssemblyName>WangJun.Net</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,31 +41,23 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WangJun.Debug.Fakes">
-      <HintPath>FakesAssemblies\WangJun.Debug.Fakes.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FTP.cs" />
     <Compile Include="HTTP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="URL.cs" />
     <Compile Include="WebClientWithCookie.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WangJun.Local\WangJun.Local.csproj">
-      <Project>{bb2a52e3-a00f-4591-a561-ba2e5ac00f2c}</Project>
-      <Name>WangJun.Local</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
-      <Project>{79474114-39e0-4fec-a040-f2e867ca82a7}</Project>
-      <Name>WangJun.Tools</Name>
-    </ProjectReference>
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
+      <Project>{ddc51285-3f85-4d6d-a10b-f835b9c5058a}</Project>
+      <Name>WangJun.Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

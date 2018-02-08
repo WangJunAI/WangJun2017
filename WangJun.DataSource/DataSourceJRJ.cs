@@ -11,7 +11,7 @@ namespace WangJun.NetLoader
     /// <summary>
     /// 金融街数据源
     /// </summary>
-    public class JRJ
+    public class DataSourceJRJ
     {
 
         /// <summary>

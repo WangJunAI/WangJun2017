@@ -79,7 +79,7 @@ namespace WangJun.NodeRunner
             {
                 //WeChatService.GetAllOrg();
                 //new DocRunner().DataAnalyse();
-                //var res = new DataSourceBaidu().GetPic("骆驼管家告诉你投资P2P，分散也要懂策略！");
+                var res = new DataSourceBaidu().GetPic("骆驼管家告诉你投资P2P，分散也要懂策略！");
 
                 //MongoDB.GetInst("mongodb").Aggregate("DocService", "DocItem", "{}");
                 //for (int k = 0; k < 1000; k++)

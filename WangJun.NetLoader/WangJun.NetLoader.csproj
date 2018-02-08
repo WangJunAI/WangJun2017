@@ -48,12 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
-    <Compile Include="FanyYiJunAPI.cs" />
-    <Compile Include="JRJ.cs" />
+    <Compile Include="DataSourceTencent.cs" />
+    <Compile Include="DataSourceJRJ.cs" />
     <Compile Include="NodeService.cs" />
     <Compile Include="DataSourceBaidu.cs" />
     <Compile Include="SinaFin.cs" />
-    <Compile Include="So360.cs" />
+    <Compile Include="DataSourceSo360.cs" />
     <Compile Include="THS.cs" />
     <Compile Include="WebLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +74,10 @@
     <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
       <Project>{79474114-39e0-4fec-a040-f2e867ca82a7}</Project>
       <Name>WangJun.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
+      <Project>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</Project>
+      <Name>WangJun.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

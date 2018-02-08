@@ -4,13 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F778D22C-042F-4535-A9E1-10BFB9E23A7F}</ProjectGuid>
+    <ProjectGuid>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WangJun.Doc</RootNamespace>
-    <AssemblyName>WangJun.Doc</AssemblyName>
+    <RootNamespace>WangJun.Utility</RootNamespace>
+    <AssemblyName>WangJun.Utility</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DnsClient, Version=1.0.7.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
@@ -42,6 +46,9 @@
     <Reference Include="MongoDB.Driver.Core, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MongoDB.Driver.Core.2.5.0\lib\net45\MongoDB.Driver.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.3.0\lib\netstandard1.1\System.Buffers.dll</HintPath>
@@ -51,6 +58,8 @@
       <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.0.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -59,51 +68,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnalysisItem.cs" />
-    <Compile Include="ChangeItem.cs" />
-    <Compile Include="ClientBehaviorItem.cs" />
-    <Compile Include="ClientBehaviorManager.cs" />
-    <Compile Include="CommentItem.cs" />
-    <Compile Include="CONST.cs" />
-    <Compile Include="DocAnalysor.cs" />
-    <Compile Include="DocAPI.cs" />
-    <Compile Include="CategoryItem.cs" />
-    <Compile Include="DocItem.cs" />
-    <Compile Include="CommentManager.cs" />
-    <Compile Include="CategoryManager.cs" />
-    <Compile Include="DocManager.cs" />
-    <Compile Include="DocRunner.cs" />
-    <Compile Include="ModifyLogItem.cs" />
-    <Compile Include="ObjectItem.cs" />
+    <Compile Include="CollectionTools.cs" />
+    <Compile Include="Convertor.cs" />
+    <Compile Include="DictTools.cs" />
+    <Compile Include="EventProc.cs" />
+    <Compile Include="LocalDataOperator.cs" />
+    <Compile Include="LOGGER.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecycleBinItem.cs" />
-    <Compile Include="RecycleBinManager.cs" />
-    <Compile Include="WriteLogItem.cs" />
+    <Compile Include="StringChecker.cs" />
+    <Compile Include="ThreadManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WangJun.AI\WangJun.AI.csproj">
-      <Project>{590D4B25-0269-4CA9-9695-E1F39395BA96}</Project>
-      <Name>WangJun.AI</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.DataSource\WangJun.DataSource.csproj">
-      <Project>{773C67BE-ABAD-4C67-A84D-831458B8385E}</Project>
-      <Name>WangJun.DataSource</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
-      <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
-      <Name>WangJun.DB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.HumanResource\WangJun.HumanResource.csproj">
-      <Project>{06F3A647-D026-4847-94A5-20643223CC96}</Project>
-      <Name>WangJun.HumanResource</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
-      <Project>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</Project>
-      <Name>WangJun.Utility</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

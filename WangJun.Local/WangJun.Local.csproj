@@ -50,10 +50,6 @@
       <Project>{0232eca8-2266-4b23-a59f-66ec9308260a}</Project>
       <Name>WangJun.Debug</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
-      <Project>{79474114-39e0-4fec-a040-f2e867ca82a7}</Project>
-      <Name>WangJun.Tools</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

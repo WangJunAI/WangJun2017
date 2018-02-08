@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using WangJun.Data;
 using WangJun.DB;
 using WangJun.HumanResource;
+using WangJun.Tools;
+using WangJun.Utility;
 
 namespace WangJun.Doc
 {
@@ -19,8 +19,10 @@ namespace WangJun.Doc
             return inst;
         }
 
-        public int Save(string title, string content, string categoryID, string publishTime,string status,string id,string plainText)
+        public int Save(string title, string content, string categoryID, string publishTime,string status,string id,string plainText,string thumbnailSrc)
         {
+            var session = SESSION.Current;
+
             var inst = new DocItem();
             var isNew = false;
             if (!string.IsNullOrWhiteSpace(id)&& 24 == id.Length && "000000000000000000000000" != id)
@@ -40,10 +42,21 @@ namespace WangJun.Doc
             inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
             inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100,100));
             inst.ContentType = "测试";
-            inst.CreatorName = "测试员";
+            inst.CreatorID = session.UserID;
+            inst.CreatorName = session.UserName;
             inst.PublishTime = DateTime.Parse(publishTime);
             inst.Status = status;
             inst.PlainText = plainText;
+            if(StringChecker.IsHttpUrl(thumbnailSrc))
+            {
+                inst.ImageUrl = thumbnailSrc;
+            }
+            else
+            {
+                var pic = (DataSourceBaidu.GetInstance().GetPic(inst.Title)[0] as Dictionary<string, object>)["thumbURL"].ToString() ;
+                inst.ImageUrl = pic;
+            }
+
             inst.Save();
 
             ///添加记录
@@ -138,7 +151,7 @@ namespace WangJun.Doc
                 stringBuilder.AppendFormat("ObjectId('{0}'),",item.ID);
             }
             query = query.Replace("idArray", stringBuilder.ToString());
-            var res = this.Find(query, protection, sort, pageIndex, pageSize);
+            var res = this.Find(query, protection, sort, 0, int.MaxValue);
             return res;
         }
 

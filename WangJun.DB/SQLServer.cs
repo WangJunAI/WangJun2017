@@ -1,12 +1,11 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Data.SqlClient;
-using System.Data;
-using WangJun.Data;
-using MongoDB.Bson;
+using WangJun.Utility;
 
 namespace WangJun.DB
 {

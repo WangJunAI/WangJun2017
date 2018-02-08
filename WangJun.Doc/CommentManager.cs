@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WangJun.Data;
+﻿using System.Collections.Generic;
 using WangJun.DB;
 using WangJun.HumanResource;
+using WangJun.Utility;
 
 namespace WangJun.Doc
 {

@@ -11,7 +11,7 @@ namespace WangJun.NetLoader
     /// <summary>
     /// 
     /// </summary>
-    public  class So360
+    public  class DataSourceSo360
     {
         /// <summary>
         /// 获取节日信息

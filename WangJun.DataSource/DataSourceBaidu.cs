@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
-using WangJun.Data;
 using WangJun.Net;
+using WangJun.Utility;
 
 namespace WangJun.Tools
 {

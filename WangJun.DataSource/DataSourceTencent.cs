@@ -11,7 +11,7 @@ namespace WangJun.NetLoader
     /// <summary>
     /// 翻译君API
     /// </summary>
-    public static class FanyYiJunAPI
+    public static class DataSourceTencent
     {
         private static HTTP http = new HTTP();
         private static string url = "http://fanyi.qq.com/api/translate";

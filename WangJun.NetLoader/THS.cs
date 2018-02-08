@@ -439,7 +439,7 @@ namespace WangJun.NetLoader
                     queueUrl.Enqueue(item.Key);///Key：StockCode Value:StockName
                 }
             }
-            var jrj = new JRJ();
+            var jrj = new DataSourceJRJ();
             while (0 < queueUrl.Count)
             {
                 var stockCode = queueUrl.Dequeue();
