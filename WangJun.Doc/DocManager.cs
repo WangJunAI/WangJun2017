@@ -143,7 +143,7 @@ namespace WangJun.Doc
 
         public List<DocItem> LoadAllDocInSubFolder(string categoryId, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50) {
             var list = RecycleBinManager.GetInstance().FindTarget(CONST.DB.DBName_DocService,CONST.DB.CollectionName_CategoryItem,categoryId);
-            var source = list.Where((p) => { return p.TableName == CONST.DB.CollectionName_DocItem; }).Skip(pageIndex * pageSize).Take(pageSize);
+            var source = list.Where((p) => { return p.TableName == CONST.DB.CollectionName_DocItem; });
             var query = "{'_id':{$in:[idArray]}}";
             StringBuilder stringBuilder = new StringBuilder();
             foreach (var item in source)
@@ -151,7 +151,7 @@ namespace WangJun.Doc
                 stringBuilder.AppendFormat("ObjectId('{0}'),",item.ID);
             }
             query = query.Replace("idArray", stringBuilder.ToString());
-            var res = this.Find(query, protection, sort, 0, int.MaxValue);
+            var res = this.Find(query, protection, sort, pageIndex, pageSize);
             return res;
         }
 

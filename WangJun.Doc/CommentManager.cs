@@ -60,7 +60,7 @@ namespace WangJun.Doc
         /// <param name="pageSize"></param>
         /// <returns></returns>
 
-        public List<CommentItem> Find(string query, string protection = "{}",string sort="{}", int pageIndex = 0,int pageSize=50)
+        public List<CommentItem> Find(string query, string sort = "{}",string protection="{}", int pageIndex = 0,int pageSize=50)
         {
             var list = new List<CommentItem>();
             var dbName = CONST.DB.DBName_DocService;

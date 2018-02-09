@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.DataSource", "WangJ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.AI", "WangJun.AI\WangJun.AI.csproj", "{590D4B25-0269-4CA9-9695-E1F39395BA96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WangJun.Office", "WangJun.Office\WangJun.Office.csproj", "{F542ABA6-FF88-4AA0-8EDC-C7858E6BD6B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,10 @@ Global
 		{590D4B25-0269-4CA9-9695-E1F39395BA96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{590D4B25-0269-4CA9-9695-E1F39395BA96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{590D4B25-0269-4CA9-9695-E1F39395BA96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F542ABA6-FF88-4AA0-8EDC-C7858E6BD6B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F542ABA6-FF88-4AA0-8EDC-C7858E6BD6B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F542ABA6-FF88-4AA0-8EDC-C7858E6BD6B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F542ABA6-FF88-4AA0-8EDC-C7858E6BD6B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

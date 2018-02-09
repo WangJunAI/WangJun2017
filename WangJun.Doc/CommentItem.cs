@@ -36,6 +36,7 @@ namespace WangJun.Doc
                 try
                 {
                     this._id = ObjectId.GenerateNewId();
+                    this.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
                     var dbName = CONST.DB.DBName_DocService;
                     var collectionName = CONST.DB.CollectionName_CommentItem;
                     var db = DataStorage.GetInstance(DBType.MongoDB);

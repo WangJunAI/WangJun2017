@@ -48,37 +48,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WangJun.BizCore\WangJun.BizCore.csproj">
-      <Project>{4E6BB412-B6A6-45B0-978D-582609930D82}</Project>
-      <Name>WangJun.BizCore</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
       <Project>{af918729-03e8-443f-bd76-79bc604e286e}</Project>
       <Name>WangJun.DB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.Debug\WangJun.Debug.csproj">
-      <Project>{0232ECA8-2266-4B23-A59F-66EC9308260A}</Project>
-      <Name>WangJun.Debug</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.Doc\WangJun.Doc.csproj">
-      <Project>{F778D22C-042F-4535-A9E1-10BFB9E23A7F}</Project>
-      <Name>WangJun.Doc</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.HumanResource\WangJun.HumanResource.csproj">
       <Project>{06F3A647-D026-4847-94A5-20643223CC96}</Project>
       <Name>WangJun.HumanResource</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.NetLoader\WangJun.NetLoader.csproj">
-      <Project>{EE3A5A9F-20B3-4555-9A40-609C3641A7E0}</Project>
-      <Name>WangJun.NetLoader</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.Stock\WangJun.Stock.csproj">
-      <Project>{73325152-D226-46CB-B333-B5EEA545209B}</Project>
-      <Name>WangJun.Stock</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
-      <Project>{79474114-39E0-4FEC-A040-F2E867CA82A7}</Project>
-      <Name>WangJun.Tools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
