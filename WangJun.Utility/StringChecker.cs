@@ -184,6 +184,13 @@ namespace WangJun.Utility
         }
         #endregion
 
+        #region 判断是否是非空ObjectId
+        public static bool IsNotEmptyObjectId(string id)
+        {
+            var oid = ObjectId.Empty;
+            return ObjectId.TryParse(id, out oid) && oid != ObjectId.Empty;
+        }
+        #endregion
 
     }
 }

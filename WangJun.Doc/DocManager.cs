@@ -25,28 +25,32 @@ namespace WangJun.Doc
 
             var inst = new DocItem();
             var isNew = false;
-            if (!string.IsNullOrWhiteSpace(id)&& 24 == id.Length && "000000000000000000000000" != id)
+            if (StringChecker.IsNotEmptyObjectId(id))
             {
                 inst._id = ObjectId.Parse(id);
             }
             else
             {
                 inst._id = ObjectId.GenerateNewId();
+                inst.ID = Guid.NewGuid();
+                inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
+                inst.CreatorName = session.UserName;
+                inst.CreatorID = session.UserID;
                 isNew = true;
-            }
+             }
             inst.Title = title;
             inst.Keyword = "暂空";
             inst.Summary = "暂空";
             inst.Content = content;
+            inst.ContentLength = content.Length;
             inst.CategoryID = categoryID;
             inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
-            inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100,100));
-            inst.ContentType = "测试";
-            inst.CreatorID = session.UserID;
-            inst.CreatorName = session.UserName;
-            inst.PublishTime = DateTime.Parse(publishTime);
+            inst.ContentType = "文档库模板";
+             inst.PublishTime = DateTime.Parse(publishTime);
             inst.Status = status;
             inst.PlainText = plainText;
+            inst.PlainTextLength = plainText.Length;
+            inst.UpdateTime = DateTime.Now;
             if(StringChecker.IsHttpUrl(thumbnailSrc))
             {
                 inst.ImageUrl = thumbnailSrc;

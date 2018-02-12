@@ -9,6 +9,12 @@ namespace WangJun.Doc
 {
     public  class ClientBehaviorManager
     {
+        public static ClientBehaviorManager GetInstance()
+        {
+            var inst = new ClientBehaviorManager();
+            return inst;
+        }
+
         public static void Add(string dbName,string collectionName,string targetId,string behaviorType,string userID,string userName)
         {
             var inst = new ClientBehaviorItem();

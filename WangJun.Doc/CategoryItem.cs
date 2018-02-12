@@ -10,7 +10,7 @@ namespace WangJun.Doc
     /// <summary>
     /// 文档实体 
     /// </summary>
-    public class CategoryItem
+    public class CategoryItem:BaseItem
     {
         public static CategoryItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
         {
@@ -33,7 +33,7 @@ namespace WangJun.Doc
 
         public ObjectId _id { get; set; }
 
-        public string id { get { return _id.ToString(); } }
+        public override string id { get { return _id.ToString(); } }
         public Guid ID{ get; set; }
  
         public string Name { get; set; }
@@ -49,28 +49,13 @@ namespace WangJun.Doc
 
         public int SubCategoryCount { get; set; }
 
-
-         
-
-        public DateTime CreateTime { get; set; }
-
-        public DateTime UpdateTime { get; set; }
-
-        public string Status { get; set; }
-
-        public string CreatorName { get; set; }
-
-        public string CreatorID { get; set; }
-
-        public List<Dictionary<string, object>> ModifyLog { get; set; }
-
-        public string ClassFullName { get { return this.GetType().FullName; } }
+ 
  
 
         public static CategoryItem Load(string id)
         {
             var _id = ObjectId.Parse(id);
-            var query = "{\"_id\":new ObjectId('"+id+"')}";
+            var query = CONST.DB.MongoDBFilterCreator_ByObjectId(id);
             var inst = CategoryManager.GetInstance().Find(query);
             
             return inst.First() ;
@@ -83,8 +68,8 @@ namespace WangJun.Doc
 
         public void Save()
         {
-            var dbName = "DocService";
-            var collectionName = "CategoryItem";
+            var dbName = CONST.DB.DBName_DocService;
+            var collectionName = CONST.DB.CollectionName_CategoryItem;
             var db = DataStorage.GetInstance(DBType.MongoDB);
 
             if (this._id == ObjectId.Empty)
@@ -93,7 +78,7 @@ namespace WangJun.Doc
             }
             else
             {
-                var query = "{\"_id\":ObjectId('"+this._id.ToString()+"')}";
+                var query = CONST.DB.MongoDBFilterCreator_ByObjectId(this._id.ToString());
                 db.Save3(dbName, collectionName, this, query);
             }
         }

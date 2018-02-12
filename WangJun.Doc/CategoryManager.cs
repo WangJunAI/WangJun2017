@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using WangJun.DB;
+using WangJun.HumanResource;
 using WangJun.Utility;
 
 namespace WangJun.Doc
@@ -15,17 +16,22 @@ namespace WangJun.Doc
             return inst;
         }
 
-        public int Save(string name, string parentId, string id, string creatorID)
+        public int Save(string name, string parentId, string id)
         {
+            var session = SESSION.Current;
             var inst = new CategoryItem();
             var isNew = false;
-            if (24 == id.Length && "000000000000000000000000" != id)
+            if (StringChecker.IsObjectId(id))
             {
                 inst._id = ObjectId.Parse(id);
             }
             else
             {
                 inst._id = ObjectId.GenerateNewId();
+                inst.ID = Guid.NewGuid();
+                inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
+                inst.CreatorName = session.UserName;
+                inst.CreatorID = session.UserID;
                 isNew = true;
             }
 
@@ -33,11 +39,8 @@ namespace WangJun.Doc
             inst.Name = name;
             inst.ParentID = parentId;
             inst.GroupName = "文档库模板";
-            inst.CreateTime = DateTime.Now;
             inst.UpdateTime = DateTime.Now;
-            inst.CreatorName = "测试人员";
             inst.Status = CONST.Status.Normal;
-            inst.CreatorID = creatorID;
             inst.Save();
 
             ///添加记录
@@ -72,7 +75,7 @@ namespace WangJun.Doc
         /// <param name="pageSize"></param>
         /// <returns></returns>
 
-        public List<CategoryItem> Find(string query, string protection = "{}", int pageIndex = 0,int pageSize=50)
+        public List<CategoryItem> Find(string query, string protection = "{}",string sort="{}", int pageIndex = 0,int pageSize=50)
         {
             var list = new List<CategoryItem>();
             var dbName = CONST.DB.DBName_DocService;
@@ -80,7 +83,7 @@ namespace WangJun.Doc
             if (!string.IsNullOrWhiteSpace(query))
             {
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
-                var resList = mongo.Find2(dbName, collectionName, query,protection,pageIndex,pageSize);
+                var resList = mongo.Find3(dbName, collectionName, query, sort, protection, pageIndex, pageSize);
 
                 list = Convertor.FromDictionaryToObject<CategoryItem>(resList);
             }

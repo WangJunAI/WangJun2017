@@ -97,6 +97,7 @@ namespace WangJun.Doc
                         rItem.Title = item["Title"].ToJson();
                         rItem.Type = "文档";
                     }
+                    rItem.id = item["id"].ToString();
                     list.Add(rItem);
                 }
              }

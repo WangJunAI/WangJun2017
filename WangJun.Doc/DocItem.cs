@@ -10,7 +10,7 @@ namespace WangJun.Doc
     /// <summary>
     /// 文档实体 
     /// </summary>
-    public class DocItem
+    public class DocItem: BaseItem
     {
         public static DocItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
         {
@@ -38,7 +38,7 @@ namespace WangJun.Doc
 
         public ObjectId _id { get; set; }
 
-        public string id { get { return _id.ToString(); } }
+        public override string id { get { return _id.ToString(); } }
         public Guid ID{ get; set; }
 
         public string ShowMode { get; set; }
@@ -49,7 +49,11 @@ namespace WangJun.Doc
 
         public string Content { get; set; }
 
+        public int ContentLength { get; set; }
+
         public string PlainText { get; set; }
+
+        public int PlainTextLength { get; set; }
 
         public string Summary { get; set; }
 
@@ -78,26 +82,13 @@ namespace WangJun.Doc
         public List<Dictionary<string, object>> AppendList { get; set; } ///
 
         public List<CommentItem> CommentList { get; set; }
-
-        public DateTime CreateTime { get; set; }
-
-        public DateTime UpdateTime { get; set; }
-
-        public string Status { get; set; }
-
-        public string CreatorName { get; set; }
-
-        public string CreatorID { get; set; }
-
+ 
         public DateTime PublishTime { get; set; }
 
-        public List<Dictionary<string, object>> ModifyLog { get; set; }
+        
 
-        public bool HasProc { get; set; } //是否处理
-
-        public DateTime ProcTime { get; set; } ///处理时间
-
-        public string ClassFullName { get { return this.GetType().FullName; } }
+ 
+             
 
         public static DocItem Load(string id)
         {

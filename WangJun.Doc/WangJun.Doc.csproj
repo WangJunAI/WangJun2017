@@ -60,19 +60,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalysisItem.cs" />
+    <Compile Include="BaseItem.cs" />
     <Compile Include="ChangeItem.cs" />
     <Compile Include="ClientBehaviorItem.cs" />
     <Compile Include="ClientBehaviorManager.cs" />
     <Compile Include="CommentItem.cs" />
     <Compile Include="CONST.cs" />
     <Compile Include="DocAnalysor.cs" />
-    <Compile Include="DocAPI.cs" />
     <Compile Include="CategoryItem.cs" />
     <Compile Include="DocItem.cs" />
     <Compile Include="CommentManager.cs" />
     <Compile Include="CategoryManager.cs" />
     <Compile Include="DocManager.cs" />
     <Compile Include="DocRunner.cs" />
+    <Compile Include="DocWebAPI.cs" />
     <Compile Include="ModifyLogItem.cs" />
     <Compile Include="ObjectItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
