@@ -4,31 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WangJun.Doc
+namespace WangJun.HumanResource
 {
     public static class CONST
     {
         public static class DB
         {
-            public static string DBName_DocService { get { return "DocService"; } }
+            public static string DBName_HumanResource { get { return "HumanResource"; } }
 
-            public static string CollectionName_DocItem { get { return "DocItem"; } }
+            public static string CollectionName_OrgItem { get { return "OrgItem"; } }
 
-            public static string CollectionName_CategoryItem { get { return "CategoryItem"; } }
-
-            public static string CollectionName_CommentItem { get { return "CommentItem"; } }
-
-            public static string CollectionName_LogItem { get { return "LogItem"; } }
-
-            public static string CollectionName_InvokeItem { get { return "InvokeItem"; } }
-
-            public static string CollectionName_ModifyLogItem { get { return "ModifyLogItem"; } }
-
-            public static string CollectionName_RecycleBin { get { return "RecycleBin"; } }
-
-            public static string CollectionName_FenCi { get { return "FenCi"; } }
-
-            public static string CollectionName_ClientBehaviorItem { get { return "ClientBehaviorItem"; } }
+            public static string CollectionName_StaffItem { get { return "StaffItem"; } }
 
 
             public static string MongoDBFilterCreator_ByObjectId(string id)

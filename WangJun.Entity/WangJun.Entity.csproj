@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{06F3A647-D026-4847-94A5-20643223CC96}</ProjectGuid>
+    <ProjectGuid>{41FE0A71-2098-483A-8E1B-ED4BEBB4DD72}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WangJun.HumanResource</RootNamespace>
-    <AssemblyName>WangJun.HumanResource</AssemblyName>
+    <RootNamespace>WangJun.Entity</RootNamespace>
+    <AssemblyName>WangJun.Entity</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -40,27 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CONST.cs" />
-    <Compile Include="OrgItem.cs" />
-    <Compile Include="OrgManager.cs" />
-    <Compile Include="SESSION.cs" />
-    <Compile Include="StaffItem.cs" />
-    <Compile Include="StaffManager.cs" />
+    <Compile Include="BaseItem.cs" />
+    <Compile Include="EntityManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StaffWebAPI.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
-      <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
-      <Name>WangJun.DB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
-      <Project>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</Project>
-      <Name>WangJun.Utility</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

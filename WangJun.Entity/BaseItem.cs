@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WangJun.Doc
+namespace WangJun.Entity
 {
     /// <summary>
     /// 基本类型

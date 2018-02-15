@@ -83,5 +83,21 @@ namespace WangJun.HumanResource
 
             }
         }
+
+        public List<StaffItem> Find(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
+        {
+            var list = new List<StaffItem>();
+            var dbName = CONST.DB.DBName_HumanResource;
+            var collectionName = CONST.DB.CollectionName_StaffItem;
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                var mongo = DataStorage.GetInstance(DBType.MongoDB);
+                var resList = mongo.Find3(dbName, collectionName, query, sort, protection, pageIndex, pageSize);
+
+                list = Convertor.FromDictionaryToObject<StaffItem>(resList);
+            }
+
+            return list;
+        }
     }
 }

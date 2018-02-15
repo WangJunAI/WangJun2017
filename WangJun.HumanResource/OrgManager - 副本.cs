@@ -19,7 +19,6 @@ namespace WangJun.HumanResource
 
         }
 
-        #region
         public void Import()
         {
             var json = File.ReadAllText(@"F:\[2016]数据备份\组织.txt", Encoding.UTF8);
@@ -39,23 +38,6 @@ namespace WangJun.HumanResource
                 db.Save3("HumanResource", "OrgItem", svItem);
 
             }
-        }
-        #endregion
-
-        public List<OrgItem> Find(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
-        {
-            var list = new List<OrgItem>();
-            var dbName = CONST.DB.DBName_HumanResource;
-            var collectionName = CONST.DB.CollectionName_OrgItem;
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                var mongo = DataStorage.GetInstance(DBType.MongoDB);
-                var resList = mongo.Find3(dbName, collectionName, query, sort, protection, pageIndex, pageSize);
-
-                list = Convertor.FromDictionaryToObject<OrgItem>(resList);
-            }
-
-            return list;
         }
 
 

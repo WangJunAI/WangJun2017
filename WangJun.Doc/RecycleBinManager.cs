@@ -79,7 +79,7 @@ namespace WangJun.Doc
         {
             var list = new List<RecycleBinItem> ();
             var dbName = CONST.DB.DBName_DocService;
-            var collectionName = CONST.DB.CollectionName_DocItem;
+            var collectionName = CONST.DB.CollectionName_RecycleBin;
             if (!string.IsNullOrWhiteSpace(query))
             {
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
