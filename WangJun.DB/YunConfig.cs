@@ -11,7 +11,7 @@ namespace WangJun.DB
     /// </summary>
     public class YunConfig
     {
-        public const string CurrentGroupID = "ubuntu开发环境";//联网端使用
+        public const string CurrentGroupID = "阿里云按量计费";//"ubuntu开发环境";//联网端使用
         public Dictionary<string, string> Load(string keyName)
         {
 
@@ -20,7 +20,7 @@ namespace WangJun.DB
             dict["ubuntu开发环境"] = new Dictionary<string, string>();
             dict["docker开发环境"] = new Dictionary<string, string>();
 
-            dict["阿里云按量计费"]["mongodb"] = "mongodb://localhost:27017";
+            dict["阿里云按量计费"]["mongodb"] = "mongodb://101.200.49.75:27017";
             dict["阿里云按量计费"]["sqlserver"] = "Data Source=qds165298153.my3w.com;Initial Catalog=qds165298153_db;Persist Security Info=True;User ID=qds165298153;Password=75737573";
 
 

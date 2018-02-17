@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using WangJun.Data;
 using WangJun.DB;
-using WangJun.Debug;
-using WangJun.Tools;
+using WangJun.Utility;
 
 namespace WangJun.Stock
 {

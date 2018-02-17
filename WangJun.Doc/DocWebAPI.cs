@@ -108,7 +108,11 @@ namespace WangJun.Doc
             var res = CategoryManager.GetInstance().Find(query, protection,sort, pageIndex, pageSize);
             return res;
         }
-
+        public List<CategoryItem> Test()
+        {
+            var res = CategoryManager.GetInstance().Find("{}", "{}", "{}", 0, 1000);
+            return res;
+        }
         /// <summary>
         /// 加载文档列表
         /// </summary>
@@ -138,6 +142,12 @@ namespace WangJun.Doc
         public object DocCount(string query)
         {
             var res = DocManager.GetInstance().Count(query);
+            return res;
+        }
+
+        public object RecycleBinCount(string query)
+        {
+            var res = RecycleBinManager.GetInstance().Count(query);
             return res;
         }
 

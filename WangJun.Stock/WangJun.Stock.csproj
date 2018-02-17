@@ -42,46 +42,42 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CONST.cs" />
-    <Compile Include="DataSourceSINA.cs" />
-    <Compile Include="DataSourceTHS.cs" />
-    <Compile Include="DataSourceTouTiao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StockAnalyser.cs" />
     <Compile Include="StockAPI.cs" />
     <Compile Include="StockSynchronizer.cs" />
-    <Compile Include="StockTaskCreator.cs" />
     <Compile Include="StockTaskExecutor.cs" />
     <Compile Include="TaskStatusManager.cs" />
     <Compile Include="WebDataSource.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WangJun.BizCore\WangJun.BizCore.csproj">
-      <Project>{4E6BB412-B6A6-45B0-978D-582609930D82}</Project>
-      <Name>WangJun.BizCore</Name>
+    <ProjectReference Include="..\WangJun.AI\WangJun.AI.csproj">
+      <Project>{590D4B25-0269-4CA9-9695-E1F39395BA96}</Project>
+      <Name>WangJun.AI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WangJun.DataSource\WangJun.DataSource.csproj">
+      <Project>{773C67BE-ABAD-4C67-A84D-831458B8385E}</Project>
+      <Name>WangJun.DataSource</Name>
     </ProjectReference>
     <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
       <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
       <Name>WangJun.DB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.Debug\WangJun.Debug.csproj">
-      <Project>{0232ECA8-2266-4B23-A59F-66EC9308260A}</Project>
-      <Name>WangJun.Debug</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.Doc\WangJun.Doc.csproj">
       <Project>{F778D22C-042F-4535-A9E1-10BFB9E23A7F}</Project>
       <Name>WangJun.Doc</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.NetLoader\WangJun.NetLoader.csproj">
-      <Project>{EE3A5A9F-20B3-4555-9A40-609C3641A7E0}</Project>
-      <Name>WangJun.NetLoader</Name>
+    <ProjectReference Include="..\WangJun.Entity\WangJun.Entity.csproj">
+      <Project>{41FE0A71-2098-483A-8E1B-ED4BEBB4DD72}</Project>
+      <Name>WangJun.Entity</Name>
     </ProjectReference>
     <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
       <Project>{952A70F6-06A9-405A-A3E6-62B24C218DAF}</Project>
       <Name>WangJun.Net</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.Tools\WangJun.Tools.csproj">
-      <Project>{79474114-39E0-4FEC-A040-F2E867CA82A7}</Project>
-      <Name>WangJun.Tools</Name>
+    <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
+      <Project>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</Project>
+      <Name>WangJun.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

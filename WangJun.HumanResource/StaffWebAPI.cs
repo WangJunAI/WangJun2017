@@ -21,6 +21,19 @@ namespace WangJun.HumanResource
 
             return res;
         }
+
+        public object StaffCount(string query)
+        {
+            var res = StaffManager.GetInstance().Count(query);
+            return res;
+        }
+
+
+        public object RecycleBinCount(string query)
+        {
+            var res = RecycleBinManager.GetInstance().Count(query);
+            return res;
+        }
     }
     
 }

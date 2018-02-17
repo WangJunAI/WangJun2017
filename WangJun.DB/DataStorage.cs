@@ -73,7 +73,7 @@ namespace WangJun.DB
         {
             if (DateTime.MinValue == DataStorage.initialTime)
             {
-                var configJson = new HTTP().GetGzip2(string.Format("http://localhost:9990/API.ashx?c=WangJun.DB.YunConfig&m=Load&p0={0}",YunConfig.CurrentGroupID), Encoding.UTF8);
+                var configJson = new HTTP().GetGzip2(string.Format("http://aifuwu.wang/API.ashx?c=WangJun.DB.YunConfig&m=Load&p0={0}",YunConfig.CurrentGroupID), Encoding.UTF8);
                 if (!string.IsNullOrWhiteSpace(configJson))
                 {
                     var configDict = Convertor.FromJsonToDict2(configJson); ///加载当前的配置信息

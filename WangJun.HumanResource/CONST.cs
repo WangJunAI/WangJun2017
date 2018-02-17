@@ -16,6 +16,8 @@ namespace WangJun.HumanResource
 
             public static string CollectionName_StaffItem { get { return "StaffItem"; } }
 
+            public static string CollectionName_RecycleBin { get { return "RecycleBin"; } }
+
 
             public static string MongoDBFilterCreator_ByObjectId(string id)
             {

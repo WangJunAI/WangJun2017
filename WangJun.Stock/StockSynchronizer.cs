@@ -4,13 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using WangJun.Data;
 using WangJun.DB;
-using WangJun.Debug;
 using WangJun.Doc;
-using WangJun.Tools;
+using WangJun.Utility;
 
 namespace WangJun.Stock
 {
@@ -741,7 +737,7 @@ namespace WangJun.Stock
         {
             var q = this.PrepareData();
             //var date = DateTime.Now;
-            for (var date = new DateTime(2018, 1, 26); new DateTime(2017, 1, 1) < date; date = date.AddDays(-1))
+            for (var date = new DateTime(2018, 2, 14); new DateTime(2017, 1, 1) < date; date = date.AddDays(-1))
             {
                 foreach (var stockCode in q)
                 {
