@@ -63,7 +63,7 @@ namespace WangJun.Doc
                     var docList = DocManager.GetInstance().Find("{'CategoryID':'" + dbItem1.ID + "'}","{}","{}",0,int.MaxValue);
                     foreach (var doc in docList)
                     {
-                        var dbItem2 = DBItem.Create(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, doc.id);
+                        var dbItem2 = DBItem.Create(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, doc.ID);
                         list.Add(dbItem2);
                     }
                 }

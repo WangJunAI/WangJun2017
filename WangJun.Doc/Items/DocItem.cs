@@ -13,34 +13,15 @@ namespace WangJun.Doc
     /// </summary>
     public class DocItem: BaseItem
     {
-        public static DocItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
+        public DocItem()
         {
-            var inst = new DocItem();
-            //inst._id = ObjectId.GenerateNewId();
-            inst.Title = title;
-            inst.Keyword = keyword;
-            inst.Summary = summary;
-            inst.Content = content;
-            inst.CreateTime = dateTime;
-            inst.ContentType = "股票全网新闻";
-            inst.CreatorName = creatorName;
-            inst.CreatorID = creatorID;
-            return inst;
+            this._DbName = CONST.DB.DBName_DocService;
+            this._CollectionName = CONST.DB.CollectionName_DocItem;
+            this.GroupName = "文档模板类";
+            this.BizMode = "文档服务";
+            this.ClassFullName = this.GetType().FullName;
+
         }
-
-
-
-
-        public static DocItem Create(Dictionary<string,object> data)
-        {
-            var inst = Convertor.FromDictionaryToObject<DocItem>(data);
-            return inst;
-        }
-
-        public ObjectId _id { get; set; }
-
-        public  string id { get { return _id.ToString(); } }
-        public Guid ID{ get; set; }
 
         public string ShowMode { get; set; }
 
@@ -57,13 +38,7 @@ namespace WangJun.Doc
         public int PlainTextLength { get; set; }
 
         public string Summary { get; set; }
-
-        public string ContentType { get; set; }
-
-        public string CategoryName { get; set; }
-
-        public string CategoryID { get; set; }
-
+ 
         public int ReadCount { get; set; }
 
         public int LikeCount { get; set; }
@@ -71,67 +46,39 @@ namespace WangJun.Doc
         public int CommentCount { get; set; }
 
         public string ImageUrl { get; set; }
-
-        public List<Dictionary<string,object>> Images { get; set; }
-
-        public List<Dictionary<string, object>> Videos { get; set; }
-
-        public List<Dictionary<string, object>> Votes { get; set; }
-
-        public List<Dictionary<string, object>> Attachments { get; set; }
-
-        public List<Dictionary<string, object>> AppendList { get; set; } ///
-
-        public List<CommentItem> CommentList { get; set; }
  
         public DateTime PublishTime { get; set; }
 
-        
+        public string PublishMode { get; set; }
 
- 
-             
 
-        public static DocItem Load(string id)
-        {
-            if (!string.IsNullOrWhiteSpace(id) && 24 == id.Length)
-            {
-                var _id = ObjectId.Parse(id);
-                var query = "{\"_id\":new ObjectId('" + id + "')}";
-                var inst = DocManager.GetInstance().Find(query);
-
-                return inst.First();
-            }
-            return new DocItem();
-        }
-
-        public DocItem LoadInst(string id)
-        {
-            return DocItem.Load(id);
-        }
-
+        /// <summary>
+        /// [OK]
+        /// </summary>
         public void Save()
         {
-            var dbName = "DocService";
-            var collectionName = "DocItem";
-            var db = DataStorage.GetInstance(DBType.MongoDB);
-            //var filter = "{\"_id\":ObjectId('"+this._id.ToString()+"')}";
-            
-
-
-            db.Save3(dbName, collectionName, this);
+            EntityManager.GetInstance().Save<DocItem>(this);
         }
-
+        public static void Save(string jsonInput)
+        {
+            var dict = Convertor.FromJsonToDict2(jsonInput);
+            var inst = new DocItem();
+            if (dict.ContainsKey("ID") && null != dict["ID"])
+            {
+                inst.ID = dict["ID"].ToString();
+            }
+            inst = EntityManager.GetInstance().Get<DocItem>(inst);
+            foreach (var kv in dict)
+            {
+                inst.GetType().GetProperty(kv.Key).SetValue(inst, kv.Value);
+            }
+            inst.Save();
+        }
         public void Remove()
         {
-            //var dbName = "DocService";
-            //var collectionName = "DocItem";
-            //var db = DataStorage.GetInstance(DBType.MongoDB);
-            //var filter = "{\"_id\":ObjectId('" + this._id.ToString() + "')}";
-            //db.Remove(dbName, collectionName, filter);
-
+            EntityManager.GetInstance().Remove(this);
 
         }
 
- 
     }
 }

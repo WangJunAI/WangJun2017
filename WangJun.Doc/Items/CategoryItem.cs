@@ -22,26 +22,7 @@ namespace WangJun.Doc
             this.ClassFullName = this.GetType().FullName;
 
         }
-
-        public static CategoryItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
-        {
-            var inst = new CategoryItem();
-            inst._id = ObjectId.GenerateNewId();
-            inst.Name = title;
-            inst.CreatorName = creatorName;
-            inst.CreatorID = creatorID;
-            return inst;
-        }
-
-
-
-
-        public static CategoryItem Create(Dictionary<string,object> data)
-        {
-            var inst = Convertor.FromDictionaryToObject<CategoryItem>(data);
-            return inst;
-        }
-         
+  
 
         public  string id { get { return _id.ToString(); } }
  

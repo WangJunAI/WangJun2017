@@ -45,7 +45,7 @@ namespace WangJun.Doc
         }
 
         public static class Status {
-            public static string Normal  { get { return "使用中"; } }
+            public static string Normal  { get { return "已发布"; } }
 
             public static string Deleted { get { return "已删除"; } }
         }

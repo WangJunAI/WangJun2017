@@ -32,7 +32,7 @@ namespace WangJun.Doc
             else
             {
                 inst._id = ObjectId.GenerateNewId();
-                inst.ID = Guid.NewGuid();
+                //inst.ID = Guid.NewGuid();
                 inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
                 inst.CreatorName = session.UserName;
                 inst.CreatorID = session.UserID;
@@ -43,9 +43,9 @@ namespace WangJun.Doc
             inst.Summary = "暂空";
             inst.Content = content;
             inst.ContentLength = content.Length;
-            inst.CategoryID = categoryID;
-            inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
-            inst.ContentType = "文档库模板";
+            //inst.CategoryID = categoryID;
+            //inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
+            //inst.ContentType = "文档库模板";
              inst.PublishTime = DateTime.Parse(publishTime);
             inst.Status = status;
             inst.PlainText = plainText;
@@ -90,7 +90,7 @@ namespace WangJun.Doc
             else
             {
                 inst._id = ObjectId.GenerateNewId();
-                inst.ID = Guid.NewGuid();
+                //inst.ID = Guid.NewGuid();
                 inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
                 inst.CreatorName = session.UserName;
                 inst.CreatorID = session.UserID;
@@ -101,9 +101,9 @@ namespace WangJun.Doc
             inst.Summary = "暂空";
             inst.Content = content;
             inst.ContentLength = content.Length;
-            inst.CategoryID = categoryID;
-            inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
-            inst.ContentType = "文档库模板";
+            //inst.CategoryID = categoryID;
+            //inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
+            //inst.ContentType = "文档库模板";
             inst.PublishTime = DateTime.Parse(publishTime);
             inst.Status = status;
             inst.PlainText = plainText;
@@ -135,22 +135,22 @@ namespace WangJun.Doc
             return 0;
         }
 
-        public DocItem Get(string id)
-        {
-            var inst = DocItem.Load(id);
-            try
-            {
-                var currentUser = SESSION.Current;
+        //public DocItem Get(string id)
+        //{
+        //    var inst = DocItem.Load(id);
+        //    try
+        //    {
+        //        var currentUser = SESSION.Current;
 
-                this.UpdateValue(id, "{$inc:{'ReadCount':1}}");
-                ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, id, "阅读", currentUser.UserID, currentUser.UserName);
-            }
-            catch
-            {
+        //        this.UpdateValue(id, "{$inc:{'ReadCount':1}}");
+        //        ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, id, "阅读", currentUser.UserID, currentUser.UserName);
+        //    }
+        //    catch
+        //    {
 
-            }
-            return inst;
-        }
+        //    }
+        //    return inst;
+        //}
 
         public int UpdateStatus(string query, string newStatus)
         {

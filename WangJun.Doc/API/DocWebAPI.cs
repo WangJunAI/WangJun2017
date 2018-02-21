@@ -14,6 +14,7 @@ namespace WangJun.Doc
     /// </summary>
     public class DocWebAPI
     {
+        #region 目录操作
         /// <summary>
         /// 保存一个目录
         /// </summary>
@@ -63,50 +64,63 @@ namespace WangJun.Doc
             inst = EntityManager.GetInstance().Get<CategoryItem>(inst);
             return inst;
         }
+        #endregion
 
-
-        ////以上为修正部分
-
+        #region 文档操作
+        /// <summary>
+        /// 保存一个目录
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="parentId"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int SaveEntity(string jsonInput)
+        {
+            DocItem.Save(jsonInput);
+            return 0;
+        }
 
         /// <summary>
-        /// 保存一个文章
+        /// 加载目录
         /// </summary>
-        /// <param name="title"></param>
-        /// <param name="content"></param>
-        /// <param name="categoryID"></param>
-        /// <param name="publishTime"></param>
-        /// <param name="status"></param>
-        /// <param name="id"></param>
-        /// <param name="plainText"></param>
-        /// <param name="thumbnailSrc"></param>
+        /// <param name="query"></param>
+        /// <param name="protection"></param>
+        /// <param name="sort"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
         /// <returns></returns>
-        public int SaveDoc(string title, string content, string categoryID, string publishTime, string status, string id, string plainText, string thumbnailSrc)
+        public List<DocItem> LoadEntityList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
         {
-            var res = DocManager.GetInstance().Save(title,   content,   categoryID,   publishTime,   status,   id,   plainText,   thumbnailSrc);
+            var res = EntityManager.GetInstance().Find<DocItem>(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, query, protection, sort, pageIndex, pageSize);
             return res;
         }
 
+
         /// <summary>
-        /// 获取一份文档
+        /// 删除一个目录
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public DocItem GetDoc(string id)
+        public int RemoveEntity(string id)
         {
-            var inst = DocItem.Load(id);
-            try
-            {
-                var currentUser = Entity.SESSION.Current;
+            var inst = new DocItem();
+            inst.ID = id;
+            inst.Remove();
+            return 0;
+        }
 
-                DocManager.GetInstance().UpdateValue(id, CONST.DB.MongoDBFilterCreator_ByInc("ReadCount", 1));
-                ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, id, CONST.ClientBehavior.Read, currentUser.UserID, currentUser.UserName);
-            }
-            catch
-            {
-
-            }
+        public DocItem GetEntity(string id)
+        {
+            var inst = new DocItem();
+            inst.ID = id;
+            inst = EntityManager.GetInstance().Get<DocItem>(inst);
             return inst;
         }
+        #endregion
+
+
+
+  
 
         ///// <summary>
         ///// 移除一份文档

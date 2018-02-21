@@ -110,22 +110,7 @@ namespace WangJun.Doc
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public DocItem GetDoc(string id)
-        {
-            var inst = DocItem.Load(id);
-            try
-            {
-                var currentUser = Entity.SESSION.Current;
-
-                DocManager.GetInstance().UpdateValue(id, CONST.DB.MongoDBFilterCreator_ByInc("ReadCount", 1));
-                ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, id, CONST.ClientBehavior.Read, currentUser.UserID, currentUser.UserName);
-            }
-            catch
-            {
-
-            }
-            return inst;
-        }
+ 
 
         ///// <summary>
         ///// 移除一份文档

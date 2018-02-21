@@ -60,7 +60,7 @@ namespace WangJun.Doc
                     if(targetCollectionName == CONST.DB.CollectionName_DocItem)
                     {
                         ///重新分词,聚类
-                        var doc = DocItem.Load(targetID.ToString());
+                        var doc = new DocItem();
                         var plainText = doc.PlainText;
                         var res = FenCi.GetResult(plainText);
                         var queryDel = "{'TargetID':ObjectId('" + targetID.ToString() + "')}";
