@@ -13,6 +13,7 @@ namespace WangJun.Doc
     /// </summary>
     public class YunNoteWebAPI
     {
+        #region 目录操作
         /// <summary>
         /// 保存一个目录
         /// </summary>
@@ -63,9 +64,59 @@ namespace WangJun.Doc
             return inst;
         }
 
+        #endregion
+
+        #region 文档操作
+        /// <summary>
+        /// 保存一个目录
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="parentId"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int SaveEntity(string jsonInput)
+        {
+            DocItem.Save(jsonInput);
+            return 0;
+        }
+
+        /// <summary>
+        /// 加载目录
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="protection"></param>
+        /// <param name="sort"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public List<DocItem> LoadEntityList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
+        {
+            var res = EntityManager.GetInstance().Find<DocItem>(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, query, protection, sort, pageIndex, pageSize);
+            return res;
+        }
 
 
+        /// <summary>
+        /// 删除一个目录
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int RemoveEntity(string id)
+        {
+            var inst = new DocItem();
+            inst.ID = id;
+            inst.Remove();
+            return 0;
+        }
 
+        public DocItem GetEntity(string id)
+        {
+            var inst = new DocItem();
+            inst.ID = id;
+            inst = EntityManager.GetInstance().Get<DocItem>(inst);
+            return inst;
+        }
+        #endregion
 
 
 

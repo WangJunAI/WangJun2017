@@ -51,6 +51,8 @@ namespace WangJun.Doc
 
         public string PublishMode { get; set; }
 
+        public string Permission { get; set; }
+
 
         /// <summary>
         /// [OK]
