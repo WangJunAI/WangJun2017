@@ -64,14 +64,73 @@ namespace WangJun.Doc
             inst.Save();
 
             ///添加记录
-            if (isNew)
+            //if (isNew)
+            //{
+            //    ModifyLogItem.LogAsNew(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
+            //}
+            //else
+            //{
+            //    ModifyLogItem.LogAsModify(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
+            //}
+
+            return 0;
+        }
+
+        public int SaveAs(string id=null,string title=null,string content=null,string categoryID=null,string status=null,string plainText=null
+            ,string publishTime="1990-01-01",string thumbnailSrc=null,string bizMode=null)
+        {
+            var session = SESSION.Current;
+
+            var inst = new DocItem();
+            var isNew = false;
+            if (StringChecker.IsNotEmptyObjectId(id))
             {
-                ModifyLogItem.LogAsNew(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
+                inst._id = ObjectId.Parse(id);
             }
             else
             {
-                ModifyLogItem.LogAsModify(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
+                inst._id = ObjectId.GenerateNewId();
+                inst.ID = Guid.NewGuid();
+                inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
+                inst.CreatorName = session.UserName;
+                inst.CreatorID = session.UserID;
+                isNew = true;
             }
+            inst.Title = title;
+            inst.Keyword = "暂空";
+            inst.Summary = "暂空";
+            inst.Content = content;
+            inst.ContentLength = content.Length;
+            inst.CategoryID = categoryID;
+            inst.CategoryName = CategoryManager.GetInstance().Get(categoryID).Name;
+            inst.ContentType = "文档库模板";
+            inst.PublishTime = DateTime.Parse(publishTime);
+            inst.Status = status;
+            inst.PlainText = plainText;
+            inst.PlainTextLength = plainText.Length;
+            inst.UpdateTime = DateTime.Now;
+            inst.BizMode = bizMode;
+            if (StringChecker.IsHttpUrl(thumbnailSrc))
+            {
+                inst.ImageUrl = thumbnailSrc;
+            }
+            else
+            {
+                var pic = (DataSourceBaidu.GetInstance().GetPic(inst.Title)[0] as Dictionary<string, object>)["thumbURL"].ToString();
+                inst.ImageUrl = pic;
+            }
+
+            inst.Save();
+
+            ///添加记录
+            //if (isNew)
+            //{
+            //    ModifyLogItem.LogAsNew(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
+            //}
+            //else
+            //{
+            //    ModifyLogItem.LogAsModify(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
+            //}
 
             return 0;
         }
@@ -183,9 +242,9 @@ namespace WangJun.Doc
             {
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
                mongo.Remove(dbName, collectionName, query);
-                ModifyLogItem.LogAsRemove(query.Replace("_id", string.Empty).Replace(":", string.Empty).Replace("ObjectId", string.Empty)
-                    .Replace("(", string.Empty).Replace(")", string.Empty).Replace(" ",string.Empty)
-                    , CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
+                //ModifyLogItem.LogAsRemove(query.Replace("_id", string.Empty).Replace(":", string.Empty).Replace("ObjectId", string.Empty)
+                //    .Replace("(", string.Empty).Replace(")", string.Empty).Replace(" ",string.Empty)
+                //    , CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem);
             }
 
             return 0;

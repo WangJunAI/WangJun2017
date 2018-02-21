@@ -1,8 +1,10 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Utility;
 
 namespace WangJun.Entity
 {
@@ -11,14 +13,75 @@ namespace WangJun.Entity
     /// </summary>
     public class BaseItem
     {
-        public virtual string id { get; set; }
+        public ObjectId _id { get; set; }
+        public ObjectId _OID { get { return this._id; } set { this._id = value; } }
+  
+        public Guid _GID { get; set; }
+
+ 
+        public long IntID { get; set; }
+        public string ID
+        {
+            get
+            {
+                return this._OID.ToString();
+            }
+            set
+            {
+                if (StringChecker.IsObjectId(value))
+                {
+                    this._OID = ObjectId.Parse(value);
+                }
+            }
+        }
+        public string Name { get; set; }
+
+        public ObjectId _ParentOID { get; set; } 
+
+        public Guid _ParentGID { get; set; }
+         
+
+        public long ParentIntID { get; set; }
+
+        public string ParentID
+        {
+            get
+            {
+                return this._ParentOID.ToString();
+            }
+            set
+            {
+                if (StringChecker.IsObjectId(value))
+                {
+                    this._ParentOID = ObjectId.Parse(value);
+                }
+            }
+        }
+
+        public string ParentName { get; set; }
+
+        public ObjectId _RootOID { get; set; }
+        public string RootOID { get; set; }
+
+        public Guid _RootGID { get; set; }
+          
+        public long RootIntID { get; set; }
+
+        public string RootID { get; set; }
+
+        public string RootName { get; set; }
+
+        public long GroupID { get; set; }
+
+        public string GroupName { get; set; }
 
         public DateTime CreateTime { get; set; }
-
         public DateTime UpdateTime { get; set; }
         public DateTime DeleteTime { get; set; }
 
         public string Status { get; set; }
+
+        public int StatusCode { get; set; }
 
         public string ClassFullName { get; set; }
 
@@ -30,7 +93,7 @@ namespace WangJun.Entity
 
         public string ModifierName { get; set; }
 
-        public bool HasProc { get; set; } //是否处理
+        public int HasProc { get; set; } //是否处理
 
         public DateTime ProcTime { get; set; } ///处理时间
 
@@ -41,5 +104,9 @@ namespace WangJun.Entity
         public string _CollectionName { get; set; }
 
         public string _SourceID { get; set; }
+
+        public string BizMode { get; set; }
+
+        public string BizModeCode { get; set; }
     }
 }

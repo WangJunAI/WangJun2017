@@ -28,7 +28,7 @@ namespace WangJun.Doc
             else
             {
                 inst._id = ObjectId.GenerateNewId();
-                inst.ID = Guid.NewGuid();
+                //inst.ID = Guid.NewGuid();
                 inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
                 inst.CreatorName = session.UserName;
                 inst.CreatorID = session.UserID;
@@ -38,20 +38,20 @@ namespace WangJun.Doc
 
             inst.Name = name;
             inst.ParentID = parentId;
-            inst.GroupName = "文档库模板";
+            //inst.GroupName = "文档库模板";
             inst.UpdateTime = DateTime.Now;
             inst.Status = CONST.Status.Normal;
             inst.Save();
 
             ///添加记录
-            if (isNew)
-            {
-                ModifyLogItem.LogAsNew(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem);
-            }
-            else
-            {
-                ModifyLogItem.LogAsModify(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem);
-            }
+            //if (isNew)
+            //{
+            //    ModifyLogItem.LogAsNew(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem);
+            //}
+            //else
+            //{
+            //    ModifyLogItem.LogAsModify(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem);
+            //}
 
             return 0;
         }

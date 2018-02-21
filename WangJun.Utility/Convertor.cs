@@ -653,8 +653,14 @@ namespace WangJun.Utility
             var pid = short.Parse(input["Pid"].ToString());
             var increment = int.Parse(input["Increment"].ToString());
             var id = new ObjectId(timestamp, machine, pid, increment);
-            return id.ToString();
+            return id.ToString();//ObjectId.Parse(id);
         }
+
+        public static ObjectId StringToObjectID(string objectId)
+        {
+            return ObjectId.Parse(objectId);
+        }
+
 
         public static int GetJidu(DateTime dateTime)
         {

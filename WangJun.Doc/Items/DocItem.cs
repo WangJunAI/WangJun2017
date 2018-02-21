@@ -39,7 +39,7 @@ namespace WangJun.Doc
 
         public ObjectId _id { get; set; }
 
-        public override string id { get { return _id.ToString(); } }
+        public  string id { get { return _id.ToString(); } }
         public Guid ID{ get; set; }
 
         public string ShowMode { get; set; }

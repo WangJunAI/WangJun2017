@@ -13,6 +13,16 @@ namespace WangJun.Doc
     /// </summary>
     public class CategoryItem:BaseItem
     {
+        public CategoryItem()
+        {
+            this._DbName = CONST.DB.DBName_DocService;
+            this._CollectionName = CONST.DB.CollectionName_CategoryItem;
+            this.GroupName = "文档模板类";
+            this.BizMode = "目录服务";
+            this.ClassFullName = this.GetType().FullName;
+
+        }
+
         public static CategoryItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
         {
             var inst = new CategoryItem();
@@ -31,20 +41,10 @@ namespace WangJun.Doc
             var inst = Convertor.FromDictionaryToObject<CategoryItem>(data);
             return inst;
         }
+         
 
-        public ObjectId _id { get; set; }
-
-        public override string id { get { return _id.ToString(); } }
-        public Guid ID{ get; set; }
+        public  string id { get { return _id.ToString(); } }
  
-        public string Name { get; set; }
-        public string ParentID { get; set; }
-
-        public string ParentName { get; set; }
-
-        public string GroupName { get; set; }
-
-        public string GroupID { get; set; }
 
         public int ItemCount { get; set; }
 
@@ -61,37 +61,32 @@ namespace WangJun.Doc
             
             return inst.First() ;
         }
-
-        public CategoryItem LoadInst(string id)
-        {
-            return CategoryItem.Load(id);
-        }
-
+         
+        /// <summary>
+        /// [OK]
+        /// </summary>
         public void Save()
         {
-            var dbName = CONST.DB.DBName_DocService;
-            var collectionName = CONST.DB.CollectionName_CategoryItem;
-            var db = DataStorage.GetInstance(DBType.MongoDB);
-
-            if (this._id == ObjectId.Empty)
-            {
-                db.Save3(dbName, collectionName, this);
-            }
-            else
-            {
-                var query = CONST.DB.MongoDBFilterCreator_ByObjectId(this._id.ToString());
-                db.Save3(dbName, collectionName, this, query);
-            }
+            EntityManager.GetInstance().Save<CategoryItem>(this);
         }
-
+        public static void Save(string jsonInput)
+        {
+            var dict = Convertor.FromJsonToDict2(jsonInput);
+             var inst = new CategoryItem();
+            if(dict.ContainsKey("ID") && null !=dict["ID"])
+            {
+                inst.ID = dict["ID"].ToString();
+            }
+            inst = EntityManager.GetInstance().Get<CategoryItem>(inst);
+            foreach (var kv in dict)
+            {
+                inst.GetType().GetProperty(kv.Key).SetValue(inst, kv.Value);
+            }
+            inst.Save();
+        }
         public void Remove()
         {
-            //var dbName = "DocService";
-            //var collectionName = "CategoryItem";
-            //var db = DataStorage.GetInstance(DBType.MongoDB);
-            //var filter = "{\"_id\":ObjectId('" + this._id.ToString() + "')}";
-            //db.Remove(dbName, collectionName, filter);
-
+            EntityManager.GetInstance().Remove(this);
 
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -56,6 +57,46 @@ namespace WangJun.HumanResource
             }
 
             return list;
+        }
+
+        public int Save(string name, string parentId, string id)
+        {
+            var session = SESSION.Current;
+            var inst = new OrgItem();
+            var isNew = false;
+            if (StringChecker.IsObjectId(id))
+            {
+                //inst._id = Convertor.StringToObjectID(id);
+            }
+            else
+            {
+               // inst._id = ObjectId.GenerateNewId();
+                //inst.ID = Guid.NewGuid();
+                inst.CreateTime = DateTime.Now.AddDays(new Random().Next(-100, 100));
+                inst.CreatorName = session.UserName;
+                inst.CreatorID = session.UserID;
+                isNew = true;
+            }
+
+
+            inst.Name = name;
+            inst.ParentID = parentId;
+            inst.GroupName = "文档库模板";
+            inst.UpdateTime = DateTime.Now;
+            inst.Status = CONST.Status.Normal;
+            inst.Save();
+
+            ///添加记录
+            if (isNew)
+            {
+                //ModifyLogItem.LogAsNew(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem);
+            }
+            else
+            {
+                //ModifyLogItem.LogAsModify(inst.id, CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem);
+            }
+
+            return 0;
         }
 
 

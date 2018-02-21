@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Entity;
 using WangJun.HumanResource;
 
 namespace WangJun.Doc
@@ -10,25 +11,99 @@ namespace WangJun.Doc
     /// <summary>
     /// 
     /// </summary>
-    public class DocWebAPI
+    public class YunNoteWebAPI
     {
         /// <summary>
-        /// 保存一个文章
+        /// 保存一个目录
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="parentId"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int SaveCategory(string jsonInput)
+        {
+            CategoryItem.Save(jsonInput);
+            return 0;
+        }
+
+        /// <summary>
+        /// 加载目录
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="protection"></param>
+        /// <param name="sort"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public List<CategoryItem> LoadCategoryList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
+        {
+            var res = EntityManager.GetInstance().Find<CategoryItem>(CONST.DB.DBName_DocService, CONST.DB.CollectionName_CategoryItem, query, protection, sort, pageIndex, pageSize);
+            return res;
+        }
+
+
+        /// <summary>
+        /// 删除一个目录
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int RemoveCategory(string id)
+        {
+            var inst = new CategoryItem();
+            inst.ID = id;
+            inst.Remove();
+            return 0;
+        }
+
+        public CategoryItem GetCategory(string id)
+        {
+            var inst = new CategoryItem();
+            inst.ID = id;
+            inst = EntityManager.GetInstance().Get<CategoryItem>(inst);
+            return inst;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// ///////////////////////
         /// </summary>
         /// <param name="title"></param>
         /// <param name="content"></param>
         /// <param name="categoryID"></param>
-        /// <param name="publishTime"></param>
-        /// <param name="status"></param>
         /// <param name="id"></param>
         /// <param name="plainText"></param>
-        /// <param name="thumbnailSrc"></param>
+        /// <param name="thumbnailSr"></param>
         /// <returns></returns>
-        public int SaveDoc(string title, string content, string categoryID, string publishTime, string status, string id, string plainText, string thumbnailSrc)
+
+
+
+
+        public int SaveNote(string title, string content, string categoryID , string id, string plainText, string thumbnailSr)
         {
-            var res = DocManager.GetInstance().Save(title,   content,   categoryID,   publishTime,   status,   id,   plainText,   thumbnailSrc);
+            var res = DocManager.GetInstance().SaveAs( bizMode:"汪俊云笔记", id:id,title:title,content:content,categoryID:categoryID,plainText:plainText,thumbnailSrc:thumbnailSr);
             return res;
         }
+
+        public object RemoveNote(string id)
+        {
+            var query = CONST.DB.MongoDBFilterCreator_ByObjectId(id);
+            var res = DocManager.GetInstance().Remove(query);
+            return res;
+        }
+
+
 
         /// <summary>
         /// 获取一份文档
@@ -40,7 +115,7 @@ namespace WangJun.Doc
             var inst = DocItem.Load(id);
             try
             {
-                var currentUser = SESSION.Current;
+                var currentUser = Entity.SESSION.Current;
 
                 DocManager.GetInstance().UpdateValue(id, CONST.DB.MongoDBFilterCreator_ByInc("ReadCount", 1));
                 ClientBehaviorManager.Add(CONST.DB.DBName_DocService, CONST.DB.CollectionName_DocItem, id, CONST.ClientBehavior.Read, currentUser.UserID, currentUser.UserName);
@@ -69,31 +144,8 @@ namespace WangJun.Doc
             RecycleBinManager.GetInstance().MoveToRecycleBin(dbName, collectionName, id);
             return res;
         }
-
-        /// <summary>
-        /// 获取一个目录
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public CategoryItem GetCategory(string id)
-        {
-            var inst = CategoryManager.GetInstance().Get(id);
-            return inst;
-        }
-
-        /// <summary>
-        /// 保存一个目录
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="parentId"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public int SaveCategory(string name, string parentId, string id)
-        {
-            var res = CategoryManager.GetInstance().Save(name, parentId, id);
-            return res;
-        }
-
+ 
+ 
         /// <summary>
         /// 加载目录
         /// </summary>
@@ -128,16 +180,7 @@ namespace WangJun.Doc
             return res;
         }
 
-        /// <summary>
-        /// 删除一个目录
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public int RemoveCategory(string id)
-        {
-            var res = CategoryManager.GetInstance().Remove(id);
-            return res;
-        }
+ 
 
         public object DocCount(string query)
         {
