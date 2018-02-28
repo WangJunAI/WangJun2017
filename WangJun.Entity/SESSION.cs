@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.DB;
+using WangJun.Utility;
 
 namespace WangJun.Entity
 {
@@ -11,6 +13,7 @@ namespace WangJun.Entity
     /// </summary>
     public  class SESSION
     {
+        public string ID { get; set; }
         public string UserID { get;set; }
 
         public string UserName { get; set; }
@@ -30,6 +33,14 @@ namespace WangJun.Entity
 
                 return list[new Random().Next(0, 100)];
             }
+        }
+
+        public static SESSION Login(string loginID,string password)
+        {
+            var query = "{'StaffID':'"+loginID+"'}";
+            var res= DataStorage.GetInstance(DBType.MongoDB).Get("HumanResource","StaffItem", query);
+            return Convertor.FromDictionaryToObject<SESSION>(res); 
+
         }
     }
 }

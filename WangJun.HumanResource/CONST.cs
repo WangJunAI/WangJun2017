@@ -36,6 +36,9 @@ namespace WangJun.HumanResource
             public static string Normal  { get { return "使用中"; } }
 
             public static string Deleted { get { return "已删除"; } }
+            public static string Incumbency { get { return "在职"; } }
+
+            public static string Dimission { get { return "离职"; } }
         }
 
         public static class ClientBehavior {

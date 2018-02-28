@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,10 +16,10 @@ namespace WangJun.Entity
     {
         public ObjectId _id { get; set; }
         public ObjectId _OID { get { return this._id; } set { this._id = value; } }
-  
+
         public Guid _GID { get; set; }
 
- 
+
         public long IntID { get; set; }
         public string ID
         {
@@ -36,10 +37,10 @@ namespace WangJun.Entity
         }
         public string Name { get; set; }
 
-        public ObjectId _ParentOID { get; set; } 
+        public ObjectId _ParentOID { get; set; }
 
         public Guid _ParentGID { get; set; }
-         
+
 
         public long ParentIntID { get; set; }
 
@@ -64,7 +65,7 @@ namespace WangJun.Entity
         public string RootOID { get; set; }
 
         public Guid _RootGID { get; set; }
-          
+
         public long RootIntID { get; set; }
 
         public string RootID { get; set; }
@@ -78,6 +79,35 @@ namespace WangJun.Entity
         public DateTime CreateTime { get; set; }
         public DateTime UpdateTime { get; set; }
         public DateTime DeleteTime { get; set; }
+
+
+        public ArrayList OrgAllowedArray { get; set; }
+
+        public string OrgAllowedArrayText { get; set; }
+
+        public ArrayList UserAllowedArray { get; set; }
+
+        public string UserAllowedArrayText { get; set; }
+         
+        public ArrayList RoleAllowedArray { get; set; }
+
+        public string RoleAllowedArrayText { get; set; }
+
+
+        public ArrayList OrgDeniedArray { get; set; }
+
+        public string OrgDeniedArrayText { get; set; }
+
+
+        public ArrayList UserDeniedArray { get; set; }
+
+        public string UserDeniedArrayText { get; set; }
+         
+        public ArrayList RoleDeniedArray { get; set; }
+
+        public string RoleDeniedArrayText { get; set; }
+
+
 
         public string Status { get; set; }
 
@@ -99,14 +129,20 @@ namespace WangJun.Entity
 
         public List<Dictionary<string, object>> ModifyLog { get; set; }
 
-        public string _DbName{get;set;}
+        public string _DbName { get; set; }
 
         public string _CollectionName { get; set; }
 
         public string _SourceID { get; set; }
+         
 
-        public string BizMode { get; set; }
+        public int AllowedComment { get; set; }
 
-        public string BizModeCode { get; set; }
+        public int Version { get; set; }
+
+        public string AppName { get; set; }
+
+        public int AppCode { get; set; }
+
     }
 }

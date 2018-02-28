@@ -33,7 +33,7 @@ namespace WangJun.Entity
                 item.CreatorName = session.UserName;
                 item.ModifierID = session.UserID;
                 item.ModifierName = session.UserName;
-                item.Status = CONST.Status.Normal;
+                //item.Status = CONST.Status.Normal;
 
                 db.Save3(item._DbName, item._CollectionName, inst);
             }
@@ -81,7 +81,20 @@ namespace WangJun.Entity
 
             return list;
         }
+        /// <summary>
+        /// {$match:{}},{$group:{_id:"计数",Count:{$sum:1}}}
+        /// </summary>
+        /// <param name="dbName"></param>
+        /// <param name="collectionName"></param>
+        /// <param name="match"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
 
-        
+        public object Aggregate(string dbName,string collectionName,string match, string group)
+        {
+            var db = DataStorage.GetInstance(DBType.MongoDB);
+            return db.Aggregate(dbName, collectionName, match, group);
+        }
+
     }
 }

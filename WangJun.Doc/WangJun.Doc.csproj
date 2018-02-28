@@ -69,6 +69,8 @@
     <Compile Include="CONST.cs" />
     <Compile Include="DocAnalysor.cs" />
     <Compile Include="Items\CategoryItem.cs" />
+    <Compile Include="Items\MilestoneItem.cs" />
+    <Compile Include="Items\ProjectItem.cs" />
     <Compile Include="Items\DocItem.cs" />
     <Compile Include="CommentManager.cs" />
     <Compile Include="CategoryManager.cs" />

@@ -118,9 +118,22 @@ namespace WangJun.Doc
         }
         #endregion
 
+        #region 统计操作
+        /// <summary>
+        /// 统计操作
+        /// </summary>
+        /// <returns></returns>
+        public object Count(string json)
+        {
+            var item = new DocItem();
+            var match = "{$match:{}}";
+            var group = "{$group:{_id:'DocItem总数',Count:{$sum:1}}}";
+            var res = EntityManager.GetInstance().Aggregate(item._DbName, item._CollectionName, match, group);
+            return (res as List<Dictionary<string,object>>)[0];
+        }
+        #endregion
 
 
-  
 
         ///// <summary>
         ///// 移除一份文档

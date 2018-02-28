@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using WangJun.DB;
+using WangJun.Entity;
 using WangJun.HumanResource;
 using WangJun.Tools;
 using WangJun.Utility;
@@ -109,8 +110,7 @@ namespace WangJun.Doc
             inst.PlainText = plainText;
             inst.PlainTextLength = plainText.Length;
             inst.UpdateTime = DateTime.Now;
-            inst.BizMode = bizMode;
-            if (StringChecker.IsHttpUrl(thumbnailSrc))
+             if (StringChecker.IsHttpUrl(thumbnailSrc))
             {
                 inst.ImageUrl = thumbnailSrc;
             }

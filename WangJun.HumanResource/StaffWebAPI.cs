@@ -91,6 +91,16 @@ namespace WangJun.HumanResource
             return res;
         }
 
+        public List<object> LoadAll()
+        {
+            var list = new List<object>();
+            var orgList = this.LoadOrgList("{}", "{}", "{}", 0, int.MaxValue);
+            var staffList = this.LoadEntityList("{}", "{}", "{}", 0, int.MaxValue);
+            list.AddRange(orgList);
+            list.AddRange(staffList);
+            return list;
+        }
+
 
         /// <summary>
         /// 删除一个目录
@@ -114,7 +124,31 @@ namespace WangJun.HumanResource
         }
         #endregion
 
+        #region 统计操作
+        /// <summary>
+        /// 统计操作
+        /// </summary>
+        /// <returns></returns>
+        public object Count(string json)
+        {
+            var item = new StaffItem();
+            var match = "{$match:{}}";
+            var group = "{$group:{_id:'StaffItem总数',Count:{$sum:1}}}";
+            var res = EntityManager.GetInstance().Aggregate(item._DbName, item._CollectionName, match, group);
+            return (res as List<Dictionary<string, object>>)[0];
+        }
+        #endregion
 
+
+        #region SESSION操作
+        public SESSION Login(string json)
+        {
+            var dict = Convertor.FromJsonToDict2(json);
+            var inst = Convertor.FromDictionaryToObject<SESSION>(dict);
+            var res = SESSION.Login(inst.UserID, null);
+            return res;
+        }
+        #endregion
 
 
 

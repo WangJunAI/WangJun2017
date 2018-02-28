@@ -15,10 +15,11 @@ namespace WangJun.HumanResource
         {
             this._DbName = CONST.DB.DBName_HumanResource;
             this._CollectionName = CONST.DB.CollectionName_StaffItem;
-            this.GroupName = "人力资源模板类";
-            this.BizMode = "人力资源服务";
-            this.ClassFullName = this.GetType().FullName;
-
+             this.ClassFullName = this.GetType().FullName;
+            this.Version = 1;
+            this.AppCode = Entity.CONST.APP.Staff;
+            this.AppName = Entity.CONST.APP.GetString(this.AppCode);
+            this.Status = CONST.Status.Incumbency;
         }
 
         public string Sex { get; set; }
@@ -66,7 +67,10 @@ namespace WangJun.HumanResource
                 if(typeof(DateTime) == property.PropertyType)
                 {
                     property.SetValue(inst, DateTime.Parse(kv.Value.ToString()));
-
+                }
+                else if (null != kv.Value && typeof(string) == kv.Value.GetType())
+                {
+                    inst.GetType().GetProperty(kv.Key).SetValue(inst, kv.Value.ToString().Trim());
                 }
                 else
                 {

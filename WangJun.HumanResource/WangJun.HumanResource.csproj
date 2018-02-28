@@ -59,12 +59,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OrgItem.cs" />
+    <Compile Include="Items\OrgItem.cs" />
     <Compile Include="CONST.cs" />
     <Compile Include="OrgManager.cs" />
     <Compile Include="RecycleBinManager.cs" />
-    <Compile Include="SESSION.cs" />
-    <Compile Include="StaffItem.cs" />
+    <Compile Include="Items\StaffItem.cs" />
     <Compile Include="StaffManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaffWebAPI.cs" />

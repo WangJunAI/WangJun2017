@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WangJun.DB;
+using WangJun.Entity;
 using WangJun.Utility;
 
 namespace WangJun.HumanResource

@@ -64,6 +64,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WangJun.Net">
+      <HintPath>..\WangJun.Net\bin\Debug\WangJun.Net.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DBItem.cs" />
@@ -80,10 +83,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
-      <Project>{952A70F6-06A9-405A-A3E6-62B24C218DAF}</Project>
-      <Name>WangJun.Net</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
       <Project>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</Project>
       <Name>WangJun.Utility</Name>

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using WangJun.DB;
+using WangJun.Entity;
 using WangJun.HumanResource;
 using WangJun.Utility;
 

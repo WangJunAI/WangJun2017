@@ -17,40 +17,18 @@ namespace WangJun.HumanResource
         {
             this._DbName = CONST.DB.DBName_HumanResource;
             this._CollectionName = CONST.DB.CollectionName_OrgItem;
-            this.GroupName = "组织结构模板类";
-            this.BizMode = "组织结构服务";
-            this.ClassFullName = this.GetType().FullName;
+             this.ClassFullName = this.GetType().FullName;
+            this.Version = 1;
+            this.AppCode=Entity.CONST.APP.Staff;
+            this.AppName = Entity.CONST.APP.GetString(this.AppCode);
 
-        }
-
-        public static OrgItem Create(string title,string keyword,string summary,string content,DateTime dateTime,string creatorName,string creatorID)
-        {
-            var inst = new OrgItem();
-            inst._id = ObjectId.GenerateNewId();
-            inst.Name = title;
-            inst.CreatorName = creatorName;
-            inst.CreatorID = creatorID;
-            return inst;
-        }
-
-
-
-
-        public static OrgItem Create(Dictionary<string,object> data)
-        {
-            var inst = Convertor.FromDictionaryToObject<OrgItem>(data);
-            return inst;
-        }
-         
-
-        public  string id { get { return _id.ToString(); } }
- 
-
+        } 
         public int ItemCount { get; set; }
 
         public int SubCategoryCount { get; set; }
 
-  
+
+        #region 实体保存
         /// <summary>
         /// [OK]
         /// </summary>
@@ -70,17 +48,34 @@ namespace WangJun.HumanResource
             inst = EntityManager.GetInstance().Get<OrgItem>(inst);
             foreach (var kv in dict)
             {
-                inst.GetType().GetProperty(kv.Key).SetValue(inst, kv.Value);
+                var property = inst.GetType().GetProperty(kv.Key);
+
+                if (typeof(DateTime) == property.PropertyType)
+                {
+                    property.SetValue(inst, DateTime.Parse(kv.Value.ToString()));
+                }
+                else if (null != kv.Value && typeof(string) == kv.Value.GetType())
+                {
+                    property.SetValue(inst, kv.Value.ToString().Trim());
+                }
+                else
+                {
+                    property.SetValue(inst, kv.Value);
+                }
+
             }
             inst.Save();
         }
+        #endregion
 
+        #region 实体移除
         public void Remove()
         {
             EntityManager.GetInstance().Remove(this);
 
         }
+        #endregion
 
- 
+
     }
 }

@@ -61,13 +61,13 @@ namespace WangJun.Utility
                     {
                         if (property.PropertyType == typeof(Guid))
                         {
-                            property.SetValue(item, new Guid(data[key].ToString()),null);
+                            property.SetValue(item, new Guid(data[key].ToString()), null);
 
                         }
-                        else if(property.PropertyType.IsValueType)
+                        else if (property.PropertyType.IsValueType)
                         {
 
-                            if(property.PropertyType == typeof(int))
+                            if (property.PropertyType == typeof(int))
                             {
                                 property.SetValue(item, int.Parse(data[key].ToString()), null);
                             }
@@ -76,9 +76,14 @@ namespace WangJun.Utility
                                 property.SetValue(item, data[key], null);
                             }
                         }
+                        else if (property.PropertyType == typeof(ArrayList) && null != data[key] && typeof(object[]) == data[key].GetType())
+                        {
+                            ArrayList arrayList = new ArrayList((object[])data[key]);
+                            property.SetValue(item, arrayList, null);
+                        }
                         else
                         {
-                            property.SetValue(item, data[key],null);
+                            property.SetValue(item, data[key], null);
                         }
                     }
                 }
