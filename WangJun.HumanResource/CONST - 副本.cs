@@ -33,7 +33,7 @@ namespace WangJun.HumanResource
         }
 
         public static class Status {
-            public static string Normal  { get { return "使用中"; } }
+            public static string Normal  { get { return "未验证"; } }
 
             public static string Deleted { get { return "已删除"; } }
             public static string Incumbency { get { return "在职"; } }

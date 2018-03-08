@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Config;
 using WangJun.DB;
 using WangJun.Entity;
 using WangJun.Utility;
@@ -13,13 +15,14 @@ namespace WangJun.HumanResource
     {
         public StaffItem()
         {
-            this._DbName = CONST.DB.DBName_HumanResource;
-            this._CollectionName = CONST.DB.CollectionName_StaffItem;
-             this.ClassFullName = this.GetType().FullName;
+            this._DbName = CONST.APP.OrgStaff.DB;
+            this._CollectionName = CONST.APP.OrgStaff.TableStaff;
+            this.ClassFullName = this.GetType().FullName;
             this.Version = 1;
-            this.AppCode = Entity.CONST.APP.Staff;
-            this.AppName = Entity.CONST.APP.GetString(this.AppCode);
-            this.Status = CONST.Status.Incumbency;
+            this.AppCode = CONST.APP.OrgStaff.Code;
+            this.AppName = CONST.APP.OrgStaff.Name;
+            this.StatusCode = CONST.APP.OrgStaff.StaffStatus.在职;
+            this.Status = CONST.APP.OrgStaff.StaffStatus.GetString(this.StatusCode);
         }
 
         public string Sex { get; set; }
@@ -39,11 +42,17 @@ namespace WangJun.HumanResource
 
         public string RoleName { get; set; }
 
+        public string Password { get; set; }
+
 
         public string AreaID { get; set; }
         public DateTime EntryTime { get; set; }
         public DateTime DepartureTime { get; set; }
         public string Attachment { get; set; }
+ 
+        public bool IsAdmin { get; set; }
+
+        public bool IsSuperAdmin { get; set; }
 
         /// <summary>
         /// [OK]
@@ -56,9 +65,11 @@ namespace WangJun.HumanResource
         {
             var dict = Convertor.FromJsonToDict2(jsonInput);
             var inst = new StaffItem();
+            var isNew = true;
             if (dict.ContainsKey("ID") && null != dict["ID"])
             {
                 inst.ID = dict["ID"].ToString();
+                isNew = false;
             }
             inst = EntityManager.GetInstance().Get<StaffItem>(inst);
             foreach (var kv in dict)
@@ -79,12 +90,14 @@ namespace WangJun.HumanResource
                 
             }
             inst.Save();
-        }
-        public void Remove()
-        {
-            EntityManager.GetInstance().Remove(this);
 
+            ///激活
+            if (isNew)
+            {
+                new WebClient().DownloadString(string.Format("http://localhost:9990/API.ashx?_SID={0}&c=WangJun.Admin.AdminWebAPI&m=ActiveStaff&p0={0}", inst.ID));
+            }
         }
+ 
 
     }
 }

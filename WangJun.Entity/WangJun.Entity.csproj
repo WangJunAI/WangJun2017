@@ -51,6 +51,7 @@
       <HintPath>..\..\WangJunUI2017\WangJunUI2017\packages\System.Runtime.InteropServices.RuntimeInformation.4.0.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,8 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseItem.cs" />
-    <Compile Include="CONST.cs" />
     <Compile Include="EntityManager.cs" />
+    <Compile Include="MongoDBFilterCreator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SESSION.cs" />
   </ItemGroup>
@@ -69,6 +70,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\WangJunUI2017\WangJunUI2017\WangJun.Config\WangJun.Config.csproj">
+      <Project>{EEBD1F1F-3DCD-4329-87BE-AC4C7DF19348}</Project>
+      <Name>WangJun.Config</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WangJun.DB\WangJun.DB.csproj">
       <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
       <Name>WangJun.DB</Name>

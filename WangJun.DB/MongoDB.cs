@@ -176,9 +176,10 @@ namespace WangJun.DB
 
                 var dict = new Dictionary<string, object>();
                 var dat = new BsonDocument();
-                if(data is string && data.ToString().Contains("$")&& false ==replace)
+                if(data is string&& !string.IsNullOrWhiteSpace(query) && query.ToString().Contains("_id")  && false ==replace)
                 {
-
+                    dict = Convertor.FromJsonToDict2(data.ToString());
+                    dat = new BsonDocument(dict);
                 }
                 else
                 {
@@ -213,7 +214,7 @@ namespace WangJun.DB
                         FindOneAndUpdateOptions<BsonDocument, BsonDocument> option = new FindOneAndUpdateOptions<BsonDocument, BsonDocument>();
                         option.IsUpsert = true;
                         var updateDefinition = "{ '$set': " + dat.ToJson() + " }";
-                        if(data is string)
+                        if(data is string && data.ToString().Contains("$set"))
                         {
                             updateDefinition = data.ToString();
                         }

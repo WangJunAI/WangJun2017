@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WangJun.Config;
 using WangJun.DB;
 using WangJun.Entity;
 using WangJun.Utility;
@@ -9,18 +10,20 @@ using WangJun.Utility;
 namespace WangJun.HumanResource
 {
     /// <summary>
-    /// 文档实体 
+    /// 组织实体 
     /// </summary>
     public class OrgItem : BaseItem
     {
         public OrgItem()
         {
-            this._DbName = CONST.DB.DBName_HumanResource;
-            this._CollectionName = CONST.DB.CollectionName_OrgItem;
-             this.ClassFullName = this.GetType().FullName;
+            this._DbName = CONST.APP.OrgStaff.DB;
+            this._CollectionName = CONST.APP.OrgStaff.TableOrg;
+            this.ClassFullName = this.GetType().FullName;
             this.Version = 1;
-            this.AppCode=Entity.CONST.APP.Staff;
-            this.AppName = Entity.CONST.APP.GetString(this.AppCode);
+            this.AppCode = CONST.APP.OrgStaff.Code;
+            this.AppName = CONST.APP.OrgStaff.Name;
+            this.StatusCode = CONST.APP.OrgStaff.OrgStatus.正常;
+            this.Status = CONST.APP.OrgStaff.OrgStatus.GetString(this.StatusCode);
 
         } 
         public int ItemCount { get; set; }

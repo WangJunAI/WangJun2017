@@ -17,8 +17,7 @@ namespace WangJun.Doc
         {
             this._DbName = CONST.DB.DBName_DocService;
             this._CollectionName = CONST.DB.CollectionName_DocItem;
-            this.GroupName = "文档模板类";
-             this.ClassFullName = this.GetType().FullName;
+              this.ClassFullName = this.GetType().FullName;
 
         }
 

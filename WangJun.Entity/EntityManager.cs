@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WangJun.Config;
 using WangJun.DB;
 using WangJun.Utility;
 
@@ -33,13 +34,20 @@ namespace WangJun.Entity
                 item.CreatorName = session.UserName;
                 item.ModifierID = session.UserID;
                 item.ModifierName = session.UserName;
+
+                item.CompanyID = session.CompanyID;
+                item.CompanyName = session.CompanyName;
                 //item.Status = CONST.Status.Normal;
+                if (!StringChecker.IsNotEmptyObjectId(item.OwnerID)) ///默认指定则不赋值
+                {
+                    item.OwnerID = session.UserID; ///数据所有者
+                }
 
                 db.Save3(item._DbName, item._CollectionName, inst);
             }
             else
             {
-                var query = CONST.DB.MongoDBFilterCreator_ByObjectId(item.ID);
+                var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
                 db.Save3(item._DbName, item._CollectionName, inst, query);
             }
             return 0;
@@ -50,7 +58,19 @@ namespace WangJun.Entity
             if(StringChecker.IsNotEmptyObjectId(item.ID))
             {
                 var db = DataStorage.GetInstance(DBType.MongoDB);
-                var query = CONST.DB.MongoDBFilterCreator_ByObjectId(item.ID);
+                var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
+                //db.Remove(item._DbName, item._CollectionName, query);
+                db.Save3(item._DbName, item._CollectionName, "{StatusCode:" + CONST.APP.Status.删除 + ",Status:'" + CONST.APP.Status.GetString(CONST.APP.Status.删除) + "'}", query,false);
+            }
+            return 0;
+        }
+
+        public int Delete(BaseItem item)
+        {
+            if (StringChecker.IsNotEmptyObjectId(item.ID))
+            {
+                var db = DataStorage.GetInstance(DBType.MongoDB);
+                var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
                 db.Remove(item._DbName, item._CollectionName, query);
             }
             return 0;
@@ -61,7 +81,7 @@ namespace WangJun.Entity
             if (StringChecker.IsNotEmptyObjectId(item.ID))
             {
                 var db = DataStorage.GetInstance(DBType.MongoDB);
-                var query = CONST.DB.MongoDBFilterCreator_ByObjectId(item.ID);
+                var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
                 var data = db.Get(item._DbName, item._CollectionName, query);
                 return Convertor.FromDictionaryToObject<T>(data);
             }
@@ -75,6 +95,21 @@ namespace WangJun.Entity
             {
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
                 var resList = mongo.Find3(dbName, collectionName, query, sort, protection, pageIndex, pageSize);
+
+                list = Convertor.FromDictionaryToObject<T>(resList);
+            }
+
+            return list;
+        }
+
+        public List<T> Find<T>(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50) where T : class, new()
+        {
+            var tplItem = new T() as BaseItem;
+            var list = new List<T>();
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                var mongo = DataStorage.GetInstance(DBType.MongoDB);
+                var resList = mongo.Find3(tplItem._DbName, tplItem._CollectionName, query, sort, protection, pageIndex, pageSize);
 
                 list = Convertor.FromDictionaryToObject<T>(resList);
             }
@@ -95,6 +130,24 @@ namespace WangJun.Entity
             var db = DataStorage.GetInstance(DBType.MongoDB);
             return db.Aggregate(dbName, collectionName, match, group);
         }
+
+        /// <summary>
+        /// 更改状态
+        /// </summary>
+        /// <param name="newStatusCode">状态码</param>
+        /// <returns></returns>
+        public object UpdateField<T>(string jsonString,string query)where T:class ,new()
+        {
+            var item = new T() as BaseItem;
+            if (null != item)
+            {
+                var db = DataStorage.GetInstance(DBType.MongoDB);
+                db.Save3(item._DbName, item._CollectionName, jsonString,query);
+                return 0;
+            }
+            return null;
+        }
+        
 
     }
 }

@@ -5,16 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using WangJun.Config;
 using WangJun.Entity;
+using WangJun.HumanResource;
 using WangJun.Utility;
 
-namespace WangJun.HumanResource
+namespace WangJun.YunDoc
 {
-    public class StaffWebAPI
+    /// <summary>
+    /// 
+    /// </summary>
+    public class YunDocWebAPI
     {
-        public long AppCode = CONST.APP.OrgStaff.Code;
+        public long AppCode = CONST.APP.YunDoc.Code;
 
 
-        #region 组织操作
+        #region 目录操作
         /// <summary>
         /// 保存一个目录
         /// </summary>
@@ -22,9 +26,9 @@ namespace WangJun.HumanResource
         /// <param name="parentId"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public int SaveOrg(string jsonInput)
+        public int SaveCategory(string jsonInput)
         {
-            OrgItem.Save(jsonInput);
+            CategoryItem.Save(jsonInput);
             return 0;
         }
 
@@ -37,13 +41,20 @@ namespace WangJun.HumanResource
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public List<OrgItem> LoadOrgList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
+        public List<CategoryItem> LoadCategoryList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
         {
             var dict = Convertor.FromJsonToDict2(query);
- 
-                query = "{$and:[" + query + ",{ 'AppCode':" + this.AppCode + "},{'StatusCode':{$ne:" + CONST.APP.Status.删除 + "}}]}";
-    
-            var res = EntityManager.GetInstance().Find<OrgItem>( query, protection, sort, pageIndex, pageSize);
+            if (dict.ContainsKey("OwnerID") && dict["OwnerID"].ToString() == SESSION.Current.CompanyID) ///企业云盘查询
+            {
+                dict.Remove("OwnerID");
+                query = Convertor.FromObjectToJson(dict);
+                query = "{$and:[" + query + ",{'OwnerID':'" + SESSION.Current.CompanyID + "','AppCode':" + this.AppCode + "},{'StatusCode':{$ne:" + CONST.APP.Status.删除 + "}}]}";
+            }
+            else ///个人查询
+            {
+                query = "{$and:[" + query + ",{'OwnerID':'" + SESSION.Current.UserID + "','AppCode':" + this.AppCode + "},{'StatusCode':{$ne:" + CONST.APP.Status.删除 + "}}]}";
+            }
+            var res = EntityManager.GetInstance().Find<CategoryItem>(query, protection, sort, pageIndex, pageSize);
             return res;
         }
 
@@ -53,24 +64,25 @@ namespace WangJun.HumanResource
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public int RemoveOrg(string id)
+        public int RemoveCategory(string id)
         {
-            var inst = new OrgItem();
+            var inst = new CategoryItem();
             inst.ID = id;
             inst.Remove();
             return 0;
         }
 
-        public OrgItem GetOrg(string id)
+        public CategoryItem GetCategory(string id)
         {
-            var inst = new OrgItem();
+            var inst = new CategoryItem();
             inst.ID = id;
-            inst = EntityManager.GetInstance().Get<OrgItem>(inst);
+            inst = EntityManager.GetInstance().Get<CategoryItem>(inst);
             return inst;
         }
+
         #endregion
 
-        #region 员工操作
+        #region 文档操作
         /// <summary>
         /// 保存一个目录
         /// </summary>
@@ -80,7 +92,7 @@ namespace WangJun.HumanResource
         /// <returns></returns>
         public int SaveEntity(string jsonInput)
         {
-            StaffItem.Save(jsonInput);
+            YunDocItem.Save(jsonInput);
             return 0;
         }
 
@@ -93,24 +105,11 @@ namespace WangJun.HumanResource
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public List<StaffItem> LoadEntityList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
+        public List<YunDocItem> LoadEntityList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
         {
-            var dict = Convertor.FromJsonToDict2(query);
- 
-                query = "{$and:[" + query + ",{ 'AppCode':" + this.AppCode + "},{'StatusCode':{$ne:" + CONST.APP.Status.删除 + "}}]}";
- 
-            var res = EntityManager.GetInstance().Find<StaffItem>(query, protection, sort, pageIndex, pageSize);
+            query = "{$and:[" + query + ",{'StatusCode':{$ne:" + CONST.APP.Status.删除 + "}}]}";
+            var res = EntityManager.GetInstance().Find<YunDocItem>(query, protection, sort, pageIndex, pageSize);
             return res;
-        }
-
-        public List<object> LoadAll()
-        {
-            var list = new List<object>();
-            var orgList = this.LoadOrgList("{}", "{}", "{}", 0, int.MaxValue);
-            var staffList = this.LoadEntityList("{}", "{}", "{}", 0, int.MaxValue);
-            list.AddRange(orgList);
-            list.AddRange(staffList);
-            return list;
         }
 
 
@@ -121,20 +120,22 @@ namespace WangJun.HumanResource
         /// <returns></returns>
         public int RemoveEntity(string id)
         {
-            var inst = new StaffItem();
+            var inst = new YunDocItem();
             inst.ID = id;
             inst.Remove();
             return 0;
         }
 
-        public StaffItem GetEntity(string id)
+        public YunDocItem GetEntity(string id)
         {
-            var inst = new StaffItem();
+            var inst = new YunDocItem();
             inst.ID = id;
-            inst = EntityManager.GetInstance().Get<StaffItem>(inst);
+            inst = EntityManager.GetInstance().Get<YunDocItem>(inst);
             return inst;
         }
         #endregion
+
+
 
         #region 统计操作
         /// <summary>
@@ -143,32 +144,20 @@ namespace WangJun.HumanResource
         /// <returns></returns>
         public object Count(string json)
         {
-            var item = new StaffItem();
+            var item = new YunDocItem();
             var match = "{$match:{}}";
-            var group = "{$group:{_id:'StaffItem总数',Count:{$sum:1}}}";
+            var group = "{$group:{_id:'YunDocItem总数',Count:{$sum:1}}}";
             var res = EntityManager.GetInstance().Aggregate(item._DbName, item._CollectionName, match, group);
-            return (res as List<Dictionary<string, object>>)[0];
-        }
-        #endregion
-
-
-        #region SESSION操作
-        public SESSION Login(string json)
-        {
-            var dict = Convertor.FromJsonToDict2(json);
-            var inst = Convertor.FromDictionaryToObject<SESSION>(dict);
-            var res = SESSION.Login(inst.UserID, null);
             return res;
         }
         #endregion
 
-
         #region 回收站
-        public List<StaffItem> LoadRecycleBinEntityList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
+        public List<YunDocItem> LoadRecycleBinEntityList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
         {
-            query = "{$and:[" + "{}" + ",{ 'AppCode':" + this.AppCode + "},{'StatusCode':{$eq:" + CONST.APP.Status.删除 + "}}]}";
-
-            var res = EntityManager.GetInstance().Find<StaffItem>(query, protection, sort, pageIndex, pageSize);
+            query = "{$and:[" + "{}" + ",{'OwnerID':'" + SESSION.Current.UserID + "','AppCode':" + this.AppCode + "},{'StatusCode':{$eq:" + CONST.APP.Status.删除 + "}}]}";
+             
+            var res = EntityManager.GetInstance().Find<YunDocItem>(query, protection, sort, pageIndex, pageSize);
             return res;
         }
 
@@ -179,7 +168,7 @@ namespace WangJun.HumanResource
         /// <returns></returns>
         public int DeleteEntity(string id)
         {
-            var inst = new StaffItem();
+            var inst = new YunDocItem();
             inst.ID = id;
             inst.Delete();
             return 0;
@@ -188,7 +177,7 @@ namespace WangJun.HumanResource
         public int EmptyRecycleBin()
         {
             var list = this.LoadRecycleBinEntityList("{}", "{}", "{}", 0, int.MaxValue);
-            foreach (StaffItem item in list)
+            foreach (YunDocItem item in list)
             {
                 item.Delete();
             }
@@ -197,6 +186,8 @@ namespace WangJun.HumanResource
         #endregion
 
 
-    }
 
+
+
+    }
 }

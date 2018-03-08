@@ -2,46 +2,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WangJun.Config;
 using WangJun.DB;
 using WangJun.Entity;
 using WangJun.Utility;
 
-namespace WangJun.Doc
+namespace WangJun.YunDoc
 {
     /// <summary>
-    /// 文档实体 
+    /// 云笔记目录 
     /// </summary>
     public class CategoryItem:BaseItem
     {
         public CategoryItem()
         {
-            this._DbName = CONST.DB.DBName_DocService;
-            this._CollectionName = CONST.DB.CollectionName_CategoryItem;
-            this.GroupName = "文档模板类";
-             this.ClassFullName = this.GetType().FullName;
-
+            this._DbName = CONST.APP.YunDoc.DB;
+            this._CollectionName = CONST.APP.YunDoc.TableCategory;
+            this.ClassFullName = this.GetType().FullName;
+            this.Version = 1;
+            this.AppCode = CONST.APP.YunDoc.Code;
+            this.AppName = CONST.APP.YunDoc.Name;
+            this.StatusCode = CONST.APP.YunDoc.Status.正常;
+            this.Status = CONST.APP.YunDoc.Status.GetString(this.StatusCode);
         }
   
 
-        public  string id { get { return _id.ToString(); } }
  
-
         public int ItemCount { get; set; }
 
         public int SubCategoryCount { get; set; }
 
- 
- 
-
-        public static CategoryItem Load(string id)
-        {
-            var _id = ObjectId.Parse(id);
-            var query = CONST.DB.MongoDBFilterCreator_ByObjectId(id);
-            var inst = CategoryManager.GetInstance().Find(query);
-            
-            return inst.First() ;
-        }
-         
+  
         /// <summary>
         /// [OK]
         /// </summary>
