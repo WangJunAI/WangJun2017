@@ -61,7 +61,7 @@
   <ItemGroup>
     <Compile Include="API\YunDocWebAPI.cs" />
     <Compile Include="Items\CategoryItem.cs" />
-    <Compile Include="Items\YunNoteItem.cs" />
+    <Compile Include="Items\YunDocItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

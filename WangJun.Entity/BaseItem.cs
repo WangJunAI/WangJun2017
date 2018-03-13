@@ -33,6 +33,10 @@ namespace WangJun.Entity
                 {
                     this._OID = ObjectId.Parse(value);
                 }
+                else
+                {
+                    this._OID = ObjectId.Empty;
+                }
             }
         }
         public string Name { get; set; }
@@ -121,6 +125,8 @@ namespace WangJun.Entity
         public ArrayList RoleDeniedArray { get; set; }
 
         public string RoleDeniedArrayText { get; set; }
+
+        public string _RedirectID { get; set; }
 
         #endregion
 

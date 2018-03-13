@@ -52,7 +52,19 @@ namespace WangJun.HumanResource
  
         public bool IsAdmin { get; set; }
 
-        public bool IsSuperAdmin { get; set; }
+        public bool IsSuperAdmin { get { return 16 == this.Level; } }
+
+
+
+
+        public static StaffItem Load(string id)
+        {
+            var inst = new StaffItem();
+            inst.ID = id;
+            inst = EntityManager.GetInstance().Get<StaffItem>(inst);
+            return inst;
+        }
+
 
         /// <summary>
         /// [OK]

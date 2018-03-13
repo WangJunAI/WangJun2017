@@ -40,8 +40,8 @@ namespace WangJun.HumanResource
         public List<OrgItem> LoadOrgList(string query, string protection = "{}", string sort = "{}", int pageIndex = 0, int pageSize = 50)
         {
             var dict = Convertor.FromJsonToDict2(query);
- 
-                query = "{$and:[" + query + ",{ 'AppCode':" + this.AppCode + "},{'StatusCode':{$ne:" + CONST.APP.Status.删除 + "}}]}";
+
+            query = "{$and:[" + query + ",{ 'AppCode':" + this.AppCode + ",'CompanyID':'" + SESSION.Current.CompanyID + "'},{'StatusCode':{$ne:" + CONST.APP.Status.删除 + "}}]}";
     
             var res = EntityManager.GetInstance().Find<OrgItem>( query, protection, sort, pageIndex, pageSize);
             return res;
@@ -195,6 +195,8 @@ namespace WangJun.HumanResource
             return 0;
         }
         #endregion
+
+ 
 
 
     }
