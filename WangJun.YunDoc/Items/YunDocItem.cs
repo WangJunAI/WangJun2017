@@ -69,6 +69,8 @@ namespace WangJun.YunDoc
             {
                 inst.GetType().GetProperty(kv.Key).SetValue(inst, kv.Value);
             }
+            inst.Name = "[" + SESSION.Current.UserName + "]" + inst.Name;///调试用
+            inst.Title = "[" + SESSION.Current.UserName + "]" + inst.Title;///调试用
             inst.Save();
 
             #region 创建共享文档

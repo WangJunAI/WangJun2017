@@ -63,10 +63,6 @@
       <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
       <Name>WangJun.DB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.Doc\WangJun.Doc.csproj">
-      <Project>{F778D22C-042F-4535-A9E1-10BFB9E23A7F}</Project>
-      <Name>WangJun.Doc</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.Entity\WangJun.Entity.csproj">
       <Project>{41FE0A71-2098-483A-8E1B-ED4BEBB4DD72}</Project>
       <Name>WangJun.Entity</Name>
