@@ -38,6 +38,7 @@ namespace WangJun.HumanResource
         public void Save()
         {
             EntityManager.GetInstance().Save<OrgItem>(this);
+            ClientBehaviorItem.Save(this, ClientBehaviorItem.BehaviorType.修改,SESSION.Current);
         }
 
         public static void Save(string jsonInput)
@@ -52,20 +53,21 @@ namespace WangJun.HumanResource
             foreach (var kv in dict)
             {
                 var property = inst.GetType().GetProperty(kv.Key);
-
-                if (typeof(DateTime) == property.PropertyType)
+                if (property.CanWrite)
                 {
-                    property.SetValue(inst, DateTime.Parse(kv.Value.ToString()));
+                    if (typeof(DateTime) == property.PropertyType)
+                    {
+                        property.SetValue(inst, DateTime.Parse(kv.Value.ToString()));
+                    }
+                    else if (null != kv.Value && typeof(string) == kv.Value.GetType())
+                    {
+                        property.SetValue(inst, kv.Value.ToString().Trim());
+                    }
+                    else
+                    {
+                        property.SetValue(inst, kv.Value);
+                    }
                 }
-                else if (null != kv.Value && typeof(string) == kv.Value.GetType())
-                {
-                    property.SetValue(inst, kv.Value.ToString().Trim());
-                }
-                else
-                {
-                    property.SetValue(inst, kv.Value);
-                }
-
             }
             inst.Save();
         }

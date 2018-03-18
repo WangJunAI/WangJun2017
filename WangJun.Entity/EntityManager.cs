@@ -49,7 +49,7 @@ namespace WangJun.Entity
             {
                 var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
                 db.Save3(item._DbName, item._CollectionName, inst, query);
-            }
+             }
             return 0;
         }
 
@@ -59,8 +59,9 @@ namespace WangJun.Entity
             {
                 var db = DataStorage.GetInstance(DBType.MongoDB);
                 var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
-                //db.Remove(item._DbName, item._CollectionName, query);
                 db.Save3(item._DbName, item._CollectionName, "{StatusCode:" + CONST.APP.Status.删除 + ",Status:'" + CONST.APP.Status.GetString(CONST.APP.Status.删除) + "'}", query,false);
+                ClientBehaviorItem.Save(item, ClientBehaviorItem.BehaviorType.移除, SESSION.Current);
+
             }
             return 0;
         }
@@ -72,6 +73,8 @@ namespace WangJun.Entity
                 var db = DataStorage.GetInstance(DBType.MongoDB);
                 var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
                 db.Remove(item._DbName, item._CollectionName, query);
+                ClientBehaviorItem.Save(item, ClientBehaviorItem.BehaviorType.删除, SESSION.Current);
+
             }
             return 0;
         }
@@ -83,6 +86,8 @@ namespace WangJun.Entity
                 var db = DataStorage.GetInstance(DBType.MongoDB);
                 var query = MongoDBFilterCreator.SearchByObjectId(item.ID);
                 var data = db.Get(item._DbName, item._CollectionName, query);
+
+
                 return Convertor.FromDictionaryToObject<T>(data);
             }
             return new T();
@@ -97,6 +102,7 @@ namespace WangJun.Entity
                 var resList = mongo.Find3(dbName, collectionName, query, sort, protection, pageIndex, pageSize);
 
                 list = Convertor.FromDictionaryToObject<T>(resList);
+
             }
 
             return list;
@@ -110,7 +116,7 @@ namespace WangJun.Entity
             {
                 var mongo = DataStorage.GetInstance(DBType.MongoDB);
                 var resList = mongo.Find3(tplItem._DbName, tplItem._CollectionName, query, sort, protection, pageIndex, pageSize);
-
+ 
                 list = Convertor.FromDictionaryToObject<T>(resList);
             }
 
@@ -143,6 +149,7 @@ namespace WangJun.Entity
             {
                 var db = DataStorage.GetInstance(DBType.MongoDB);
                 db.Save3(item._DbName, item._CollectionName, jsonString,query);
+
                 return 0;
             }
             return null;

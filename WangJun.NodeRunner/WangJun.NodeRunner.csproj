@@ -56,6 +56,10 @@
       <Project>{06F3A647-D026-4847-94A5-20643223CC96}</Project>
       <Name>WangJun.HumanResource</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
+      <Project>{952A70F6-06A9-405A-A3E6-62B24C218DAF}</Project>
+      <Name>WangJun.Net</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

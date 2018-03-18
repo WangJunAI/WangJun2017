@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseItem.cs" />
+    <Compile Include="ClientBehaviorItem.cs" />
     <Compile Include="EntityManager.cs" />
     <Compile Include="MongoDBFilterCreator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

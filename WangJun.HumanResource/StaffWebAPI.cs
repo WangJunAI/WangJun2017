@@ -144,10 +144,10 @@ namespace WangJun.HumanResource
         public object Count(string json)
         {
             var item = new StaffItem();
-            var match = "{$match:{}}";
+            var match = "{$match:" + json + "}";
             var group = "{$group:{_id:'StaffItem总数',Count:{$sum:1}}}";
             var res = EntityManager.GetInstance().Aggregate(item._DbName, item._CollectionName, match, group);
-            return (res as List<Dictionary<string, object>>)[0];
+            return res;
         }
         #endregion
 
@@ -196,7 +196,23 @@ namespace WangJun.HumanResource
         }
         #endregion
 
- 
+        #region 聚合计算
+        public object Aggregate(string itemType, string match, string group)
+        {
+            var item = new BaseItem();
+            if ("Entity" == itemType)
+            {
+                item = new StaffItem();
+            }
+            else if ("Category" == itemType)
+            {
+                item = new OrgItem();
+            }
+            var res = EntityManager.GetInstance().Aggregate(item._DbName, item._CollectionName, match, group);
+            return res;
+
+        }
+        #endregion
 
 
     }

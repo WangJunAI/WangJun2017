@@ -145,7 +145,7 @@ namespace WangJun.YunDoc
         public object Count(string json)
         {
             var item = new YunDocItem();
-            var match = "{$match:{}}";
+            var match = "{$match:" + json + "}";
             var group = "{$group:{_id:'YunDocItem总数',Count:{$sum:1}}}";
             var res = EntityManager.GetInstance().Aggregate(item._DbName, item._CollectionName, match, group);
             return res;
@@ -184,6 +184,25 @@ namespace WangJun.YunDoc
             return 0;
         }
         #endregion
+
+        #region 聚合计算
+        public object Aggregate(string itemType, string match,string group)
+        {
+            var item = new BaseItem();
+            if ("Entity" == itemType)
+            {
+                item = new YunDocItem();
+            }
+            else if("Category" == itemType)
+            {
+                item = new CategoryItem();
+            }
+             var res = EntityManager.GetInstance().Aggregate(item._DbName, item._CollectionName, match, group);
+            return res;
+
+        }
+        #endregion
+ 
 
 
 
