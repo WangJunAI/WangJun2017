@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using WangJun.DB;
-using WangJun.Doc;
 using WangJun.Utility;
 
 namespace WangJun.Stock

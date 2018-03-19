@@ -37,6 +37,10 @@ namespace WangJun.Entity
 
             public static int 搜索 { get { return 5; } }
 
+            public static int 点赞 { get { return 6; } }
+            
+            public static int 收藏 { get { return 8; } }
+
             public static string GetString(int behaviorType)
             {
                 if(behaviorType == BehaviorType.修改)
@@ -51,13 +55,21 @@ namespace WangJun.Entity
                 {
                     return "搜索";
                 }
-                else if (behaviorType == BehaviorType.修改)
+                else if (behaviorType == BehaviorType.移除)
                 {
-                    return "修改";
+                    return "移除";
                 }
                 else if (behaviorType == BehaviorType.搜索)
                 {
                     return "搜索";
+                }
+                else if (behaviorType == BehaviorType.点赞)
+                {
+                    return "点赞";
+                }
+                else if (behaviorType == BehaviorType.收藏)
+                {
+                    return "收藏";
                 }
 
                 return "未定义";
@@ -90,6 +102,6 @@ namespace WangJun.Entity
             });
 
 
-        }
+        } 
     }
 }

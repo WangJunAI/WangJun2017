@@ -346,8 +346,8 @@ namespace WangJun.DB
         /// </summary>
         public static void MoveDataFromMongoToSQLServer(string sourceKeyName, string sourceDbName, string sourceCollectionName, string sourceFilter, string targetKeyName, string targetDbName, string targetCollectionName, bool needDeleteSource = false)
         {
-            var srcDB = DataStorage.GetInstance(sourceKeyName, "mongo");
-            var targetDB = DataStorage.GetInstance(targetKeyName, "sqlserver");
+            var srcDB = DataStorage.GetInstance(DBType.MongoDB);
+            var targetDB = DataStorage.GetInstance(DBType.SQLServer);
             var srcList = srcDB.Find(sourceDbName, sourceCollectionName, sourceFilter, 0, 1);
             if (1 == srcList.Count)
             {

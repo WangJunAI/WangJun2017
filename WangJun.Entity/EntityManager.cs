@@ -148,7 +148,7 @@ namespace WangJun.Entity
             if (null != item)
             {
                 var db = DataStorage.GetInstance(DBType.MongoDB);
-                db.Save3(item._DbName, item._CollectionName, jsonString,query);
+                db.Save3(item._DbName, item._CollectionName, jsonString,query,false);
 
                 return 0;
             }

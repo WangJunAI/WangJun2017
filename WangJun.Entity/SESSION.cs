@@ -16,6 +16,7 @@ namespace WangJun.Entity
     /// </summary>
     public class SESSION 
     {
+        
         public string ID { get; set; }
 
         public string LoginID { get; set; }
@@ -31,6 +32,11 @@ namespace WangJun.Entity
         public string CompanyName { get; set; }
 
         public bool IsSuperAdmin { get; set; }
+
+        public bool CanWrite(int appCode)
+        {
+            return true;
+        }
 
         public DateTime LoginTime { get; set; }
 

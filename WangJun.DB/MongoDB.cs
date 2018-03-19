@@ -214,10 +214,14 @@ namespace WangJun.DB
                         FindOneAndUpdateOptions<BsonDocument, BsonDocument> option = new FindOneAndUpdateOptions<BsonDocument, BsonDocument>();
                         option.IsUpsert = true;
                         var updateDefinition = "{ '$set': " + dat.ToJson() + " }";
-                        if(data is string && data.ToString().Contains("$set"))
+                        if(data is string && data.ToString().Contains("$inc"))
+                        {
+                            updateDefinition = dat.ToJson();
+                        }
+                        else if(data is string && data.ToString().Contains("$set"))
                         {
                             updateDefinition = data.ToString();
-                        }
+                        } 
                         collection.FindOneAndUpdate(query, updateDefinition, option);
                     }
                 }
