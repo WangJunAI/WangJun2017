@@ -52,10 +52,6 @@
       <Project>{af918729-03e8-443f-bd76-79bc604e286e}</Project>
       <Name>WangJun.DB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.HumanResource\WangJun.HumanResource.csproj">
-      <Project>{06F3A647-D026-4847-94A5-20643223CC96}</Project>
-      <Name>WangJun.HumanResource</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.Net\WangJun.Net.csproj">
       <Project>{952A70F6-06A9-405A-A3E6-62B24C218DAF}</Project>
       <Name>WangJun.Net</Name>

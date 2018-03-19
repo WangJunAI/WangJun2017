@@ -77,10 +77,6 @@
       <Project>{41FE0A71-2098-483A-8E1B-ED4BEBB4DD72}</Project>
       <Name>WangJun.Entity</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.HumanResource\WangJun.HumanResource.csproj">
-      <Project>{06F3A647-D026-4847-94A5-20643223CC96}</Project>
-      <Name>WangJun.HumanResource</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
       <Project>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</Project>
       <Name>WangJun.Utility</Name>
