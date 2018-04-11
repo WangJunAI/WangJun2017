@@ -79,10 +79,6 @@
       <Project>{AF918729-03E8-443F-BD76-79BC604E286E}</Project>
       <Name>WangJun.DB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
-      <Project>{DDC51285-3F85-4D6D-A10B-F835B9C5058A}</Project>
-      <Name>WangJun.Utility</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

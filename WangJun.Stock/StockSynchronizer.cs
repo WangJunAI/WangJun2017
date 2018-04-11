@@ -736,7 +736,7 @@ namespace WangJun.Stock
         {
             var q = this.PrepareData();
             //var date = DateTime.Now;
-            for (var date = new DateTime(2018, 2, 14); new DateTime(2017, 1, 1) < date; date = date.AddDays(-1))
+            for (var date = DateTime.Now; new DateTime(2017, 1, 1) < date; date = date.AddDays(-1))
             {
                 foreach (var stockCode in q)
                 {

@@ -54,12 +54,6 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WangJun.Utility\WangJun.Utility.csproj">
-      <Project>{ddc51285-3f85-4d6d-a10b-f835b9c5058a}</Project>
-      <Name>WangJun.Utility</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
